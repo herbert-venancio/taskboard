@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
+
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.DatedStatusTransition;
 import objective.taskboard.followup.kpi.StatusTransition;
@@ -78,30 +80,28 @@ public class TransitionsBuilder {
     public TransitionWorklog withWorklogs() {
         return new TransitionWorklog();
     }
-    
+
     private void lastTransited(TransitionDto transitionDto) {
         this.lastTransitionWithDate = Optional.of(transitionDto);
     }
-    
+
     public StatusDto currentStatus() {
         return lastTransitionWithDate.map( l -> l.status).orElse(firstTransition.status);
     }
-    
+
     public Map<String, ZonedDateTime> getReversedTransitions() {
         LinkedList<TransitionDto> reversedOrder = new LinkedList<>();
-        
         TransitionDto currentIndex = firstTransition;
         while(currentIndex.next.isPresent()) {
            reversedOrder.push(currentIndex);
            currentIndex = currentIndex.next.get();
         }
         reversedOrder.push(currentIndex);
-        
         Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
         for (TransitionDto transition : reversedOrder) {
             transitions.put(transition.status.name(), transition.date.orElse(null));
         }
-        
+
         return transitions;
     }
 
@@ -182,7 +182,6 @@ public class TransitionsBuilder {
 
         public TransitionWorklog on(String status) {
             this.status = status;
-            
             return this;
         }
 
@@ -190,18 +189,24 @@ public class TransitionsBuilder {
             this.date = date;
             return this;
         }
-        
+
         public TransitionsBuilder eoW() {
             registerWorklog();
             return TransitionsBuilder.this;
         }
-        
+
         public TransitionWorklog and() {
             registerWorklog();
             return new TransitionWorklog();
         }
-        
+
         private void registerWorklog() {
+            if (date == null) {
+                Assertions.fail("Date can't be null");
+            }
+            if (status == null) {
+                Assertions.fail("Status can't be null");
+            }
             TransitionsBuilder.this.put(new Worklog("a.developer", parseStringToDate(date), timeSpentInSeconds),status);
         }
     }

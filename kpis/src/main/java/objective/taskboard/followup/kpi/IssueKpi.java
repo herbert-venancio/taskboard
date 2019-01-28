@@ -8,12 +8,15 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.data.Worklog;
+import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
+import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi.SubCycleKpi;
 import objective.taskboard.followup.kpi.touchTime.TouchTimeWeekRange;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
@@ -122,11 +125,11 @@ public class IssueKpi {
 
     public Optional<Range<LocalDate>> getDateRangeBasedOnProgressingStatuses(ZoneId timezone) {
 
-        Optional<ZonedDateTime> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
+        Optional<LocalDate> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
         if(!firstDateOp.isPresent())
             return Optional.empty();
 
-        LocalDate firstDate = firstDateOp.get().toLocalDate();
+        LocalDate firstDate = firstDateOp.get();
         LocalDate now = ZonedDateTime.ofInstant(clock.now(),timezone).toLocalDate();
         LocalDate lastDate = firstStatus.flatMap(s -> s.getDateAfterLeavingLastProgressingStatus()).orElse(now);
 
@@ -157,6 +160,47 @@ public class IssueKpi {
     private Optional<LocalDate> earliestOfStatuses(Stream<DatedStatusTransition> all) {
         Optional<ZonedDateTime> minimum = all.map(s -> s.getDate()).min(Comparator.naturalOrder());
         return minimum.flatMap(zd -> Optional.of(zd.toLocalDate()));
+    }
+
+    public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
+        if (!hasEnteredCycle(cycleStatuses, timezone)) {
+            return false;
+        }
+        return doAllCycleStatusesHaveExitDate(cycleStatuses, timezone);
+    }
+
+    public List<CycleTimeKpi.SubCycleKpi> getSubCycles(Set<String> cycleStatuses, ZoneId timezone) {
+        return getStatusChainAsList().stream()
+            .filter(s -> cycleStatuses.contains(s.status))
+            .map(s -> new SubCycleKpi(s.status, s.getEnterDate(timezone), s.getExitDate(timezone)))
+            .collect(Collectors.toList());
+    }
+
+    private boolean doAllCycleStatusesHaveExitDate(Set<String> cycleStatuses, ZoneId timezone) {
+        List<StatusTransition> statusChain = getStatusChainAsList();
+        return statusChain.stream()
+            .filter(s -> cycleStatuses.contains(s.status))
+            .filter(s -> !s.getExitDate(timezone).isPresent())
+            .count() == 0;
+    }
+
+    private boolean hasEnteredCycle(Set<String> cycleStatuses, ZoneId timezone) {
+        return getStatusChainAsList().stream()
+                .filter(s -> cycleStatuses.contains(s.status))
+                .anyMatch(s -> s.getEnterDate(timezone).isPresent());
+    }
+
+    private List<StatusTransition> getStatusChainAsList() {
+        List<StatusTransition> statusChain = new LinkedList<>();
+        Optional<StatusTransition> current = firstStatus;
+        do {
+            if (current.isPresent()) {
+                StatusTransition status = current.get();
+                statusChain.add(status);
+                current = status.next;
+            }
+        } while (current.isPresent());
+        return statusChain;
     }
 
 }

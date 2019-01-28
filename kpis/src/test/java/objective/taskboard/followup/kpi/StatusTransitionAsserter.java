@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 
 public class StatusTransitionAsserter {
@@ -25,7 +26,7 @@ public class StatusTransitionAsserter {
         this.status = status.orElseThrow(() -> new AssertionError("Status should have been built"));
         initializeMap();
     }
-    
+
     private void initializeMap() {
         Optional<StatusTransition> statusIndex = Optional.of(this.status);
         while(statusIndex.isPresent()) {
@@ -41,7 +42,7 @@ public class StatusTransitionAsserter {
     }
 
     public DateChecker firstDateOnProgressing() {
-        Optional<LocalDate> date = status.firstDateOnProgressing(timezone).flatMap(d -> Optional.of(d.toLocalDate()));
+        Optional<LocalDate> date = status.firstDateOnProgressing(timezone);
         return new DateChecker(date);
     }
 
@@ -112,8 +113,33 @@ public class StatusTransitionAsserter {
 
         public StatusTransitionAsserter hasTotalEffortInSeconds(long seconds) {
             assertThat(subject.getEffort()).as("Effort fom Status %s",subject.status).isEqualTo(seconds);
-            return StatusTransitionAsserter.this; 
+            return StatusTransitionAsserter.this;
         }
 
+        public StatusTransitionAsserter hasEnterDate(String date) {
+            Assertions.assertThat(subject.getEnterDate(timezone)).isPresent();
+            Assertions.assertThat(subject.getEnterDate(timezone).get()).isEqualTo(parseZonedDateTime(date));
+            return StatusTransitionAsserter.this;
+        }
+
+        public StatusTransitionAsserter hasNoEnterDate() {
+            Assertions.assertThat(subject.getEnterDate(timezone)).isEmpty();
+            return StatusTransitionAsserter.this;
+        }
+
+        public StatusTransitionAsserter hasExitDate(String date) {
+            Assertions.assertThat(subject.getExitDate(timezone)).isPresent();
+            Assertions.assertThat(subject.getExitDate(timezone).get()).isEqualTo(parseZonedDateTime(date));
+            return StatusTransitionAsserter.this;
+        }
+
+        public StatusTransitionAsserter hasNoExitDate() {
+            Assertions.assertThat(subject.getExitDate(timezone)).isEmpty();
+            return StatusTransitionAsserter.this;
+        }
+
+        private ZonedDateTime parseZonedDateTime(String date) {
+            return parseDateTime(date, "00:00:00", timezone);
+        }
     }
 }
