@@ -63,7 +63,7 @@ public class KpiEnvironment {
     public DSLKpi then() {
         return kpiContext;
     }
-    
+
     public DSLKpi eoE() {
         return kpiContext;
     }
@@ -105,7 +105,7 @@ public class KpiEnvironment {
         typeRepository.addSubtask(name);
         return this;
     }
-    
+
 
     public StatusDto withStatus(String name) {
         StatusDto status = statusRepository.create(name);
@@ -142,16 +142,16 @@ public class KpiEnvironment {
         return issues.get(pKey);
     }
 
-    public IssueKpiMocker givenDemand(String pKey) {
-        return givenIssue(pKey).isDemand();
-    }
-
     public IssueKpiMocker givenSubtask(String pkey) {
         return givenIssue(pkey).isSubtask();
     }
 
     public IssueKpiMocker givenFeature(String pkey) {
         return givenIssue(pkey).isFeature();
+    }
+
+    public IssueKpiMocker givenDemand(String pkey) {
+        return givenIssue(pkey).isDemand();
     }
 
     public StatusDto getStatus(String name) {
@@ -185,7 +185,7 @@ public class KpiEnvironment {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
-    
+
     public List<IssueKpiDataItemAdapter> getAllIssuesAdapters() {
         return getAllIssueMockers().stream().map(IssueKpiMocker::buildAsAdapter).collect(Collectors.toList());
     }
@@ -199,13 +199,13 @@ public class KpiEnvironment {
             storeType(name, dto);
             return this;
         }
-        
+
         public IssueTypeRepository addUnmapped(String name) {
             IssueTypeDTO dto = new IssueTypeDTO(id++, KpiLevel.UNMAPPED,name);
             storeType(name, dto);
             return this;
         }
-        
+
         private void addFeature(String name) {
             IssueTypeDTO dto = new IssueTypeDTO(id++, KpiLevel.FEATURES,name);
             storeType(name, dto);
@@ -249,7 +249,7 @@ public class KpiEnvironment {
         public KpiEnvironment eoT() {
             return KpiEnvironment.this;
         }
-        
+
         public List<IssueTypeDTO> configuredForLevel(KpiLevel level){
             return types.values().stream().filter(t -> level == t.level()).collect(Collectors.toList());
         }

@@ -1,5 +1,6 @@
 package objective.taskboard.followup.kpi;
 
+import static java.util.Arrays.asList;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -8,19 +9,24 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.Range;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
+import objective.taskboard.followup.kpi.enviroment.SubCycleKpiAsserterList;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueKpiAsserter<T> {
@@ -54,6 +60,16 @@ public class IssueKpiAsserter<T> {
         return fatherContext;
     }
 
+    public IssueKpiAsserter<T> hasCompletedCycle(String...statuses) {
+        assertThat(subject.hasCompletedCycle(new HashSet<>(asList(statuses)), environment.getTimezone())).isTrue();
+        return this;
+    }
+
+    public IssueKpiAsserter<T> hasNotCompletedCycle(String...statuses) {
+        assertThat(subject.hasCompletedCycle(new HashSet<>(asList(statuses)), environment.getTimezone())).isFalse();
+        return this;
+    }
+
     public StatusAsserter atStatus(String status) {
         statusesAsserter.putIfAbsent(status, new StatusAsserter(status));
         return statusesAsserter.get(status);
@@ -77,6 +93,17 @@ public class IssueKpiAsserter<T> {
 
     private Optional<IssueKpi> findChildByKey(String childKey) {
         return subject.getChildren().stream().filter(c -> childKey.equals(c.getIssueKey())).findFirst();
+    }
+
+    public SubCycleKpiAsserterList<?> subCycles() {
+        Set<String> cycleStatuses = environment.withKpiProperties().getCycleStatusMap().get(subject.getLevel());
+        ZoneId timezone = environment.getTimezone();
+        return new SubCycleKpiAsserterList<>(subject.getSubCycles(cycleStatuses, timezone), this);
+    }
+
+    public IssueKpiAsserter<T> hasType(String type) {
+        Assertions.assertThat(subject.getIssueTypeName()).isEqualTo(type);
+        return this;
     }
 
     public class SubtaskChecker {
@@ -105,7 +132,6 @@ public class IssueKpiAsserter<T> {
             return IssueKpiAsserter.this;
         }
 
-
         public SubtaskChecker doesNotHaveWorklogs() {
             return hasTotalWorklogs(0);
         }
@@ -133,9 +159,8 @@ public class IssueKpiAsserter<T> {
             assertThat(range.getMaximum(),is(endDate));
 
             return IssueKpiAsserter.this;
-
-
         }
+
         private Optional<Range<LocalDate>> getRange() {
             return subject.getDateRangeBasedOnProgressingStatuses(environment.getTimezone());
         }
@@ -145,8 +170,6 @@ public class IssueKpiAsserter<T> {
             assertFalse(opRange.isPresent());
             return IssueKpiAsserter.this;
         }
-
-
     }
 
     public class DateChecker {

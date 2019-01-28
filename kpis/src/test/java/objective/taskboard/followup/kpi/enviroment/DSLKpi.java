@@ -11,6 +11,8 @@ import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiAsserter;
 import objective.taskboard.followup.kpi.StatusTransition;
 import objective.taskboard.followup.kpi.StatusTransitionAsserter;
+import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
+import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiFactory;
 
 public class DSLKpi {
 
@@ -65,6 +67,15 @@ public class DSLKpi {
             return new StatusTransitionAsserter(timezone,firstStatus);
         }
 
+        public CycleTimeKpiAsserter<AsserterFactory> cycleTimeKpi(String pkey) {
+            IssueKpi kpi = getIssueKpi(pkey);
+            CycleTimeKpiFactory cycleTimeKpiFactory = new CycleTimeKpiFactory(
+                    environment.withKpiProperties().getCycleStatusMap(),
+                    environment.getTimezone());
+            CycleTimeKpi cKpi = cycleTimeKpiFactory.create(kpi);
+            return new CycleTimeKpiAsserter<DSLKpi.AsserterFactory>(cKpi, this);
+        }
+
     }
 
     public static class BehaviorFactory {
@@ -79,7 +90,7 @@ public class DSLKpi {
         public IssueBehavior givenIssueKpi(String pkey) {
             return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.environment.givenIssue(key)));
         }
-        
+
         public <T> ExceptionBehavior<T> expectExceptionFromBehavior(DSLSimpleBehavior<T> behavior){
             ExceptionBehavior<T> exceptionBehavior = new ExceptionBehavior<>(behavior);
             exceptionBehavior.behave(kpiContext.environment);

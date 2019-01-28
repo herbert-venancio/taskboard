@@ -1,31 +1,49 @@
 package objective.taskboard.followup.kpi.enviroment;
 
+import static java.util.Arrays.asList;
+
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.mockito.Mockito;
-
+import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
 import objective.taskboard.followup.kpi.properties.TouchTimeSubtaskConfiguration;
 
 public class KpiPropertiesMocker {
 
-    private KPIProperties kpiProperties = Mockito.mock(KPIProperties.class);
+    private KPIProperties kpiProperties;
     private KpiEnvironment fatherEnvironment;
     private Map<String, HierarchyBuilder> featureHierarchyBuilder = new LinkedHashMap<>();
     private Map<String, HierarchyBuilder> demandHierarchyBuilder = new LinkedHashMap<>();
     private TouchTimeSubtaskConfigsBuilder touchTimeSubtaskConfigsBuilder = new TouchTimeSubtaskConfigsBuilder();
-    private List<String> progressingStatuses = new LinkedList<>();
     private boolean shouldCollectProgressingStatuses = true;
+    private Map<KpiLevel,Set<String>> cycleTimeConfigurations;
 
     public KpiPropertiesMocker(KpiEnvironment environment) {
         this.fatherEnvironment = environment;
+        initializeMap();
+    }
+
+    private void initializeMap() {
+        cycleTimeConfigurations = new EnumMap<>(KpiLevel.class);
+        for (KpiLevel level : KpiLevel.values()) {
+            cycleTimeConfigurations.put(level, new HashSet<>());
+        }
+    }
+
+    public Map<KpiLevel, Set<String>> getCycleStatusMap() {
+        return cycleTimeConfigurations;
     }
 
     public HierarchyBuilder atFeatureHierarchy(String fatherStatus) {
@@ -50,11 +68,19 @@ public class KpiPropertiesMocker {
     }
 
     public KPIProperties getKpiProperties() {
-        buildHierarchies();
-        buildTouchTimeSubtaskConfigs();
-        if (shouldCollectProgressingStatuses)
-            progressingStatuses = fatherEnvironment.statuses().getProgressingStatuses();
-        mockProgressingStatuses(progressingStatuses);
+        if(kpiProperties == null)
+            kpiProperties = prepareProperties();
+
+        return kpiProperties;
+    }
+
+    private KPIProperties prepareProperties() {
+        KPIProperties kpiProperties = new KPIProperties();
+        kpiProperties.setDemandHierarchy(getHierarchy(demandHierarchyBuilder));
+        kpiProperties.setFeaturesHierarchy(getHierarchy(featureHierarchyBuilder));
+        kpiProperties.setTouchTimeSubtaskConfigs(touchTimeSubtaskConfigsBuilder.build());
+        kpiProperties.setProgressingStatuses(getProgressingStatuses());
+        kpiProperties.setCycleTime(getCycleTimeProperties());
         return kpiProperties;
     }
 
@@ -62,23 +88,33 @@ public class KpiPropertiesMocker {
         return fatherEnvironment;
     }
 
-    private void mockProgressingStatuses(List<String> progressingStatuses) {
-        Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(progressingStatuses);
+    private List<String> getProgressingStatuses() {
+        if (!shouldCollectProgressingStatuses) {
+            return Collections.emptyList();
+        }
+        return fatherEnvironment.statuses().getProgressingStatuses();
     }
 
-    private void buildHierarchies() {
-        buildDemands();
-        buildFeatures();
+
+    private KpiCycleTimeProperties getCycleTimeProperties() {
+        KpiCycleTimeProperties cycleProperties = new KpiCycleTimeProperties();
+        cycleProperties.setDemands(getCycleConfigurationsFor(KpiLevel.DEMAND));
+        cycleProperties.setFeatures(getCycleConfigurationsFor(KpiLevel.FEATURES));
+        cycleProperties.setSubtasks(getCycleConfigurationsFor(KpiLevel.SUBTASKS));
+        return cycleProperties;
     }
 
-    private void buildDemands() {
-        IssueTypeChildrenStatusHierarchy hierarchy = getHierarchy(demandHierarchyBuilder);
-        Mockito.when(kpiProperties.getDemandHierarchy()).thenReturn(hierarchy);
+    private List<String> getCycleConfigurationsFor(KpiLevel level){
+        return new LinkedList<>(cycleTimeConfigurations.get(level));
     }
 
-    private void buildFeatures() {
-        IssueTypeChildrenStatusHierarchy hierarchy = getHierarchy(featureHierarchyBuilder);
-        Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(hierarchy);
+    public KpiPropertiesMocker withSubtaskCycleTimeProperties(String...statuses) {
+        cycleTimeConfigurations.get(KpiLevel.SUBTASKS).addAll(asList(statuses));
+        return this;
+    }
+
+    public KpiEnvironment eoKpi() {
+        return fatherEnvironment;
     }
 
     private IssueTypeChildrenStatusHierarchy getHierarchy(Map<String, HierarchyBuilder> hierarchyBuilder) {
@@ -88,11 +124,6 @@ public class KpiPropertiesMocker {
                 .collect(Collectors.toList());
         hierarchy.setHierarchies(hierachies);
         return hierarchy;
-    }
-
-    private void buildTouchTimeSubtaskConfigs() {
-        List<TouchTimeSubtaskConfiguration> configs = touchTimeSubtaskConfigsBuilder.build();
-        Mockito.when(kpiProperties.getTouchTimeSubtaskConfigs()).thenReturn(configs);
     }
 
     public class HierarchyBuilder {
