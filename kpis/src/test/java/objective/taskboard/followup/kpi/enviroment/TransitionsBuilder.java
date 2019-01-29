@@ -201,12 +201,8 @@ public class TransitionsBuilder {
         }
 
         private void registerWorklog() {
-            if (date == null) {
-                Assertions.fail("Date can't be null");
-            }
-            if (status == null) {
-                Assertions.fail("Status can't be null");
-            }
+            Assertions.assertThat(date).as("Date can't be null").isNotNull();
+            Assertions.assertThat(status).as("Status can't be null").isNotNull();
             TransitionsBuilder.this.put(new Worklog("a.developer", parseStringToDate(date), timeSpentInSeconds),status);
         }
     }

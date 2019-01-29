@@ -13,11 +13,11 @@ import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi.SubCycleKpi;
 public class SubCycleKpiAsserterList<T> {
 
     private List<CycleTimeKpi.SubCycleKpi> subjectList;
-    private T fatherContext;
+    private T parentContext;
 
     public SubCycleKpiAsserterList(List<CycleTimeKpi.SubCycleKpi> subjectList, T fatherContext) {
         this.subjectList = subjectList;
-        this.fatherContext = fatherContext;
+        this.parentContext = fatherContext;
     }
 
     public SubCycleKpiAsserterList<?>.SubCycleKpiAsserter at(String status) {
@@ -30,7 +30,7 @@ public class SubCycleKpiAsserterList<T> {
     }
 
     public T eoSKAL() {
-        return fatherContext;
+        return parentContext;
     }
 
     public class SubCycleKpiAsserter extends AbstractAssert<SubCycleKpiAsserter, CycleTimeKpi.SubCycleKpi>{
