@@ -40,6 +40,10 @@ public class DateTimeUtils {
         return parseDateTime(yyyymmdd, "00:00:00");
     }
 
+    public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss, String timezone) {
+        return parseDateTime(yyyymmdd, hhmmss, determineTimeZoneId(timezone));
+    }
+
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss, ZoneId timezone) {
         if (yyyymmdd == null)
             return null;

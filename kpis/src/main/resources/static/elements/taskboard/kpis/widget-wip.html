@@ -212,11 +212,7 @@
                     const builder = new WeeklyChartBuilder('wip')
                         .withChartType('column')
                         .withTooltipNumberOfDecimals(2)
-                        .withTooltipHeaderFormat(
-                            '<div class="highcharts-tooltip-header">' +
-                                '<p class="highcharts-tooltip-header__title">{point.key}</p>' +
-                                '<p class="highcharts-tooltip-header__subtitle">Values are shown in average</p>' +
-                            '</div>')
+                        .withTooltipHeaderSubTitle('Values are shown in average')
                         .withSeriesData(series);
 
                     this._resetChart();

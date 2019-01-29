@@ -36,9 +36,14 @@ class ChartUtils {
                 text: undefined
             },
             tooltip: {
-                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f}</span>',
+                borderWidth: 0,
                 shared: true,
-                reversed: true
+                style: {
+                    fontFamily: '\'ptsans-regular\', Verdana, Arial, Helvetica, sans-serif'
+                },
+                reversed: true,
+                useHTML: true,
+                valueSuffix: ''
             },
             xAxis: {
                 labels: {
@@ -199,6 +204,25 @@ class ChartBuilderBase {
                 }
             }
         };
+        this._tooltipHeader = {
+            title: {
+                text: '{point.key}',
+                bold: false,
+            },
+            subTitle: {
+                text: '',
+                bold: false
+            }
+        };
+        this._tooltipFooter = {
+            label: {
+                text: 'Total:',
+                bold: false,
+            },
+            value: {
+                text: '{point.total:.2f}'
+            }
+        };
     }
 
     withTitle (title) {
@@ -216,9 +240,66 @@ class ChartBuilderBase {
         return this;
     }
 
-    withTooltipHeaderFormat (format) {
-        this.options.tooltip.headerFormat = format;
-        this.options.tooltip.useHTML = true;
+    withTooltipHeaderTitle (title) {
+        Highcharts.merge(true, this._tooltipHeader, {
+            title: {
+                text: title
+            }
+        });
+        return this;
+    }
+
+    withTooltipHeaderTitleBold () {
+        Highcharts.merge(true, this._tooltipHeader, {
+            title: {
+                bold: true
+            }
+        });
+        return this;
+    }
+    
+    withTooltipHeaderSubTitle (subTitle) {
+        Highcharts.merge(true, this._tooltipHeader, {
+            subTitle: {
+                text: subTitle
+            }
+        });
+        return this;
+    }
+    
+    withTooltipHeaderSubTitleBold () {
+        Highcharts.merge(true, this._tooltipHeader, {
+            subTitle: {
+                bold: true
+            }
+        });
+        return this;
+    }
+
+    withTooltipFooterLabel(label) {
+        Highcharts.merge(true, this._tooltipFooter, {
+            label: {
+                text: label
+            }
+        });
+        return this;
+    }
+
+    withTooltipFooterLabelBold() {
+        Highcharts.merge(true, this._tooltipFooter, {
+            label: {
+                bold: true
+            }
+        });
+        return this;
+    }
+
+    withTooltipFooterValue(value) {
+        Highcharts.merge(true, this._tooltipFooter, {
+            value: {
+                text: value
+            }
+        });
         return this;
     }
 
@@ -239,6 +320,8 @@ class ChartBuilderBase {
     }
 
     build () {
+        this._buildTooltipHeaderFormat();
+        this._buildTooltipFooterFormat();
         const chart = Highcharts.chart(this.options);
         if (this.hasPlotLine) {
             chart.xAxis[0].addPlotLine({
@@ -248,6 +331,32 @@ class ChartBuilderBase {
                 id: 'projectionStart'});
         }
         return chart;
+    }
+
+    _buildTooltipHeaderFormat () {
+        const tooltip = this.options.tooltip;
+        if (tooltip.headerFormat === null) {
+            return;
+        }
+        if (tooltip.headerFormat === undefined) {
+            tooltip.headerFormat = `<div class="highcharts-tooltip-header">
+                <div class="highcharts-tooltip-header__title${this._tooltipHeader.title.bold ? ' highcharts-tooltip--text-bold' : ''}">${this._tooltipHeader.title.text}</div>
+                <div class="highcharts-tooltip-header__subtitle${this._tooltipHeader.title.bold ? ' highcharts-tooltip--text-bold' : ''}">${this._tooltipHeader.subTitle.text}</div>
+            </div>`;
+        }
+    }
+
+    _buildTooltipFooterFormat () {
+        const tooltip = this.options.tooltip;
+        if (tooltip.footerFormat === null) {
+            return;
+        }
+        if (tooltip.footerFormat === undefined) {
+            tooltip.footerFormat = `<div class="highcharts-tooltip-item">
+            <div class="highcharts-tooltip-item__label${this._tooltipFooter.label.bold ? ' highcharts-tooltip--text-bold' : ''}">${this._tooltipFooter.label.text}</div>
+            <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this._tooltipFooter.value.text} ${tooltip.valueSuffix}</div>
+            </div>`;
+        }
     }
 }
 
@@ -285,9 +394,7 @@ class WeeklyChartBuilder extends ChartBuilderBase {
             xAxis: {
                 type: 'datetime',
                 labels: {
-                    formatter: function () {
-                        return Highcharts.dateFormat('%e %b %y', this.value);
-                    }
+                    format: '{value:%e %b %y}'
                 }
             }
         });
@@ -377,9 +484,7 @@ class CFDChartBuilder extends ChartBuilderBase {
 
     get _xAxisLabels () {
         return {
-            formatter: function () {
-                return Highcharts.dateFormat('%e %b %y', this.value);
-            }
+            format: '{value:%e %b %y}'
         };
     }
 
@@ -393,7 +498,7 @@ class CFDChartBuilder extends ChartBuilderBase {
     }
 }
 
-class TouchTimeChartBuilder extends ChartBuilderBase {
+class TouchTimeByIssuesChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
         Highcharts.merge(true, this.options, this._chartOptions);
@@ -421,7 +526,6 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
     get _tooltipOptions () {
         return {
             tooltip: {
-                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f} (h)</span>',
                 valueSuffix: ' (h)'
             }
         };
@@ -460,12 +564,11 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
     }
 }
 
-class TouchTimeChartByWeekBuilder extends WeeklyChartBuilder {
+class TouchTimeByWeekChartBuilder extends WeeklyChartBuilder {
     constructor (divID) {
         super(divID);
         Highcharts.merge(true, this.options, {
             tooltip: {
-                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f} (h)</span>',
                 valueSuffix: ' (h)'
             }
         });
@@ -516,5 +619,69 @@ class BudgetChartBuilder extends ChartBuilderBase {
                 pointEnd: endDate
             }
         };
+    }
+}
+
+class CycleTimeChartBuilder extends ChartBuilderBase {
+    constructor (divID) {
+        super(divID);
+        const HOUR_IN_MILLIS = 60 * 60 * 1000;
+        Highcharts.merge(true, this.options, {
+            xAxis: {
+                labels: {
+                    format: '{value:%e %b %y}'
+                },
+                type: 'datetime',
+            }
+        });
+        Highcharts.merge(true, this.options, {
+            yAxis: {
+                title: {
+                    text: 'Days'
+                }
+            }
+        });
+        Highcharts.merge(true, this.options, {
+            plotOptions: {
+                series: {
+                    stacking: null,
+                    turboThreshold: 10000
+                },
+                scatter: {
+                    jitter: {
+                        x: 4 * HOUR_IN_MILLIS,
+                        y: 0.4
+                    }
+                }
+            }
+        });
+        Highcharts.merge(true, this.options, {
+            tooltip: {
+                borderWidth: 0,
+                pointFormatter: function () {
+                    const cycleHtml = [];
+                    Object.entries(this.extraData.subCycles).forEach(([status, cycle]) => {
+                        if (cycle > 0) {
+                            cycleHtml.push('<div class="highcharts-tooltip-item">');
+                            cycleHtml.push(`<div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status highcharts-tooltip-subcycle-status--bgcolor-red">${status}</div>`);
+                            cycleHtml.push(`<div class="highcharts-tooltip-item__value">${cycle} days</div>`);
+                            cycleHtml.push('</div>');
+                        }
+                    });
+                    cycleHtml.push('<div class="highcharts-tooltip-item">');
+                    cycleHtml.push('<div class="highcharts-tooltip-item__label">Conclusion Date:</div>');
+                    cycleHtml.push(`<div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>`);
+                    cycleHtml.push('</div>');
+                    return cycleHtml.join('\n');
+                },
+                footerFormat: `<div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Total Cycle Time:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">{point.y} days</div>
+                </dev>`,
+                reversed: false,
+                useHTML: true,
+                xDateFormat: '%b %e, %Y'
+            }
+        });
     }
 }

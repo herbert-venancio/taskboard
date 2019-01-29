@@ -73,6 +73,8 @@ public class ProjectServiceMocker {
 
             Mockito.doReturn(project).when(projectService).getTaskboardProjectOrCry(key);
 
+            Mockito.when(projectService.taskboardProjectExists(key)).thenReturn(true);
+
         }
 
         private Optional<LocalDate> getStartDate() {

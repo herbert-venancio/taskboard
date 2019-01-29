@@ -117,7 +117,7 @@ function DcDateRangeChartsService() {
 
     self.applySelection = function (chart) {
 
-        if (!chart) {
+        if (_.isEmpty(chart)) {
             return;
         } 
 

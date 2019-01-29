@@ -5,8 +5,6 @@ import org.junit.Test;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 
 public class IssueKpiTest {
-
-
     @Test
     public void checkStatusOnDay_happyDay() {
         dsl()
@@ -819,9 +817,310 @@ public class IssueKpiTest {
                     .atDate("2020-01-10").forStatuses("Foo", "Bar").hasEffortSumInSeconds(0L);
     }
 
+    @Test
+    public void hasCompletedCycle_happyDay() {
+        dsl()
+           .environment()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-02")
+                       .status("Doing").date("2020-01-03")
+                       .status("To Review").date("2020-01-04")
+                       .status("Reviewing").date("2020-01-05")
+                       .status("Done").date("2020-01-06")
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .hasCompletedCycle("Doing","To Review","Review");
+    }
+
+    @Test
+    public void hasNotCompletedCycle() {
+        dsl()
+           .environment()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-02")
+                       .status("Doing").date("2020-01-03")
+                       .status("To Review").noDate()
+                       .status("Reviewing").noDate()
+                       .status("Done").noDate()
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .hasNotCompletedCycle("Doing","To Review","Review");
+    }
+
+    @Test
+    public void issueNotEnteringCycle_hasNotCompletedCycle() {
+        dsl()
+           .environment()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-02")
+                       .status("Doing").noDate()
+                       .status("To Review").noDate()
+                       .status("Reviewing").noDate()
+                       .status("Done").noDate()
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .hasNotCompletedCycle("Doing","To Review","Review");
+    }
+
+    @Test
+    public void subCycle_happyDay() {
+        dsl()
+           .environment()
+               .withKpiProperties()
+                   .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+               .eoKpi()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-02")
+                       .status("Doing").date("2020-01-03")
+                       .status("To Review").date("2020-01-04")
+                       .status("Reviewing").date("2020-01-05")
+                       .status("Done").date("2020-01-06")
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .subCycles()
+                           .at("To Do")
+                               .hasEnterDate("2020-01-02")
+                               .hasExitDate("2020-01-03")
+                               .hasTotalDurationInDays(1l)
+                           .eoSCA()
+                           .at("Doing")
+                               .hasEnterDate("2020-01-03")
+                               .hasExitDate("2020-01-04")
+                               .hasTotalDurationInDays(1l)
+                           .eoSCA()
+                           .at("To Review")
+                               .hasEnterDate("2020-01-04")
+                               .hasExitDate("2020-01-05")
+                               .hasTotalDurationInDays(1l)
+                           .eoSCA()
+                               .at("Reviewing")
+                               .hasEnterDate("2020-01-05")
+                               .hasExitDate("2020-01-06")
+                               .hasTotalDurationInDays(1l)
+                           .eoSCA()
+                       .eoSKAL();
+    }
+
+    @Test
+    public void subCycle_whenNotCompletedAllCycles() {
+        dsl()
+           .environment()
+               .withKpiProperties()
+                   .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+               .eoKpi()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-02")
+                       .status("Doing").date("2020-01-03")
+                       .status("To Review").noDate()
+                       .status("Reviewing").noDate()
+                       .status("Done").noDate()
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .subCycles()
+                           .at("To Do")
+                               .hasEnterDate("2020-01-02")
+                               .hasExitDate("2020-01-03")
+                               .hasTotalDurationInDays(1l)
+                           .eoSCA()
+                           .at("Doing")
+                               .hasEnterDate("2020-01-03")
+                               .hasNoExitDate()
+                               .hasNoDuration()
+                           .eoSCA()
+                           .at("To Review")
+                               .hasNoEnterDate()
+                               .hasNoExitDate()
+                               .hasNoDuration()
+                           .eoSCA()
+                               .at("Reviewing")
+                               .hasNoEnterDate()
+                               .hasNoExitDate()
+                               .hasNoDuration()
+                           .eoSCA()
+                       .eoSKAL();
+    }
+
+    @Test
+    public void subCycle_whenSkippingStatus_thoseStausShouldNotHaveSubCycle() {
+        dsl()
+           .environment()
+               .withKpiProperties()
+                   .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+               .eoKpi()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-02")
+                       .status("Doing").noDate()
+                       .status("To Review").noDate()
+                       .status("Reviewing").date("2020-01-05")
+                       .status("Done").date("2020-01-06")
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .subCycles()
+                           .at("To Do")
+                               .hasEnterDate("2020-01-02")
+                               .hasExitDate("2020-01-05")
+                               .hasTotalDurationInDays(3l)
+                           .eoSCA()
+                           .at("Doing")
+                               .hasNoEnterDate()
+                               .hasExitDate("2020-01-05")
+                               .hasNoDuration()
+                           .eoSCA()
+                           .at("To Review")
+                               .hasNoEnterDate()
+                               .hasExitDate("2020-01-05")
+                               .hasNoDuration()
+                           .eoSCA()
+                               .at("Reviewing")
+                                   .hasEnterDate("2020-01-05")
+                                   .hasExitDate("2020-01-06")
+                                   .hasTotalDurationInDays(1l)
+                           .eoSCA()
+                       .eoSKAL();
+    }
+
+    @Test
+    public void subCycle_whenAllTransitionsWereOnSameDay_thenShouldHaveSubCycles_withZeroDaysOfCycle() {
+        dsl()
+           .environment()
+               .withKpiProperties()
+                   .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+               .eoKpi()
+               .givenSubtask("PROJ-01")
+                   .type("Subtask")
+                   .project("PROJ")
+                   .withTransitions()
+                       .status("Open").date("2020-01-01")
+                       .status("To Do").date("2020-01-01")
+                       .status("Doing").date("2020-01-01")
+                       .status("To Review").date("2020-01-01")
+                       .status("Reviewing").date("2020-01-01")
+                       .status("Done").date("2020-01-01")
+                   .eoT()
+               .eoI()
+           .then()
+               .assertThat()
+                   .issueKpi("PROJ-01")
+                       .subCycles()
+                           .at("To Do")
+                               .hasEnterDate("2020-01-01")
+                               .hasExitDate("2020-01-01")
+                               .hasTotalDurationInDays(0l)
+                           .eoSCA()
+                           .at("Doing")
+                               .hasEnterDate("2020-01-01")
+                               .hasExitDate("2020-01-01")
+                               .hasTotalDurationInDays(0l)
+                           .eoSCA()
+                           .at("To Review")
+                               .hasEnterDate("2020-01-01")
+                               .hasExitDate("2020-01-01")
+                               .hasTotalDurationInDays(0l)
+                           .eoSCA()
+                               .at("Reviewing")
+                                   .hasEnterDate("2020-01-01")
+                                   .hasExitDate("2020-01-01")
+                                   .hasTotalDurationInDays(0l)
+                           .eoSCA()
+                       .eoSKAL();
+    }
+
+    @Test
+    public void getIssueTypeName_whenTypeExists_thenHappyPath() {
+        dsl()
+        .environment()
+            .withKpiProperties()
+                .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+            .eoKpi()
+            .givenSubtask("PROJ-01")
+                .type("Subtask")
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                    .hasType("Subtask");
+    }
+
+    @Test
+    public void getIssueTypeName_whenTypeNotConfigured_thenReturnUnmappedType() {
+        dsl()
+        .environment()
+            .withKpiProperties()
+                .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+            .eoKpi()
+            .givenSubtask("PROJ-01")
+                .emptyType()
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                    .hasType("Unmapped");
+    }
+
     private DSLKpi dsl() {
         DSLKpi dsl = new DSLKpi();
         dsl.environment()
+            .withStatus("Open").isNotProgressing()
             .withStatus("To Do").isNotProgressing()
             .withStatus("Doing").isProgressing()
             .withStatus("To Review").isNotProgressing()
@@ -832,6 +1131,4 @@ public class IssueKpiTest {
 
         return dsl;
     }
-
 }
-

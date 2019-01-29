@@ -1,18 +1,18 @@
-<dom-module id="widget-touch-time-issues">
+<dom-module id="widget-cycle-time">
 
     <template>
 
         <style>
-            #touchTimeIssues {
+            #cycleTime {
                 height: 100%;
                 width: 100%;
             }
         </style>
 
-        <widget-wrap title="Touch Time by Issues" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chartWrapper.highchartChart}}" 
+        <widget-wrap title="Cycle Time" is-ready="{{isReady}}" tags="{{tags}}" 
+                options="{{options}}" highcharts-chart="{{chart}}" 
                 error-message="{{errorMessage}}">
-            <div id="touchTimeIssues" class="tb-chart"></div>
+            <div id="cycleTime" class="tb-chart"></div>
         </widget-wrap>
 
         <modal-wrap class="filters-modal" title="Filters">
@@ -47,17 +47,13 @@
     <script>
         (function () {
             Polymer({
-                is: 'widget-touch-time-issues',
+                is: 'widget-cycle-time',
 
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
-                    },
-                    selectedDate: {
-                        type: String,
                         notify: true,
-                        value: ''
+                        observer: '_onProjectSelected'
                     },
                     isReady: {
                         type: Boolean,
@@ -69,7 +65,7 @@
                         notify: true,
                         value: ''
                     },
-                    chartWrapper: {
+                    chart: {
                         type: Object,
                         notify: true,
                         value: null
@@ -90,10 +86,6 @@
                         type: String,
                         computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
                     },
-                    _btFilterClose: {
-                        type: Object,
-                        value: null
-                    },
                     _btLevelSave: {
                         type: Object,
                         value: null
@@ -103,10 +95,6 @@
                         value: null
                     }
                 },
-
-                observers: [
-                    '_onProjectSelected(selectedProjectKey, selectedDate)'
-                ],
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -120,12 +108,11 @@
                 },
 
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
-                    return `dashboard.touchTimeIssues-chart.${selectedProjectKey}.level`;
+                    return `dashboard.cycleTime-chart.${selectedProjectKey}.level`;
                 },
 
                 ready: function () {
                     ChartUtils.registerOptions(this);
-                    this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
                         if (savedLevel === this.settingIssueLevel) {
@@ -148,9 +135,9 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if (this.chartWrapper) {
-                        this.chartWrapper.destroy();
-                        this.chartWrapper = null;
+                    if (this.chart) {
+                        this.chart.destroy();
+                        this.chart = null;
                     }
                 },
 
@@ -159,8 +146,16 @@
                     new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
                         this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this.recreateChart();
+                        this._recreateChart();
                     });
+                },
+
+                _recreateChart: function () {
+                    if (this.chart != null) {
+                        this.chart.destroy();
+                        this.chart = null;
+                    }
+                    this._createChart();
                 },
 
                 _reloadChart: function() {
@@ -168,12 +163,11 @@
                     const savedLevel = this._getSavedLevel();
                     const timezone = taskboard.getTimeZoneIdFromBrowser();
                     this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/touchtime/byIssues?level=${savedLevel}&timezone=${timezone}`;
+                    const url = `/api/projects/${this.selectedProjectKey}/followup/cycletime?level=${savedLevel}&timezone=${timezone}`;
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
-                        data = data.points;
                         if (data.length === 0) {
-                            this.errorMessage = 'Touch Time chart has no data';
+                            this.errorMessage = 'Cycle Time chart has no data';
                             return;
                         }
 
@@ -188,90 +182,82 @@
                 },
 
                 _prepareData: function (data) {
+                    this._parseDates(data);
+
                     const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
-                    const issueKeys = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueKey');
 
                     const ndx = crossfilter(data);
-                    const statusesDimension = ndx.dimension('issueStatus');
+                    const exitDateDimension = ndx.dimension('exitDate');
                     const typeDimension = ndx.dimension('issueType');
-                    const startProgressingDateDimension = ndx.dimension('startProgressingDate');
-                    const endProgressingDateDimension = ndx.dimension('endProgressingDate');
-                    const statusesGroup = statusesDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'issueKey', 'effortInHours');
-
+                    const exitDateGroup = exitDateDimension.group();
+                    exitDateGroup.reduce(
+                        (previous, current) => {
+                            previous.push(current);
+                            return previous;
+                        },
+                        (previous, current) => {
+                            const pos = previous.indexOf(current);
+                            if (pos > -1) {
+                                previous.splice(pos, 1);
+                            }
+                            return previous;
+                        }, 
+                        () => {
+                            return [];
+                        });
                     this._plotData = Object.freeze({
+                        exitDateGroup: exitDateGroup,
                         issueTypes: issueTypes,
-                        issueKeys: issueKeys,
-                        statusesGroup: statusesGroup,
-                        typeDimension: typeDimension,
-                        startProgressingDateDimension: startProgressingDateDimension,
-                        endProgressingDateDimension: endProgressingDateDimension
+                        typeDimension: typeDimension
+                    });
+                },
+
+                _parseDates: function (data) {
+                    data.forEach((item) => {
+                        item.enterDate = new Date(item.enterDate);
+                        item.exitDate = new Date(item.exitDate);
                     });
                 },
 
                 _createChart: function () {
-                    const filterByTimeline = (timelineRange) => {
-                        const [tlStart, tlEnd] = timelineRange;
-                        this._plotData.startProgressingDateDimension.filter((start) => start <= tlEnd);
-                        this._plotData.endProgressingDateDimension.filter((end) => end >= tlStart);
-                        const selectedIssueKeys = new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey));
-                        return selectedIssueKeys;
-                    };
-                    const selectedIssueKeys = filterByTimeline(dcDateRangeChartsService.getTimelineRange());
-                    const effortByStatusByIssueKey = [...this._plotData.statusesGroup.all()];
-                    const selectedIssueKeysOrdered = this._orderIssueKeysByTotalEffort(selectedIssueKeys, effortByStatusByIssueKey);
-                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, selectedIssueKeysOrdered);
+                    const issues = [...this._plotData.exitDateGroup.all()];
+                    const series = this._transformToHighchartsSeries(issues);
 
-                    this.chartWrapper = new TouchTimeByIssuesChartBuilder('touchTimeIssues')
-                        .withChartType('bar')
+                    this.chart = new CycleTimeChartBuilder('cycleTime')
+                        .withChartType('scatter')
                         .withTooltipHeaderTitleBold()
                         .withTooltipNumberOfDecimals(2)
-                        .withCategories(selectedIssueKeysOrdered)
                         .withSeriesData(series)
-                        .withTimelineFilterCallback(this.recreateChart.bind(this))
                         .build();
-                    dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chartWrapper);
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart);
                 },
 
-                _orderIssueKeysByTotalEffort: function (selectedIssueKeys, effortByStatusByIssueKey) {
-                    const totalEffortByIssueKey = effortByStatusByIssueKey
-                        .map(( { value: effortByIssueKey } ) => effortByIssueKey)
-                        .reduce((previous, current) => {
-                            Object.keys(current).forEach(issueKey => previous[issueKey] = (previous[issueKey] || 0) + current[issueKey]);
-                            return previous;
-                        }, {});
-
-                    return Object.entries(totalEffortByIssueKey)
-                        .sort((entry1, entry2) => this._sortTotalEffort(entry1[1], entry2[1], { ascending: false }))
-                        .map(entry => entry[0])
-                        .filter(issueKey => selectedIssueKeys.has(issueKey));
+                _transformToHighchartsSeries: function (issues) {
+                    return [{
+                        name: 'Issues',
+                        data: this._transformToHighchartsData(issues)
+                    }];
                 },
 
-                _sortTotalEffort: function (totalEffort1, totalEffort2, {ascending = true} = {}) {
-                    if (ascending) {
-                        return totalEffort1 - totalEffort2;
-                    }
-                    return totalEffort2 - totalEffort1;
-                },
-
-                _transformToHighchartsSeries: function (effortByStatusByIssueKey, issueKeysOrderLUT) {
-                    return effortByStatusByIssueKey.map(
-                        ({key: status, value: effortByIssueKey}) => {
-                            return {
-                                name: status, 
-                                data: issueKeysOrderLUT.map((issueKey) => effortByIssueKey[issueKey])
-                            };
-                        }
-                    );
-                },
-
-                recreateChart: function () {
-                    if (this.chartWrapper != null) {
-                        this.chartWrapper.destroy();
-                    }
-                    this._createChart();
+                _transformToHighchartsData: function (issues) {
+                    const data = [];
+                    issues.forEach (({key: exitDate, value: foo}) => {
+                        foo.forEach(i => {
+                            data.push({
+                                name: i.issueKey,
+                                x: exitDate.getTime(),
+                                y: i.cycleTime,
+                                extraData: {
+                                    enterDate: i.enterDate,
+                                    exitDate: i.exitDate,
+                                    subCycles: i.subCycles
+                                }
+                            });
+                        });
+                    });
+                    return data;
                 }
-
             });
         })();
     </script>

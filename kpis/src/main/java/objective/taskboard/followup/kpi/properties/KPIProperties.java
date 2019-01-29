@@ -36,6 +36,17 @@ public class KPIProperties {
     @Valid
     private List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs;
 
+    @Valid
+    private KpiCycleTimeProperties cycleTime;
+
+    public KpiCycleTimeProperties getCycleTime() {
+        return cycleTime;
+    }
+
+    public void setCycleTime(KpiCycleTimeProperties cycleTime) {
+        this.cycleTime = cycleTime;
+    }
+
     public IssueTypeChildrenStatusHierarchy getFeaturesHierarchy() {
         return featuresHierarchy;
     }

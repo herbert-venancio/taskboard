@@ -3,6 +3,7 @@ package objective.taskboard.followup.kpi;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,18 @@ public class DatedStatusTransition extends StatusTransition {
         return !this.date.toLocalDate().isAfter(date.toLocalDate());
     }
 
+    @Override
+    public Optional<ZonedDateTime> getEnterDate(ZoneId timezone) {
+        if (enterDate.isPresent()) {
+            return enterDate;
+        }
+        Optional<ZonedDateTime> minWorklogsDate = minimumDateFromWorklogs(timezone);
+        Optional<ZonedDateTime> minNextWorklogsDate = minimumDateFromNextWorklogs(timezone);
+        Optional<ZonedDateTime> minWorklogDate = min(minWorklogsDate, minNextWorklogsDate);
+        enterDate = min(Optional.of(this.date.truncatedTo(ChronoUnit.DAYS)), minWorklogDate);
+        return enterDate;
+    }
+
     public ZonedDateTime getDate() {
         return date;
     }
@@ -64,10 +77,12 @@ public class DatedStatusTransition extends StatusTransition {
         return this.date.toLocalDate().equals(other.date.toLocalDate());
     }
 
+    @Override
     public Optional<DatedStatusTransition> withDate() {
         return Optional.of(this);
     }
 
+    @Override
     boolean hasAnyNextThatReceivesWorklog(Worklog worklog) {
         if (!isSameDate(worklog))
             return super.hasAnyNextThatReceivesWorklog(worklog);
@@ -91,19 +106,20 @@ public class DatedStatusTransition extends StatusTransition {
     }
 
     @Override
-    public Optional<ZonedDateTime> firstDateOnProgressing(ZoneId timezone) {
+    public Optional<LocalDate> firstDateOnProgressing(ZoneId timezone) {
         if (!this.isProgressingStatus)
             return super.firstDateOnProgressing(timezone);
 
         ZonedDateTime currentDate = this.date;
-        List<ZonedDateTime> allDates = collectAllDates(currentDate.getZone());
-        allDates.add(currentDate);
+        List<LocalDate> allDates = collectAllDates(currentDate.getZone());
+        allDates.add(currentDate.toLocalDate());
         return allDates.stream().min(Comparator.naturalOrder());
     }
 
-    private List<ZonedDateTime> collectAllDates(ZoneId timezone) {
+    private List<LocalDate> collectAllDates(ZoneId timezone) {
         return this.getWorklogs().stream()
                 .map(w -> DateTimeUtils.get(w.started, timezone))
+                .map(d -> d.toLocalDate())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -116,6 +132,11 @@ public class DatedStatusTransition extends StatusTransition {
         LocalDate worklogDate = worklogZonedDateTime.toLocalDate();
 
         return worklogDate.isAfter(date.toLocalDate());
+    }
+
+    @Override
+    public String toString() {
+        return "DatedStatusTransition [status=" + super.status + ", date=" + date + ", enterDate=" + enterDate + ", exitDate=" + exitDate + "]";
     }
 
 }
