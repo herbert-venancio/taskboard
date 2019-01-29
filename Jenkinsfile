@@ -101,7 +101,7 @@ node("single-executor") {
                 addDownloadBadge(downloadUrl)
                 updateJobDescription(downloadUrl)
                 if(isMasterBranch())
-                    createPostBuildBranch()
+                    createPostBuildBranch(project)
             }
         }
 
