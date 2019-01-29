@@ -4,6 +4,7 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,13 @@ import java.util.stream.Stream;
 import org.mockito.Mockito;
 
 import objective.taskboard.data.Issue;
+import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.StatusDto;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
@@ -38,6 +41,7 @@ public class MockedServices {
     private IssueKpiDataItemAdapterFactoryMocker factory = new IssueKpiDataItemAdapterFactoryMocker();
     private MetadataServiceMocker metadataService = new MetadataServiceMocker();
     private TransitionServiceMocker transitionsService = new TransitionServiceMocker();
+    private IssueColorServiceMocker colorService = new IssueColorServiceMocker();
 
     public MockedServices(KpiEnvironment fatherEnvironment) {
         this.environment = fatherEnvironment;
@@ -50,6 +54,7 @@ public class MockedServices {
         factory.mockComponent();
         metadataService.mockService();
         transitionsService.mockService();
+        colorService.mock();
     }
 
     public ProjectServiceMocker projects() {
@@ -74,6 +79,10 @@ public class MockedServices {
 
     public MetadataServiceMocker metadata() {
         return metadataService;
+    }
+
+    public IssueColorServiceMocker issueColor() {
+        return colorService;
     }
 
     public KpiEnvironment eoS() {
@@ -292,5 +301,43 @@ public class MockedServices {
             });
         }
 
+    }
+
+    public class IssueColorServiceMocker {
+        private String progressingColor = "#123456";
+        private String nonProgressingColor = "#FEDCBA";
+        private IssueColorService service;
+
+        public IssueColorService getService() {
+            if (service == null) {
+                mock();
+            }
+            return service;
+        }
+
+        public IssueColorServiceMocker withProgressingStatusesColor(String color) {
+            this.progressingColor = color;
+            return this;
+        }
+
+        public IssueColorServiceMocker withNonProgressingStatusesColor(String color) {
+            this.nonProgressingColor = color;
+            return this;
+        }
+
+        public MockedServices eoIC() {
+            return MockedServices.this;
+        }
+
+        private void mock() {
+            service =  Mockito.mock(IssueColorService.class);
+            Collection<StatusDto> statuses = environment.statuses().getStatuses();
+            environment.types().foreach(type -> {
+                statuses.forEach(statusDto -> {
+                    Mockito.when(service.getStatusColor(type.id(), statusDto.name()))
+                        .thenReturn(statusDto.isProgressingStatus() ? progressingColor : nonProgressingColor);
+                });
+            });
+        }
     }
 }

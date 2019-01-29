@@ -12,6 +12,7 @@ import objective.taskboard.followup.kpi.IssueKpiAsserter;
 import objective.taskboard.followup.kpi.StatusTransition;
 import objective.taskboard.followup.kpi.StatusTransitionAsserter;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
+import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiAsserter;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiFactory;
 
 public class DSLKpi {
@@ -24,7 +25,7 @@ public class DSLKpi {
     public KpiEnvironment environment() {
         return environment;
     }
-    
+
     public DSLKpi withNoIssuesConfigured() {
         Assertions.assertThat(environment.getAllIssueMockers()).hasSize(0);
         return this;
@@ -32,7 +33,7 @@ public class DSLKpi {
 
     public IssueKpi getIssueKpi(String pKey) {
         initializeIssuesIfNeeded();
-        
+
         Assertions.assertThat(issues).as("Issue %s not found",pKey).containsKey(pKey);
         return issues.get(pKey);
     }
@@ -44,7 +45,7 @@ public class DSLKpi {
 
     public BehaviorFactory when() {
         environment.services().mockAll();
-        
+
         return behaviorFactory;
     }
 
@@ -71,7 +72,8 @@ public class DSLKpi {
             IssueKpi kpi = getIssueKpi(pkey);
             CycleTimeKpiFactory cycleTimeKpiFactory = new CycleTimeKpiFactory(
                     environment.withKpiProperties().getCycleStatusMap(),
-                    environment.getTimezone());
+                    environment.getTimezone(),
+                    environment.services().issueColor().getService());
             CycleTimeKpi cKpi = cycleTimeKpiFactory.create(kpi);
             return new CycleTimeKpiAsserter<DSLKpi.AsserterFactory>(cKpi, this);
         }

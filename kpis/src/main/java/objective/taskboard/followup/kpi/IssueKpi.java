@@ -15,8 +15,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.data.Worklog;
-import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
-import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi.SubCycleKpi;
 import objective.taskboard.followup.kpi.touchTime.TouchTimeWeekRange;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
@@ -143,6 +141,26 @@ public class IssueKpi {
         return getDateRangeBasedOnProgressingStatuses(week.getTimezone()).map(range -> week.overlaps(range)).orElse(false);
     }
 
+    public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
+        if (!hasEnteredCycle(cycleStatuses, timezone)) {
+            return false;
+        }
+        return doAllCycleStatusesHaveExitDate(cycleStatuses, timezone);
+    }
+
+    public List<StatusTransition> getStatusChainAsList() {
+        List<StatusTransition> statusChain = new LinkedList<>();
+        Optional<StatusTransition> current = firstStatus;
+        do {
+            if (current.isPresent()) {
+                StatusTransition status = current.get();
+                statusChain.add(status);
+                current = status.next;
+            }
+        } while (current.isPresent());
+        return statusChain;
+    }
+
     private List<Worklog> collectWorklogs() {
         return firstStatus.map(s -> s.collectWorklog()).orElseGet(Collections::emptyList);
     }
@@ -162,20 +180,6 @@ public class IssueKpi {
         return minimum.flatMap(zd -> Optional.of(zd.toLocalDate()));
     }
 
-    public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
-        if (!hasEnteredCycle(cycleStatuses, timezone)) {
-            return false;
-        }
-        return doAllCycleStatusesHaveExitDate(cycleStatuses, timezone);
-    }
-
-    public List<CycleTimeKpi.SubCycleKpi> getSubCycles(Set<String> cycleStatuses, ZoneId timezone) {
-        return getStatusChainAsList().stream()
-            .filter(s -> cycleStatuses.contains(s.status))
-            .map(s -> new SubCycleKpi(s.status, s.getEnterDate(timezone), s.getExitDate(timezone)))
-            .collect(Collectors.toList());
-    }
-
     private boolean doAllCycleStatusesHaveExitDate(Set<String> cycleStatuses, ZoneId timezone) {
         List<StatusTransition> statusChain = getStatusChainAsList();
         return statusChain.stream()
@@ -188,19 +192,6 @@ public class IssueKpi {
         return getStatusChainAsList().stream()
                 .filter(s -> cycleStatuses.contains(s.status))
                 .anyMatch(s -> s.getEnterDate(timezone).isPresent());
-    }
-
-    private List<StatusTransition> getStatusChainAsList() {
-        List<StatusTransition> statusChain = new LinkedList<>();
-        Optional<StatusTransition> current = firstStatus;
-        do {
-            if (current.isPresent()) {
-                StatusTransition status = current.get();
-                statusChain.add(status);
-                current = status.next;
-            }
-        } while (current.isPresent());
-        return statusChain;
     }
 
 }

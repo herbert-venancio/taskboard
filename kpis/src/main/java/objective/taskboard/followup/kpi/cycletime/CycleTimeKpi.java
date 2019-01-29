@@ -4,11 +4,8 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -32,22 +29,14 @@ public class CycleTimeKpi {
         return issueType;
     }
     @JsonGetter
-    public Map<String, Long> getSubCycles() {
-        return subCycles.stream()
-                .collect(Collectors.toMap(
-                        SubCycleKpi::getStatus,
-                        SubCycleKpi::getDuration,
-                        (u,v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
-                        LinkedHashMap::new));
+    public List<SubCycleKpi> getSubCycles() {
+        return subCycles;
     }
     @JsonGetter
     public long getCycleTime() {
         Optional<ZonedDateTime> opEnterDate = getEnterDateAsZonedDateTime();
         Optional<ZonedDateTime> opExitDate = getExitDateAsZonedDateTime();
-        if (!opEnterDate.isPresent()) {
-            return 0L;
-        }
-        if (!opExitDate.isPresent()) {
+        if (!opEnterDate.isPresent() || !opExitDate.isPresent()) {
             return 0L;
         }
         return DAYS.between(opEnterDate.get(), opExitDate.get()) + 1;
@@ -82,25 +71,33 @@ public class CycleTimeKpi {
         private String status;
         private Optional<ZonedDateTime> enterDate;
         private Optional<ZonedDateTime> exitDate;
-        public SubCycleKpi(String status, Optional<ZonedDateTime> enterDate, Optional<ZonedDateTime> exitDate) {
+        private String color;
+        public SubCycleKpi(String status, Optional<ZonedDateTime> enterDate, Optional<ZonedDateTime> exitDate, String color) {
             this.status = status;
             this.enterDate = enterDate;
             this.exitDate = exitDate;
+            this.color = color;
         }
+        @JsonGetter
         public String getStatus() {
             return status;
         }
-        public Optional<ZonedDateTime> getEnterDate() {
+        Optional<ZonedDateTime> getEnterDate() {
             return enterDate;
         }
-        public Optional<ZonedDateTime> getExitDate() {
+        Optional<ZonedDateTime> getExitDate() {
             return exitDate;
         }
+        @JsonGetter
         public long getDuration() {
             if (!enterDate.isPresent() || !exitDate.isPresent()) {
                 return 0L;
             }
             return DAYS.between(enterDate.get(), exitDate.get());
+        }
+        @JsonGetter
+        public String getColor() {
+            return color;
         }
         @Override
         public String toString() {
