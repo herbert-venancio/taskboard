@@ -18,11 +18,13 @@ class ChartUtils {
                     color: '#8E8E8E'
                 },
                 itemStyle: {
-                    color: '#8E8E8E'
+                    color: '#8E8E8E',
+                    fontWeight: 'normal'
                 },
                 layout: 'vertical',
                 reversed: true,
-                verticalAlign: 'top'
+                verticalAlign: 'top',
+                itemMarginBottom: 4
             },
             plotOptions: {
                 series: {
@@ -58,7 +60,7 @@ class ChartUtils {
                 tickPixelInterval: 100
             },
             yAxis: {
-                gridLineColor: '#CCC',
+                gridLineColor: '#555555',
                 labels: {
                     style: {
                         color: '#8E8E8E'
@@ -84,7 +86,7 @@ class ChartUtils {
     static resizeAllHighchartsCharts () {
         /*
          * This function performs a resize on all Highchart charts.
-         * 
+         *
          * It is necessary because when the chart is first loaded, the container
          * (div) has no size set, then the chart's size falls back to the lib's
          * default size which gives an erroneous size.
@@ -257,7 +259,7 @@ class ChartBuilderBase {
         });
         return this;
     }
-    
+
     withTooltipHeaderSubTitle (subTitle) {
         Highcharts.merge(true, this._tooltipHeader, {
             subTitle: {
@@ -266,7 +268,7 @@ class ChartBuilderBase {
         });
         return this;
     }
-    
+
     withTooltipHeaderSubTitleBold () {
         Highcharts.merge(true, this._tooltipHeader, {
             subTitle: {
@@ -307,7 +309,7 @@ class ChartBuilderBase {
         Highcharts.merge(true, this.options, {series: seriesData});
         return this;
     }
-    
+
     withPlotLineAt (date) {
         this.plotLineDate = date;
         this.hasPlotLine = true;
@@ -366,9 +368,9 @@ class PieChartBuilder extends ChartBuilderBase {
         this.options.chart.plotBorderWidth = null;
         this.options.chart.plotShadow = false;
         this.options.tooltip.reversed = false;
-        this.options.plotOptions.pie = { 
-            allowPointSelect: true, 
-            cursor: 'pointer', 
+        this.options.plotOptions.pie = {
+            allowPointSelect: true,
+            cursor: 'pointer',
             showInLegend: true,
             dataLabels: {
                 enabled: true,
@@ -404,7 +406,7 @@ class WeeklyChartBuilder extends ChartBuilderBase {
 class ProgressChartBuilder extends ChartBuilderBase {
     constructor(divID, startDate, endDate){
 
-        super(divID);		
+        super(divID);
         this.options.yAxis.max = 100;
         this.options.yAxis.labels.format = '{value}%';
         this.options.yAxis.title.text = 'Progress %';
@@ -683,5 +685,23 @@ class CycleTimeChartBuilder extends ChartBuilderBase {
                 xDateFormat: '%b %e, %Y'
             }
         });
+    }
+}
+
+class ScopeProgressChartBuilder extends ChartBuilderBase {
+    constructor(divID, startDate, xAxisPlotLines){
+
+        super(divID);
+        this.options.yAxis.title.text = 'Effort (hours)';
+        this.options.yAxis.labels.format = '{value}';
+        this.options.xAxis.labels.format = '{value:%e %b %y}';
+        this.options.xAxis.type = 'datetime';
+        this.options.tooltip.headerFormat = '';
+        this.options.tooltip.footerFormat = '';
+        this.options.tooltip.pointFormat = '<b>{series.name}: {point.y:.2f} h ({point.x:%m/%d/%Y})</b><br>';
+        this.options.tooltip.shared = false;
+        this.options.xAxis.plotLines = xAxisPlotLines;
+        this.options.plotOptions.series.pointStart = startDate;
+        this.options.plotOptions.series.pointInterval = 24 * 3600 * 1000;
     }
 }
