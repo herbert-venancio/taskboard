@@ -30,7 +30,7 @@ public class KPIProperties {
     private List<String> progressingStatuses;
 
     @Valid
-    private CumulativeFlowDiagramProperties CumulativeFlowDiagram = new CumulativeFlowDiagramProperties();
+    private CumulativeFlowDiagramProperties cumulativeFlowDiagram = new CumulativeFlowDiagramProperties();
 
     @NotEmpty
     @Valid
@@ -38,6 +38,17 @@ public class KPIProperties {
 
     @Valid
     private KpiCycleTimeProperties cycleTime;
+
+    @Valid
+    private KpiLeadTimeProperties leadTime;
+
+    public KpiLeadTimeProperties getLeadTime() {
+        return leadTime;
+    }
+
+    public void setLeadTime(KpiLeadTimeProperties leadTime) {
+        this.leadTime = leadTime;
+    }
 
     public KpiCycleTimeProperties getCycleTime() {
         return cycleTime;
@@ -72,11 +83,11 @@ public class KPIProperties {
     }
 
     public CumulativeFlowDiagramProperties getCumulativeFlowDiagram() {
-        return CumulativeFlowDiagram;
+        return cumulativeFlowDiagram;
     }
 
     public void setCumulativeFlowDiagram(CumulativeFlowDiagramProperties cumulativeFlowDiagram) {
-        CumulativeFlowDiagram = cumulativeFlowDiagram;
+        this.cumulativeFlowDiagram = cumulativeFlowDiagram;
     }
 
     public List<TouchTimeSubtaskConfiguration> getTouchTimeSubtaskConfigs() {
