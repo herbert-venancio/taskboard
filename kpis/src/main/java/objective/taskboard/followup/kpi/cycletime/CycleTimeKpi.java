@@ -15,10 +15,16 @@ public class CycleTimeKpi {
     private String issueKey;
     private String issueType;
     private List<SubCycleKpi> subCycles;
-    public CycleTimeKpi(String issueKey, String issueType, List<SubCycleKpi> subCycles) {
+    private Instant enterDate;
+    private Instant exitDate;
+    private long duration;
+    public CycleTimeKpi(String issueKey, String issueType, Instant enterDate, Instant exitDate, long duration, List<SubCycleKpi> subCycles) {
         this.issueKey = issueKey;
         this.issueType = issueType;
         this.subCycles = subCycles;
+        this.enterDate = enterDate;
+        this.exitDate = exitDate;
+        this.duration = duration;
     }
     @JsonGetter
     public String getIssueKey() {
@@ -34,34 +40,15 @@ public class CycleTimeKpi {
     }
     @JsonGetter
     public long getCycleTime() {
-        Optional<ZonedDateTime> opEnterDate = getEnterDateAsZonedDateTime();
-        Optional<ZonedDateTime> opExitDate = getExitDateAsZonedDateTime();
-        if (!opEnterDate.isPresent() || !opExitDate.isPresent()) {
-            return 0L;
-        }
-        return DAYS.between(opEnterDate.get(), opExitDate.get()) + 1;
+        return duration;
     }
     @JsonGetter
     public Instant getEnterDate() {
-        return getEnterDateAsZonedDateTime().map(ZonedDateTime::toInstant).orElse(null);
+        return enterDate;
     }
     @JsonGetter
     public Instant getExitDate() {
-        return getExitDateAsZonedDateTime().map(ZonedDateTime::toInstant).orElse(null);
-    }
-    private Optional<ZonedDateTime> getEnterDateAsZonedDateTime() {
-        return subCycles.stream()
-                .map(SubCycleKpi::getEnterDate)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .min(ZonedDateTime::compareTo);
-    }
-    private Optional<ZonedDateTime> getExitDateAsZonedDateTime() {
-        return subCycles.stream()
-                .map(SubCycleKpi::getExitDate)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .max(ZonedDateTime::compareTo);
+        return exitDate;
     }
     @Override
     public String toString() {

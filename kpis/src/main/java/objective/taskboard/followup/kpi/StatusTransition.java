@@ -244,5 +244,4 @@ public class StatusTransition {
         return "StatusTransition [status=" + status + ", isProgressingStatus=" + isProgressingStatus + ", worklogs="
                 + worklogs + ", enterDate=" + enterDate + ", exitDate=" + exitDate + "]";
     }
-
 }
