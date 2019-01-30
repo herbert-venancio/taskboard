@@ -220,8 +220,8 @@
                 },
 
                 _createChart: function () {
-                    const issues = [...this._plotData.exitDateGroup.all()];
-                    const series = this._transformToHighchartsSeries(issues);
+                    const issuesByExitDate = [...this._plotData.exitDateGroup.all()];
+                    const series = this._transformToHighchartsSeries(issuesByExitDate);
 
                     this.chart = new CycleTimeChartBuilder('cycleTime')
                         .withChartType('scatter')
@@ -233,17 +233,17 @@
                     dcDateRangeChartsService.applySelection(this.chart);
                 },
 
-                _transformToHighchartsSeries: function (issues) {
+                _transformToHighchartsSeries: function (issuesByExitDate) {
                     return [{
                         name: 'Issues',
-                        data: this._transformToHighchartsData(issues)
+                        data: this._transformToHighchartsData(issuesByExitDate)
                     }];
                 },
 
-                _transformToHighchartsData: function (issues) {
+                _transformToHighchartsData: function (issuesByExitDate) {
                     const data = [];
-                    issues.forEach (({key: exitDate, value: foo}) => {
-                        foo.forEach(i => {
+                    issuesByExitDate.forEach (({key: exitDate, value: issues}) => {
+                        issues.forEach(i => {
                             data.push({
                                 name: i.issueKey,
                                 x: exitDate.getTime(),
