@@ -5,12 +5,12 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -137,6 +137,8 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
             IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, this);
             jiraIssueService.searchAllProjectIssues(visitor, cardsRepo);
 
+            checkAndUpdateNewProjectsIssues(visitor);
+
             log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
 
             updateState(state.done());
@@ -154,6 +156,19 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         }
         finally {
             log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
+        }
+    }
+
+    private void checkAndUpdateNewProjectsIssues(IssueBufferServiceSearchVisitor visitor) {
+        Optional<Set<String>> projectsOnCacheOpt = cardsRepo.getCurrentProjects();
+        if (projectsOnCacheOpt.isPresent()) {
+            Set<String> projectsOnCache = projectsOnCacheOpt.get();
+            List<String> newProjectKeys = projectService.getTaskboardProjects().stream()
+                    .map(pr -> pr.getProjectKey())
+                    .filter(k -> !projectsOnCache.contains(k) )
+                    .collect(Collectors.toList());
+            if (!newProjectKeys.isEmpty())
+                updateNewProjectsIssues(visitor, newProjectKeys);
         }
     }
 
@@ -239,6 +254,10 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         IssueUpdateType updateType = getIssueType(event);
 
         issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
+    }
+
+    private void updateNewProjectsIssues(IssueBufferServiceSearchVisitor visitor, List<String> projectKeys){
+        jiraIssueService.SearchAllIssuesForProjects(visitor, projectKeys);
     }
 
     public synchronized void startBatchUpdate() {
