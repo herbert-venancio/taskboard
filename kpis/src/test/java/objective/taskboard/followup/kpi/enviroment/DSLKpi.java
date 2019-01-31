@@ -14,6 +14,8 @@ import objective.taskboard.followup.kpi.StatusTransitionAsserter;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiAsserter;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiFactory;
+import objective.taskboard.followup.kpi.leadTime.LeadTimeKpiAsserter;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 
 public class DSLKpi {
 
@@ -76,6 +78,11 @@ public class DSLKpi {
                     environment.services().issueColor().getService());
             CycleTimeKpi cKpi = cycleTimeKpiFactory.create(kpi);
             return new CycleTimeKpiAsserter<DSLKpi.AsserterFactory>(cKpi, this);
+        }
+
+        public LeadTimeKpiAsserter leadTimeKpi(String pKey) {
+            LeadTimeKpi lKpi = environment.getLeadTimeKpi(pKey);
+            return new LeadTimeKpiAsserter(lKpi);
         }
 
     }

@@ -17,9 +17,12 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 
 import objective.taskboard.data.Issue;
+import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi.BehaviorFactory;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -129,14 +132,6 @@ public class KpiEnvironment {
         return transitionsBuilder;
     }
 
-    List<Long> collectTypeIds(List<String> childrenTypes) {
-        return typeRepository.types.values().stream()
-                .filter(type -> childrenTypes.contains(type.name))
-                .map(type -> type.id)
-                .collect(Collectors.toList());
-
-    }
-
     public IssueKpiMocker givenIssue(String pKey) {
         IssueKpiMocker issueMocker = new IssueKpiMocker(this, pKey);
         issues.putIfAbsent(pKey, issueMocker);
@@ -189,6 +184,22 @@ public class KpiEnvironment {
 
     public List<IssueKpiDataItemAdapter> getAllIssuesAdapters() {
         return getAllIssueMockers().stream().map(IssueKpiMocker::buildAsAdapter).collect(Collectors.toList());
+    }
+
+    public LeadTimeKpi getLeadTimeKpi(String pKey) {
+        IssueKpi kpi = kpiContext.getIssueKpi(pKey);
+        LeadTimeKpiFactory factory = new LeadTimeKpiFactory(
+                withKpiProperties().getLeadStatusMap(),
+                getTimezone());
+        return factory.create(kpi);
+    }
+
+    List<Long> collectTypeIds(List<String> childrenTypes) {
+        return typeRepository.types.values().stream()
+                .filter(type -> childrenTypes.contains(type.name))
+                .map(type -> type.id)
+                .collect(Collectors.toList());
+
     }
 
     public class IssueTypeRepository {
