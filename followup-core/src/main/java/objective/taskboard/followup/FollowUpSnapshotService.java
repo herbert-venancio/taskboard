@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,8 +152,11 @@ public class FollowUpSnapshotService {
     }
 
     private synchronized void syncSynthesis(String projectKey, LocalDate date, ZoneId timezone, boolean override) {
-        FollowUpSnapshot snapshot = getFromHistory(date, timezone, projectKey);
-        synthesisSyncronizer.syncSynthesis(snapshot, projectKey, date, override);
+        synthesisSyncronizer.syncSynthesis(
+                () -> getFromHistory(date, timezone, projectKey), 
+                projectKey,
+                date,
+                override);
     }
 
     private interface FollowupDataSupplier {
