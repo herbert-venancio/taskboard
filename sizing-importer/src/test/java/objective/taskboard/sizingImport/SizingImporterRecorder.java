@@ -65,7 +65,7 @@ public class SizingImporterRecorder implements SizingSheetImporterListener {
             return this;
         }
 
-        public AssertImportEvents assertThatImportFinished() {
+        public AssertImportEvents importFinished() {
             assertThat(recorder.events)
                     .last()
                     .satisfies(line ->
@@ -98,11 +98,11 @@ public class SizingImporterRecorder implements SizingSheetImporterListener {
             return this;
         }
 
-        public AssertImportEvents assertThatImportedIssue(String issueKey) {
-            return assertThatImportedIssues(issueKey);
+        public AssertImportEvents withSuccessfulIssueImported(String issueKey) {
+            return withSuccessfulIssuesImported(issueKey);
         }
 
-        public AssertImportEvents assertThatImportedIssues(String... issueKey) {
+        public AssertImportEvents withSuccessfulIssuesImported(String... issueKey) {
             assertThat(recorder.events
                     .stream()
                     .map(e -> StringUtils.substringAfter(e, "issue key: "))
