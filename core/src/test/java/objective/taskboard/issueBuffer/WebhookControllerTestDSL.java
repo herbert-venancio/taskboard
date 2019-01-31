@@ -128,6 +128,7 @@ public class WebhookControllerTestDSL {
         public IssueBufferUpdateByEventAssert shouldHaveBeenCalled(CallArgumentsAssert... arguments) {
             ArgumentCaptor<WebhookEvent> event = ArgumentCaptor.forClass(WebhookEvent.class);
             ArgumentCaptor<String> issueKey = ArgumentCaptor.forClass(String.class);
+            @SuppressWarnings("rawtypes")
             ArgumentCaptor<Optional<JiraIssueDto>> issue = (ArgumentCaptor) ArgumentCaptor.forClass(Optional.class);
 
             verify(issueBufferService, atLeastOnce()).updateByEvent(event.capture(), issueKey.capture(), issue.capture());
@@ -140,6 +141,7 @@ public class WebhookControllerTestDSL {
 
     public static class CallArgumentsAssert {
 
+        @SuppressWarnings("rawtypes")
         private final Matcher[] argumentMatchers;
 
         private CallArgumentsAssert(Object... arguments) {
@@ -148,10 +150,12 @@ public class WebhookControllerTestDSL {
                     .toArray(Matcher[]::new);
         }
 
+        @SuppressWarnings("rawtypes")
         private static Matcher asMatcher(Object arg) {
             return (arg instanceof Matcher) ? (Matcher)arg : equalTo(arg);
         }
 
+        @SuppressWarnings("unchecked")
         public void matches(Object... values) {
             assertThat(values).hasSize(argumentMatchers.length);
             for(int i = 0; i < argumentMatchers.length; ++i) {
