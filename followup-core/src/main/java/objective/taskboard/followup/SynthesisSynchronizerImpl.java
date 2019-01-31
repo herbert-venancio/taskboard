@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import java.time.LocalDate;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class SynthesisSynchronizerImpl implements SynthesisSynchronizer {
     }
     
     @Override
-    public synchronized void syncSynthesis(FollowUpSnapshot snapshot, String projectKey, LocalDate date, boolean override) {
+    public synchronized void syncSynthesis(Supplier<FollowUpSnapshot> lazySnapshotProvider, String projectKey, LocalDate date, boolean override) {
         ProjectFilterConfiguration project = projectService.getTaskboardProjectOrCry(projectKey);
 
         if (dailySynthesisRepository.exists(project.getId(), date)) {
@@ -34,7 +35,7 @@ public class SynthesisSynchronizerImpl implements SynthesisSynchronizer {
             }
         }
 
-        EffortHistoryRow effortHistoryRow = snapshot.getEffortHistoryRow();
+        EffortHistoryRow effortHistoryRow = lazySnapshotProvider.get().getEffortHistoryRow();
 
         dailySynthesisRepository.add(new FollowupDailySynthesis(
                 project.getId(), 

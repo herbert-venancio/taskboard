@@ -1,6 +1,7 @@
 package objective.taskboard;
 
 import java.time.LocalDate;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class DisableBootstrapTasks {
     @Primary
     @Bean
     public SynthesisSynchronizer disableSynthesisSynchronizer() {
-        return (FollowUpSnapshot snapshot, String projectKey, LocalDate date, boolean override) -> {
+        return (Supplier<FollowUpSnapshot> lazySnapshotProvider, String projectKey, LocalDate date, boolean override) -> {
             if (syncSynthesisMessageDisplayed) return;
             log.warn("#################### Synthesis Syncronizer disabled #################### ");
             syncSynthesisMessageDisplayed = true;
