@@ -17,6 +17,8 @@ import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
+import objective.taskboard.extension.ApplicationToolbarService;
+import objective.taskboard.extension.ExtensionManifestService;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.google.GoogleApiConfig;
 import objective.taskboard.jira.FieldMetadataService;
@@ -52,6 +54,12 @@ public class HomeController {
     @Autowired
     private FollowUpFacade followupFacade;
 
+    @Autowired
+    private ApplicationToolbarService applicationToolbarService;
+
+    @Autowired
+    private ExtensionManifestService extensionManifestService;
+
     @RequestMapping("/")
     public String home(Model model) {
         User user = jiraService.getLoggedUser();
@@ -74,6 +82,17 @@ public class HomeController {
                     .collect(Collectors.toList())));
 
         model.addAttribute("hasFollowupTemplateAvailable", followupFacade.getTemplatesForCurrentUser().size() > 0);
+        model.addAttribute("applicationToolbarItems", serialize(applicationToolbarService.getItems()));
+
+        String modules = extensionManifestService.getItems().stream().
+            map(s->s.topLevelComponentName().map(name -> String.format("<%s></%s>", name, name)).orElse("")).
+            reduce("", (a,b)->a+"\n"+b);
+
+        model.addAttribute("modules", modules);
+        
+        model.addAttribute("extensionImports", serialize(
+                extensionManifestService.getItems().stream()
+                .map(e->e.componentPath()).collect(Collectors.toList())));
 
         return "index";
     }
