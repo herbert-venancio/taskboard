@@ -113,10 +113,6 @@ function dateDiffInDays(dateA, dateB) {
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
-function isEdge() {
-    return window.navigator.userAgent.indexOf("Edge") > -1;
-}
-
 if (!Object.values) {
     Object.values = function(obj) {
         return Object.keys(obj).map(
