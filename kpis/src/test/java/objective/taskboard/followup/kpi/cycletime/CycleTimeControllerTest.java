@@ -18,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
+import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
@@ -51,6 +52,10 @@ public class CycleTimeControllerTest {
                         .withKey("TEST")
                         .eoP()
                     .eoPs()
+                    .issueColor()
+                        .withProgressingStatusesColor("#ABABAB")
+                        .withNonProgressingStatusesColor("#FEFEFE")
+                    .eoIC()
                 .eoS()
                 .givenSubtask("I-1")
                     .type("Backend Development")
@@ -94,12 +99,28 @@ public class CycleTimeControllerTest {
                         + "\"cycleTime\": 5,"
                         + "\"enterDate\": " + parseDateAsMillis("2020-01-02") + ","
                         + "\"exitDate\": " + parseDateAsMillis("2020-01-06") + ","
-                        + "\"subCycles\": {"
-                            + "\"To Do\": 1,"
-                            + "\"Doing\": 1,"
-                            + "\"To Review\": 1,"
-                            + "\"Reviewing\": 1"
-                        + "}"
+                        + "\"subCycles\": ["
+                            + "{"
+                                + "\"status\": \"To Do\","
+                                + "\"color\": \"#FEFEFE\","
+                                + "\"duration\": 1"
+                            + "},"
+                            + "{"
+                                + "\"status\": \"Doing\","
+                                + "\"color\": \"#ABABAB\","
+                                + "\"duration\": 1"
+                            + "},"
+                            + "{"
+                                + "\"status\": \"To Review\","
+                                + "\"color\": \"#FEFEFE\","
+                                + "\"duration\": 1"
+                            + "},"
+                            + "{"
+                                + "\"status\": \"Reviewing\","
+                                + "\"color\": \"#ABABAB\","
+                                + "\"duration\": 1"
+                            + "}"
+                        + "]"
                     + "},"
                     + "{"
                         + "\"issueKey\": \"I-2\","
@@ -107,12 +128,28 @@ public class CycleTimeControllerTest {
                         + "\"cycleTime\": 5,"
                         + "\"enterDate\": " + parseDateAsMillis("2020-01-03") + ","
                         + "\"exitDate\": "+ parseDateAsMillis("2020-01-07") + ","
-                        + "\"subCycles\": {"
-                            + "\"To Do\": 1,"
-                            + "\"Doing\": 1,"
-                            + "\"To Review\": 1,"
-                            + "\"Reviewing\": 1"
-                        + "}"
+                        + "\"subCycles\": ["
+                            + "{"
+                                + "\"status\": \"To Do\","
+                                + "\"color\": \"#FEFEFE\","
+                                + "\"duration\": 1"
+                            + "},"
+                            + "{"
+                                + "\"status\": \"Doing\","
+                                + "\"color\": \"#ABABAB\","
+                                + "\"duration\": 1"
+                            + "},"
+                            + "{"
+                                + "\"status\": \"To Review\","
+                                + "\"color\": \"#FEFEFE\","
+                                + "\"duration\": 1"
+                            + "},"
+                            + "{"
+                                + "\"status\": \"Reviewing\","
+                                + "\"color\": \"#ABABAB\","
+                                + "\"duration\": 1"
+                            + "}"
+                        + "]"
                     + "}"
                 + "]");
     }
@@ -373,7 +410,8 @@ public class CycleTimeControllerTest {
 
         private CycleTimeKpi transformIntoCycleTimeKpi(IssueKpi issue, KpiEnvironment environment, ZoneId timezone) {
             Map<KpiLevel, Set<String>> cycleStatusMap = environment.withKpiProperties().getCycleStatusMap();
-            CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusMap, timezone);
+            IssueColorService colorService = environment.services().issueColor().getService();
+            CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusMap, timezone, colorService);
             return factory.create(issue);
         }
 

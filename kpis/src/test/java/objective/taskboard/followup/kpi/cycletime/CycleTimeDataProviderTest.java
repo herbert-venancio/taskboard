@@ -8,9 +8,9 @@ import java.util.Optional;
 
 import org.junit.Test;
 
+import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.CycleTimeKpiAsserter;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
@@ -60,10 +60,10 @@ public class CycleTimeDataProviderTest {
                     .startsAt("2019-01-02")
                     .endsAt("2019-01-06")
                     .hasSubCycles()
-                        .subCycle("To Do").hasCycleTimeInDays(1l)
-                        .subCycle("Doing").hasCycleTimeInDays(1l)
-                        .subCycle("To Review").hasCycleTimeInDays(1l)
-                        .subCycle("Reviewing").hasCycleTimeInDays(1l)
+                        .subCycle("To Do").hasCycleTimeInDays(1l).eoS()
+                        .subCycle("Doing").hasCycleTimeInDays(1l).eoS()
+                        .subCycle("To Review").hasCycleTimeInDays(1l).eoS()
+                        .subCycle("Reviewing").hasCycleTimeInDays(1l).eoS()
                     .eoSC()
                 .eoCK()
                 .givenIssue("I-2")
@@ -71,10 +71,10 @@ public class CycleTimeDataProviderTest {
                     .startsAt("2019-01-04")
                     .endsAt("2019-01-08")
                     .hasSubCycles()
-                        .subCycle("To Do").hasCycleTimeInDays(1l)
-                        .subCycle("Doing").hasCycleTimeInDays(1l)
-                        .subCycle("To Review").hasCycleTimeInDays(1l)
-                        .subCycle("Reviewing").hasCycleTimeInDays(1l)
+                        .subCycle("To Do").hasCycleTimeInDays(1l).eoS()
+                        .subCycle("Doing").hasCycleTimeInDays(1l).eoS()
+                        .subCycle("To Review").hasCycleTimeInDays(1l).eoS()
+                        .subCycle("Reviewing").hasCycleTimeInDays(1l).eoS()
                     .eoSC()
                 .eoCK();
     }
@@ -276,9 +276,10 @@ public class CycleTimeDataProviderTest {
 
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             KPIProperties kpiProperties = environment.getKPIProperties();
+            IssueColorService colorService = environment.services().issueColor().getService();
             ZoneId timezone = environment.getTimezone();
 
-            CycleTimeDataProvider subject = new CycleTimeDataProvider(issueKpiService, kpiProperties);
+            CycleTimeDataProvider subject = new CycleTimeDataProvider(issueKpiService, kpiProperties, colorService);
             List<CycleTimeKpi> dataSet = subject.getDataSet(projectKey, level, timezone);
             asserter = new CycleTimeKpiDataAsserter(dataSet);
         }

@@ -9,7 +9,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.lang3.Range;
 import org.assertj.core.api.Assertions;
@@ -26,7 +24,6 @@ import org.junit.Assert;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
-import objective.taskboard.followup.kpi.enviroment.SubCycleKpiAsserterList;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueKpiAsserter<T> {
@@ -34,12 +31,12 @@ public class IssueKpiAsserter<T> {
     protected IssueKpi subject;
     private Map<String, StatusAsserter> statusesAsserter = new LinkedHashMap<>();
     private KpiEnvironment environment;
-    private T fatherContext;
+    private T parentContext;
 
-    public IssueKpiAsserter(IssueKpi subject, KpiEnvironment environment, T fatherContext) {
+    public IssueKpiAsserter(IssueKpi subject, KpiEnvironment environment, T parentContext) {
         this.subject = subject;
         this.environment = environment;
-        this.fatherContext = fatherContext;
+        this.parentContext = parentContext;
     }
 
     public IssueKpiAsserter<IssueKpiAsserter<T>> withChild(String childKey) {
@@ -57,7 +54,7 @@ public class IssueKpiAsserter<T> {
     }
 
     public T eoIA() {
-        return fatherContext;
+        return parentContext;
     }
 
     public IssueKpiAsserter<T> hasCompletedCycle(String...statuses) {
@@ -93,12 +90,6 @@ public class IssueKpiAsserter<T> {
 
     private Optional<IssueKpi> findChildByKey(String childKey) {
         return subject.getChildren().stream().filter(c -> childKey.equals(c.getIssueKey())).findFirst();
-    }
-
-    public SubCycleKpiAsserterList<?> subCycles() {
-        Set<String> cycleStatuses = environment.withKpiProperties().getCycleStatusMap().get(subject.getLevel());
-        ZoneId timezone = environment.getTimezone();
-        return new SubCycleKpiAsserterList<>(subject.getSubCycles(cycleStatuses, timezone), this);
     }
 
     public IssueKpiAsserter<T> hasType(String type) {
@@ -206,7 +197,6 @@ public class IssueKpiAsserter<T> {
 
         public IssueKpiAsserter<T> eoDc() {
             return IssueKpiAsserter.this;
-
         }
 
         public MultipleStatusesAsserter forStatuses(String ...statuses) {
@@ -225,7 +215,6 @@ public class IssueKpiAsserter<T> {
                 return this;
             }
         }
-
     }
 
     public class StatusAsserter {
@@ -270,7 +259,6 @@ public class IssueKpiAsserter<T> {
                 assertThat(subject.getEffortFromStatusUntilDate(status, date),is(effort));
                 return StatusAsserter.this;
             }
-
         }
 
         public StatusAsserter hasNoEffort() {

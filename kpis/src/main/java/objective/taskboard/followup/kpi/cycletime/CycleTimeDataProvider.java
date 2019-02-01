@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
@@ -23,20 +24,23 @@ public class CycleTimeDataProvider {
 
     private IssueKpiService issueKpiService;
     private KPIProperties kpiProperties;
+    private IssueColorService colorService;
 
     @Autowired
-    public CycleTimeDataProvider(IssueKpiService issueKpiService, KPIProperties kpiProperties) {
+    public CycleTimeDataProvider(IssueKpiService issueKpiService, KPIProperties kpiProperties,
+            IssueColorService colorService) {
         this.issueKpiService = issueKpiService;
         this.kpiProperties = kpiProperties;
+        this.colorService = colorService;
     }
 
     public List<CycleTimeKpi> getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
         Map<KpiLevel, Set<String>> cycleStatusesByLevel = getCycleStatusesMapFromProperties();
-        CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusesByLevel, timezone);
+        CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusesByLevel, timezone, colorService);
         return issues.stream()
                 .filter(i -> i.hasCompletedCycle(cycleStatusesByLevel.get(i.getLevel()), timezone))
-                .map(i -> factory.create(i))
+                .map(factory::create)
                 .collect(Collectors.toList());
     }
 

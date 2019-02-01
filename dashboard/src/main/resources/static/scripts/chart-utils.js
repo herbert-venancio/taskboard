@@ -662,11 +662,11 @@ class CycleTimeChartBuilder extends ChartBuilderBase {
                 borderWidth: 0,
                 pointFormatter: function () {
                     const cycleHtml = [];
-                    Object.entries(this.extraData.subCycles).forEach(([status, cycle]) => {
-                        if (cycle > 0) {
+                    this.extraData.subCycles.forEach((subcycle) => {
+                        if (subcycle.duration > 0) {
                             cycleHtml.push('<div class="highcharts-tooltip-item">');
-                            cycleHtml.push(`<div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status highcharts-tooltip-subcycle-status--bgcolor-red">${status}</div>`);
-                            cycleHtml.push(`<div class="highcharts-tooltip-item__value">${cycle} days</div>`);
+                            cycleHtml.push(`<div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status" style="background-color: ${subcycle.color}">${subcycle.status}</div>`);
+                            cycleHtml.push(`<div class="highcharts-tooltip-item__value">${subcycle.duration} days</div>`);
                             cycleHtml.push('</div>');
                         }
                     });

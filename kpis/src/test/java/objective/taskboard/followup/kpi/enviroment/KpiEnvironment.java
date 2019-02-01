@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,6 +276,10 @@ public class KpiEnvironment {
                     .filter(s -> s.isProgressingStatus())
                     .map(s -> s.name())
                     .collect(Collectors.toList());
+        }
+
+        Collection<StatusDto> getStatuses() {
+            return statuses.values();
         }
 
         public StatusRepository withProgressingStatuses(String... statuses) {

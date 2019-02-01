@@ -30,6 +30,10 @@ public class StatusTransition {
         this.isProgressingStatus = isProgressingStatus;
     }
 
+    public String getStatusName() {
+        return status;
+    }
+
     public Optional<StatusTransition> givenDate(ZonedDateTime date) {
         return next.map(n -> n.givenDate(date)).orElse(Optional.empty());
     }
