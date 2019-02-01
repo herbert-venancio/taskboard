@@ -16,15 +16,15 @@ import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi.SubCycleKpi;
 public class CycleTimeKpiAsserter<T> {
 
     private CycleTimeKpi subject;
-    private T fatherContext;
+    private T parentContext;
 
-    public CycleTimeKpiAsserter(CycleTimeKpi subject, T fatherContext) {
+    public CycleTimeKpiAsserter(CycleTimeKpi subject, T parentContext) {
         this.subject = subject;
-        this.fatherContext = fatherContext;
+        this.parentContext = parentContext;
     }
 
     public T eoCK() {
-        return fatherContext;
+        return parentContext;
     }
 
     public CycleTimeKpiAsserter<T> hasTotalCycleTime(long days) {
@@ -44,7 +44,7 @@ public class CycleTimeKpiAsserter<T> {
 
     public SubCycleGroupAsserter hasSubCycles() {
         List<SubCycleKpi> subCycles = subject.getSubCycles();
-        return new SubCycleGroupAsserter(this, subCycles);
+        return new SubCycleGroupAsserter(subCycles);
     }
 
     private Instant parseInstant(String date) {
@@ -53,11 +53,9 @@ public class CycleTimeKpiAsserter<T> {
 
     public class SubCycleGroupAsserter {
 
-        private CycleTimeKpiAsserter<T> father;
         private Map<String,SubCycleAsserter> subCyclesAsserters;
 
-        public SubCycleGroupAsserter(CycleTimeKpiAsserter<T> father, List<SubCycleKpi> subCycles) {
-            this.father = father;
+        public SubCycleGroupAsserter(List<SubCycleKpi> subCycles) {
             this.subCyclesAsserters = map(subCycles);
         }
 
@@ -72,7 +70,7 @@ public class CycleTimeKpiAsserter<T> {
         }
 
         public CycleTimeKpiAsserter<T> eoSC() {
-            return father;
+            return CycleTimeKpiAsserter.this;
         }
 
         public class SubCycleAsserter {
