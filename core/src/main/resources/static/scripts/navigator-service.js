@@ -21,6 +21,13 @@ function NavigatorService(){
 
     self.resetUrlWithouLoad = function(){
         var urlBase = window.location.origin;
+        //window.location.replace("/#")
+        window.history.replaceState({}, null, urlBase);
+    }
+
+    self.resetUrlWithoutLoadForceHashChange = function(){
+        var urlBase = window.location.origin;
+        window.location.replace("/#")
         window.history.replaceState({}, null, urlBase);
     }
 

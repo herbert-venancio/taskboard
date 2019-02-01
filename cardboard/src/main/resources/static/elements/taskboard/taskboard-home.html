@@ -273,14 +273,7 @@
                 width: 31px;
             }
 
-            .followup-button {
-                padding: 6px !important;
-            }
-
-            .followup-button,
-            .sizing-button,
-            .about-button,
-            .dashboard-button {
+            .extension-button {
                 width: 35px;
                 height: 35px;
                 padding: 4px;
@@ -288,10 +281,7 @@
                 display: block;
             }
 
-            .followup-button:hover,
-            .sizing-button:hover,
-            .about-button:hover,
-            .dashboard-button:hover {
+            .extension-button:hover {
                 background: #CCC;
                 opacity: 0.8;
                 -webkit-transition: all .5s;
@@ -350,13 +340,13 @@
         </style>
 
         <iron-ajax id="ajaxState"
-               auto
-               method="GET"
-               url="/ws/issues/issue-buffer-state"
-               content-type='plain/text'
-               handle-as="text"
-               on-response="onCacheStateResponse"
-               last-response="{{cacheState}}"></iron-ajax>
+                   auto
+                   method="GET"
+                   url="/ws/issues/issue-buffer-state"
+                   content-type='plain/text'
+                   handle-as="text"
+                   on-response="onCacheStateResponse"
+                   last-response="{{cacheState}}"></iron-ajax>
 
         <iron-signals on-iron-signal-level-config-changed="storageLevelsConfig"
                       on-iron-signal-level-weight-changed="storageLevelsConfig"
@@ -371,13 +361,11 @@
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
                       on-iron-signal-projects-changed="retrieveFilters"
-                      ></iron-signals>
+        ></iron-signals>
 
-        <followup-report id="followupReport"></followup-report>
+
 
         <config-project-modal id="projectConfigurationModal"></config-project-modal>
-
-        <sizing-import id="sizingimport"></sizing-import>
 
         <about-modal id="aboutModal"></about-modal>
 
@@ -431,29 +419,21 @@
                             </paper-toolbar>
                         </div>
 
-                        <template is="dom-if" if="{{_showFollowupReportButton}}">
+                        <template is="dom-repeat" items="{{extensionIcons}}" as="item">
                             <div>
-                                <paper-icon-button icon="taskboard-icons:reports" title="Followup reports"
-                                                   class="followup-button" on-tap="openFollowupReport"></paper-icon-button>
-                            </div>
-                        </template>
-                        <template is="dom-if" if="{{_showFollowupDashboardButton}}">
-                            <div>
-                                <a href="/followup-dashboard/" class="link-icon">
-                                    <paper-icon-button icon="taskboard-icons:dashboard" title="Followup Dashboard"
-                                                   class="dashboard-button"></paper-icon-button>
+                                <a href="{{item.onClickLink}}" class="link-icon">
+                                    <paper-icon-button id="{{item.buttonId}}"
+                                                       icon="{{item.iconName}}"
+                                                       title="{{item.iconDisplayName}}"
+                                                       class$="extension-button {{item.buttonId}}">
+                                    </paper-icon-button>
                                 </a>
                             </div>
                         </template>
-                        <template is="dom-if" if="{{_showSizingImportButton}}">
-                            <div>
-                                <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
-                                                   class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
-                            </div>
-                        </template>
+
                         <div>
                             <paper-icon-button icon="info" title="Taskboard About"
-                                               class="about-button" on-tap="openAbout"></paper-icon-button>
+                                               class="extension-button" on-tap="openAbout"></paper-icon-button>
                         </div>
                     </paper-material>
                     <paper-material class="search-warning" hidden$="[[!isFiltering]]">
@@ -505,28 +485,20 @@
                         value: "initializing"
                     },
                     stateIcon: {
-                       type: String,
-                       value: "notification:do-not-disturb"
+                        type: String,
+                        value: "notification:do-not-disturb"
                     },
                     stateTooltip: {
                         type: String,
                         value: "No issue data yet. Initialising"
                     },
-                    _showFollowupReportButton: {
-                        type: Boolean,
-                        value: false
-                    },
-                    _showFollowupDashboardButton: {
-                        type: Boolean,
-                        value: false
-                    },
-                    _showSizingImportButton: {
-                        type: Boolean,
-                        value: false
-                    },
                     searchQuery: {
                         type: String,
                         value: ""
+                    },
+                    extensionIcons : {
+                        type: Array,
+                        value: []
                     }
                 },
 
@@ -536,10 +508,10 @@
                     this.retrieveBoardFeatures();
                     this.updatedIssueKeys = [];
                     this.user = taskboard.getLoggedUser();
-                    this.verifyPermissions();
                     this.isFiltering = false;
                     var afterAnimation = function(){self.fire('iron-signal', {name: 'board-resized'})}
                     $("#lane-container").on("animationend", afterAnimation);
+                    this.extensionIcons = EXTENSION_TOOLBAR_ITEMS;
                 },
 
                 retrieveFilters: function () {
@@ -567,9 +539,9 @@
 
                 hasIssuesVisibilityChanged: function(customEvent, self){
                     if (customEvent.type !== 'iron-signal-level-weight-changed'
-                            && customEvent.type !== 'iron-signal-level-visibility-changed'
-                            && customEvent.type !== 'iron-signal-level-config-changed'
-                            && customEvent.type !== 'iron-signal-level-show-header-changed')
+                        && customEvent.type !== 'iron-signal-level-visibility-changed'
+                        && customEvent.type !== 'iron-signal-level-config-changed'
+                        && customEvent.type !== 'iron-signal-level-show-header-changed')
                         self.$$('board-table').fetchIssues();
                 },
 
@@ -650,7 +622,7 @@
                         action.button = ButtonBuilder(action.name).onClick(function(){action.callback(toastError)}).build();
                     })
                     this.set('errorActions', errorButtons);
-                    
+
                     if (this.issueErrorMessages.length === 0 && !this.infoMessage) {
                         if(!_.isEmpty(this.errorMessage))
                             toastError.open();
@@ -737,14 +709,6 @@
                     }
                 },
 
-                openFollowupReport: function() {
-                    this.$.followupReport.open();
-                },
-
-                openSizingImport: function() {
-                    this.$.sizingimport.opendialog();
-                },
-
                 openAbout: function() {
                     this.$.aboutModal.open();
                 },
@@ -812,12 +776,6 @@
                     };
                     this.set('stateIcon', state[cacheState].icon);
                     this.set('stateTooltip', state[cacheState].tooltip);
-                },
-
-                verifyPermissions: function() {
-                    this.set('_showFollowupReportButton', HAS_FOLLOWUP_TEMPLATE_AVAILABLE || authorizer.hasPermission(Permission.FOLLOWUP_TEMPLATE_EDIT));
-                    this.set('_showFollowupDashboardButton', authorizer.hasPermission(Permission.PROJECT_DASHBOARD_VIEW));
-                    this.set('_showSizingImportButton', authorizer.hasPermission(Permission.SIZING_IMPORT_VIEW));
                 }
             });
         })();

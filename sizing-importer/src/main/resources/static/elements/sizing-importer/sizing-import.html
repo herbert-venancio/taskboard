@@ -18,6 +18,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
+<link rel="import" href="progress-bar.html">
+
 <dom-module id="sizing-import">
 
     <template>
@@ -696,11 +698,30 @@
                     isImportationCompleted: {
                         type: Boolean
                     },
+                    _isOpen: {
+                        type: Boolean
+                    },
                     _errorMessage: String,
                     _errorDetail: String
                 },
 
+                ready: function() {
+                    window.addEventListener("hashchange", this.openByHash.bind(this));
+                    this.openByHash();
+                },
+
+                openByHash: function() {
+                    var hash = window.location.hash;
+                    if (hash === "#/sizing-import/open")
+                        this.opendialog();
+                    else if (this._isOpen) {
+                        this.$.modal.close();
+                        this._isOpen = false;
+                    }
+                },
+
                 opendialog: function () {
+                    this._isOpen = true;
                     this.initStepOne();
                 },
 
@@ -1105,7 +1126,7 @@
                 },
 
                 close: function() {
-                    this.$.modal.close();
+                    navigatorService.resetUrlWithoutLoadForceHashChange()
                 },
 
                 letterToColumn: function(letter) {

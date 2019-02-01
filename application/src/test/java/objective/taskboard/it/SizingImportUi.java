@@ -17,7 +17,7 @@ public class SizingImportUi extends AbstractUiFragment {
     @FindBy(css=".sizing-button")
     private WebElement buttonOpenSizing;
 
-    @FindBy(id="sizingimport")
+    @FindBy(tagName="sizing-import")
     private WebElement sizing;
 
     @FindBy(className="sizingimport-modal")
@@ -104,10 +104,10 @@ public class SizingImportUi extends AbstractUiFragment {
         private final Integer stepNumber;
         private final String title;
 
-        @FindBy(css="#sizingimport #stepsNumbers .steps__number.active")
+        @FindBy(css="sizing-import #stepsNumbers .steps__number.active")
         private WebElement activeStepNumber;
         
-        @FindBy(css="#sizingimport .step__title")
+        @FindBy(css="sizing-import .step__title")
         private WebElement titleElement;
         
         public SizingStep(WebDriver driver, Integer stepNumber, String title) {
@@ -126,13 +126,13 @@ public class SizingImportUi extends AbstractUiFragment {
 
     static abstract class SizingMiddleStep extends SizingStep {
 
-        @FindBy(css="#sizingimport .steps__content .sizing__back")
+        @FindBy(css="sizing-import .steps__content .sizing__back")
         protected WebElement buttonBack;
         
-        @FindBy(css="#sizingimport .steps__content .sizing__cancel")
+        @FindBy(css="sizing-import .steps__content .sizing__cancel")
         protected WebElement buttonCancel;
         
-        @FindBy(css="#sizingimport .steps__content .sizing__submit")
+        @FindBy(css="sizing-import .steps__content .sizing__submit")
         protected WebElement buttonSubmit;
 
         public SizingMiddleStep(WebDriver driver, Integer stepNumber, String title) {
@@ -154,16 +154,16 @@ public class SizingImportUi extends AbstractUiFragment {
 
     static class SizingStepOne extends SizingStep {
 
-        @FindBy(css="#sizingimport .steps__content .sizing__cancel")
+        @FindBy(css="sizing-import .steps__content .sizing__cancel")
         private WebElement buttonCancel;
 
-        @FindBy(css="#sizingimport .steps__content .sizing__submit")
+        @FindBy(css="sizing-import .steps__content .sizing__submit")
         private WebElement buttonSubmit;
 
-        @FindBy(css="#sizingimport .steps__content #projectkey")
+        @FindBy(css="sizing-import .steps__content #projectkey")
         private WebElement selectProjectElement;
         
-        @FindBy(css="#sizingimport .steps__content #spreadsheetUrl")
+        @FindBy(css="sizing-import .steps__content #spreadsheetUrl")
         private WebElement spreadsheetUrl;
 
         public SizingStepOne(WebDriver driver) {
@@ -187,13 +187,13 @@ public class SizingImportUi extends AbstractUiFragment {
 
     static class SizingStepTwo extends SizingMiddleStep {
 
-        @FindBy(css="#sizingimport .steps__content .sizing__open-advanced-mapping")
+        @FindBy(css="sizing-import .steps__content .sizing__open-advanced-mapping")
         private WebElement buttonAdvancedMapping;
 
-        @FindBy(css="#sizingimport .sizing__mapping-column")
+        @FindBy(css="sizing-import .sizing__mapping-column")
         private List<WebElement> columnsOfAdvancedMapping;
         
-        @FindBy(css="#sizingimport .sizing__mapping-column.is-required")
+        @FindBy(css="sizing-import .sizing__mapping-column.is-required")
         private List<WebElement> requiredColumnsOfAdvancedMapping;
 
         public SizingStepTwo(WebDriver driver) {
@@ -235,7 +235,7 @@ public class SizingImportUi extends AbstractUiFragment {
 
         public SizingStepTwo openAdvancedMapping() {
             waitForClick(buttonAdvancedMapping);
-            WebElement advancedMapping = webDriver.findElement(By.cssSelector("#sizingimport .sizing__advanced-mapping"));
+            WebElement advancedMapping = webDriver.findElement(By.cssSelector("sizing-import .sizing__advanced-mapping"));
             waitVisibilityOfElement(advancedMapping);
             return this;
         }
@@ -245,13 +245,13 @@ public class SizingImportUi extends AbstractUiFragment {
         private static final String SCOPE_TAB_NAME = "Scope (Total: 12)";
         private static final String COST_TAB_NAME = "Cost (Total: 5)";
 
-        @FindBy(css="#sizingimport .tb-table.sizing__confirmation")
+        @FindBy(css="sizing-import .tb-table.sizing__confirmation")
         private WebElement tablePreview;
 
-        @FindBy(css="#sizingimport .tb-tabs .tb-tab.active")
+        @FindBy(css="sizing-import .tb-tabs .tb-tab.active")
         private WebElement activeTab;
 
-        @FindBy(css="#sizingimport .tb-tabs .tb-tab-link")
+        @FindBy(css="sizing-import .tb-tabs .tb-tab-link")
         private List<WebElement> tabs;
 
         public SizingStepThree(WebDriver driver) {
@@ -290,13 +290,13 @@ public class SizingImportUi extends AbstractUiFragment {
 
     static class SizingStepFour extends SizingStep {
         
-        @FindBy(css="#sizingimport .steps__content .tb-table.sizing__importation--summary")
+        @FindBy(css="sizing-import .steps__content .tb-table.sizing__importation--summary")
         private WebElement tableSummary;
 
-        @FindBy(css="#sizingimport .steps__content .sizing__return-to-taskboard")
+        @FindBy(css="sizing-import .steps__content .sizing__return-to-taskboard")
         private WebElement buttonReturnToTaskboard;
         
-        @FindBy(css="#sizingimport .steps__content .sizing__open-spreadsheet")
+        @FindBy(css="sizing-import .steps__content .sizing__open-spreadsheet")
         private WebElement buttonOpenSpreadsheet;
 
         public SizingStepFour(WebDriver driver) {
