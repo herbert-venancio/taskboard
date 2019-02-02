@@ -419,7 +419,7 @@
 
                 populateProjects: function() {
                     var self = this;
-                    $.get('/api/projects/dashboard', function(projects) {
+                    $.get('/api/dashboard/projects', function(projects) {
                         self.set('projects', projects);
                         self.set('hasOnlyOneProject', projects.length == 1);
                         self.$$('.loader').classList.remove('active');

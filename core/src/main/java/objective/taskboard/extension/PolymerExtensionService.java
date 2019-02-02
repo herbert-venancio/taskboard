@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExtensionManifestService {
+public class PolymerExtensionService {
     private final List<PolymerComponentExtension> items;
 
     @Autowired
-    public ExtensionManifestService(Optional<List<PolymerComponentExtension>> items) {
+    public PolymerExtensionService(Optional<List<PolymerComponentExtension>> items) {
         this.items = Collections.unmodifiableList(items.orElse(Collections.emptyList()));
     }
 

@@ -78,6 +78,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="/static/elements/elements.html"/>
     <!-- endreplace-->
 
+    <th:block th:each="componentPath : ${extensionImports}">
+        <link rel="import" th:attr="href=${'/static/elements/'+componentPath}"/>
+    </th:block>
+
     <!-- analytics utility -->
     <script src="/static/scripts/analytics.js"></script>
 
@@ -176,17 +180,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     var CLASSES_OF_SERVICE = JSON.parse([[${classesOfService}]]);
 
     var EXTENSION_TOOLBAR_ITEMS = JSON.parse([[${applicationToolbarItems}]]);
-
-    var EXTENSION_HTMLS_TO_IMPORT = JSON.parse([[${extensionImports}]]);
-
-    EXTENSION_HTMLS_TO_IMPORT.forEach(function(elementPath) {
-        var link = document.createElement('link');
-        link.setAttribute('rel', 'import');
-        link.setAttribute('href', 'static/elements/' + elementPath);
-        document.body.appendChild(link)
-    })
-
-
 </script>
 
 

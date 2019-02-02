@@ -22,8 +22,6 @@
 package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +46,6 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.followup.FollowUpFacade;
-import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
@@ -63,8 +60,6 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    private final AuthorizedProjectsService authorizedProjectsService;
-
     private final FollowUpFacade followUpFacade;
 
     private final Authorizer authorizer;
@@ -74,13 +69,11 @@ public class ProjectController {
         TeamCachedRepository teamRepository,
         TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository,
         ProjectService projectService,
-        AuthorizedProjectsService authorizedProjectsService,
         FollowUpFacade followUpFacade,
         Authorizer authorizer) {
         this.teamRepository = teamRepository;
         this.teamFilterConfigurationRepository = teamFilterConfigurationRepository;
         this.projectService = projectService;
-        this.authorizedProjectsService = authorizedProjectsService;
         this.followUpFacade = followUpFacade;
         this.authorizer = authorizer;
     }
@@ -88,13 +81,6 @@ public class ProjectController {
     @GetMapping
     public List<ProjectData> getProjectsVisibleOnTaskboard() {
         return projectService.getNonArchivedJiraProjectsForUser().stream()
-                .map(this::generateProjectData)
-                .collect(toList());
-    }
-
-    @RequestMapping("/dashboard")
-    public List<ProjectData> getProjectsVisibleOnDashboard() {
-        return authorizedProjectsService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, PROJECT_DASHBOARD_TACTICAL, PROJECT_DASHBOARD_OPERATIONAL).stream()
                 .map(this::generateProjectData)
                 .collect(toList());
     }
@@ -164,10 +150,6 @@ public class ProjectController {
     private ProjectData generateProjectData(Project project) {
         String projectDisplayName = project.getKey() + " - " + project.getName();
         return generateProjectData(project.getKey(), projectDisplayName);
-    }
-
-    private ProjectData generateProjectData(ProjectFilterConfiguration projectFilterConfiguration) {
-        return generateProjectData(projectFilterConfiguration.getProjectKey(), projectFilterConfiguration.getProjectKey());
     }
 
     private ProjectData generateProjectData(String projectKey, String projectDisplayName) {

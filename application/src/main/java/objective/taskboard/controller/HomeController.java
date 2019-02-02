@@ -1,8 +1,11 @@
 package objective.taskboard.controller;
 
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,8 +21,7 @@ import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
 import objective.taskboard.extension.ApplicationToolbarService;
-import objective.taskboard.extension.ExtensionManifestService;
-import objective.taskboard.followup.FollowUpFacade;
+import objective.taskboard.extension.PolymerExtensionService;
 import objective.taskboard.google.GoogleApiConfig;
 import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraService;
@@ -52,13 +54,10 @@ public class HomeController {
     private UserTeamPermissionService userTeamPermissionService;
 
     @Autowired
-    private FollowUpFacade followupFacade;
-
-    @Autowired
     private ApplicationToolbarService applicationToolbarService;
 
     @Autowired
-    private ExtensionManifestService extensionManifestService;
+    private PolymerExtensionService extensionManifestService;
 
     @RequestMapping("/")
     public String home(Model model) {
@@ -81,18 +80,19 @@ public class HomeController {
                     .sorted(comparing(a -> a.teamName))
                     .collect(Collectors.toList())));
 
-        model.addAttribute("hasFollowupTemplateAvailable", followupFacade.getTemplatesForCurrentUser().size() > 0);
         model.addAttribute("applicationToolbarItems", serialize(applicationToolbarService.getItems()));
 
         String modules = extensionManifestService.getItems().stream().
-            map(s->s.topLevelComponentName().map(name -> String.format("<%s></%s>", name, name)).orElse("")).
-            reduce("", (a,b)->a+"\n"+b);
+            map(s -> s.topLevelComponentName().map(name -> String.format("<%s></%s>", name, name)).orElse("")).
+            collect(joining("\n"));
 
         model.addAttribute("modules", modules);
         
-        model.addAttribute("extensionImports", serialize(
-                extensionManifestService.getItems().stream()
-                .map(e->e.componentPath()).collect(Collectors.toList())));
+        List<String> extensionImports = extensionManifestService.getItems().stream()
+                .map(e->e.componentPath())
+                .collect(toList());
+        
+        model.addAttribute("extensionImports", extensionImports);
 
         return "index";
     }
