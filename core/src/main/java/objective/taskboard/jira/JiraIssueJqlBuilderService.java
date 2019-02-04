@@ -28,13 +28,21 @@ public class JiraIssueJqlBuilderService {
         return addTimeConstraintIfPresent(cardsRepo.getLastUpdatedDate(), jql);
     }
 
+    public String projectsFromListWithoutTimeConstraint(List<String> projects){
+        return generateJqlFromList(projects);
+    }
+
     public String projectsSqlWithoutTimeConstraint() {
-        List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
+        List<String> projects = projectRepository.getProjects().stream()
+                .map(ProjectFilterConfiguration::getProjectKey)
+                .collect(Collectors.toList());
+        return generateJqlFromList(projects);
+    }
+
+    private String generateJqlFromList(List<String> projects){
         String projectKeys = "'" + projects.stream()
-                                           .map(ProjectFilterConfiguration::getProjectKey)
-                                           .collect(Collectors.joining("','")) + "'";
-        String jql = String.format("project in (%s) ", projectKeys);
-        return jql;
+                .collect(Collectors.joining("','")) + "'";
+        return String.format("project in (%s) ", projectKeys);
     }
 
     private String addTimeConstraintIfPresent(Optional<Date> lastRemoteUpdatedDate, String jql) {
