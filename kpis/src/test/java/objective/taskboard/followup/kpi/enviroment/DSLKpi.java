@@ -80,9 +80,9 @@ public class DSLKpi {
             return new CycleTimeKpiAsserter<DSLKpi.AsserterFactory>(cKpi, this);
         }
 
-        public LeadTimeKpiAsserter leadTimeKpi(String pKey) {
+        public LeadTimeKpiAsserter<AsserterFactory> leadTimeKpi(String pKey) {
             LeadTimeKpi lKpi = environment.getLeadTimeKpi(pKey);
-            return new LeadTimeKpiAsserter(lKpi);
+            return new LeadTimeKpiAsserter<>(lKpi, this);
         }
 
     }

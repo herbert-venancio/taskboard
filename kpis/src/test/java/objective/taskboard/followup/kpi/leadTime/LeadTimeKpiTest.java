@@ -336,7 +336,7 @@ public class LeadTimeKpiTest {
                     .hasType("Development");
     }
 
-    private DSLSimpleBehavior<LeadTimeKpiAsserter> generateLeadTimeKpiForIssue(String pKey) {
+    private CreateLeadTimeKpi generateLeadTimeKpiForIssue(String pKey) {
         return new CreateLeadTimeKpi(pKey);
     }
 
@@ -353,10 +353,10 @@ public class LeadTimeKpiTest {
         return dsl;
     }
 
-    private class CreateLeadTimeKpi implements DSLSimpleBehavior<LeadTimeKpiAsserter> {
+    private class CreateLeadTimeKpi implements DSLSimpleBehavior<LeadTimeKpiAsserter<KpiEnvironment>> {
 
         private String pKey;
-        private LeadTimeKpiAsserter asserter;
+        private LeadTimeKpiAsserter<KpiEnvironment> asserter;
 
         public CreateLeadTimeKpi(String pKey) {
             this.pKey = pKey;
@@ -364,11 +364,11 @@ public class LeadTimeKpiTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            this.asserter = new LeadTimeKpiAsserter(environment.getLeadTimeKpi(pKey));
+            this.asserter = new LeadTimeKpiAsserter<KpiEnvironment>(environment.getLeadTimeKpi(pKey), environment);
         }
 
         @Override
-        public LeadTimeKpiAsserter then() {
+        public LeadTimeKpiAsserter<KpiEnvironment> then() {
             return asserter;
         }
 

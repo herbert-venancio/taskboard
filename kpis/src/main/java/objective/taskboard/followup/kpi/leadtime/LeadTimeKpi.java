@@ -3,24 +3,27 @@ package objective.taskboard.followup.kpi.leadtime;
 import java.time.Instant;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({"issueKey","issueType","leadTime","enterDate","exitDate","lastStatus"})
 public class LeadTimeKpi {
     private String issueKey;
     private String issueType;
-    private Instant startDate;
-    private Instant endDate;
+    private Instant enterDate;
+    private Instant exitDate;
     private long leadTime;
     private String lastStatus;
-    public LeadTimeKpi(String issueKey, String issueType, Optional<Instant> startDate, Optional<Instant> endDate, long leadTime, String lastStatus) {
+    public LeadTimeKpi(String issueKey, String issueType, Optional<Instant> enterDate, Optional<Instant> exitDate, long leadTime, String lastStatus) {
         this.issueKey = issueKey;
         this.issueType = issueType;
-        if (!startDate.isPresent()) {
-            throw new IllegalArgumentException("Invalid start date.");
+        if (!enterDate.isPresent()) {
+            throw new IllegalArgumentException("Invalid enter date.");
         }
-        if (!endDate.isPresent()) {
-            throw new IllegalArgumentException("Invalid end date.");
+        if (!exitDate.isPresent()) {
+            throw new IllegalArgumentException("Invalid exit date.");
         }
-        this.startDate = startDate.get();
-        this.endDate = endDate.get();
+        this.enterDate = enterDate.get();
+        this.exitDate = exitDate.get();
         this.leadTime = leadTime;
         this.lastStatus = lastStatus;
     }
@@ -31,10 +34,10 @@ public class LeadTimeKpi {
         return issueType;
     }
     public Instant getEnterDate() {
-        return startDate;
+        return enterDate;
     }
     public Instant getExitDate() {
-        return endDate;
+        return exitDate;
     }
     public long getLeadTime() {
         return leadTime;

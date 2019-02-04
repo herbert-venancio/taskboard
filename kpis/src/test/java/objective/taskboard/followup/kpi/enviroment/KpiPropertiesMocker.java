@@ -18,6 +18,7 @@ import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierar
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 import objective.taskboard.followup.kpi.properties.TouchTimeSubtaskConfiguration;
 
 public class KpiPropertiesMocker {
@@ -90,7 +91,7 @@ public class KpiPropertiesMocker {
     }
 
     KPIProperties getKpiProperties() {
-        if(kpiProperties == null)
+        if (kpiProperties == null)
             kpiProperties = prepareProperties();
 
         return kpiProperties;
@@ -116,6 +117,7 @@ public class KpiPropertiesMocker {
         kpiProperties.setTouchTimeSubtaskConfigs(touchTimeSubtaskConfigsBuilder.build());
         kpiProperties.setProgressingStatuses(getProgressingStatuses());
         kpiProperties.setCycleTime(getCycleTimeProperties());
+        kpiProperties.setLeadTime(getLeadTimeProperties());
         return kpiProperties;
     }
 
@@ -125,7 +127,6 @@ public class KpiPropertiesMocker {
         }
         return parentEnvironment.statuses().getProgressingStatuses();
     }
-
 
     private KpiCycleTimeProperties getCycleTimeProperties() {
         KpiCycleTimeProperties cycleProperties = new KpiCycleTimeProperties();
@@ -137,6 +138,18 @@ public class KpiPropertiesMocker {
 
     private List<String> getCycleConfigurationsFor(KpiLevel level){
         return new LinkedList<>(cycleTimeConfigurations.get(level));
+    }
+
+    private KpiLeadTimeProperties getLeadTimeProperties() {
+        KpiLeadTimeProperties leadProperties = new KpiLeadTimeProperties();
+        leadProperties.setDemands(getLeadConfigurationsFor(KpiLevel.DEMAND));
+        leadProperties.setFeatures(getLeadConfigurationsFor(KpiLevel.FEATURES));
+        leadProperties.setSubtasks(getLeadConfigurationsFor(KpiLevel.SUBTASKS));
+        return leadProperties;
+    }
+
+    private List<String> getLeadConfigurationsFor(KpiLevel level){
+        return new LinkedList<>(leadTimeConfigurations.get(level));
     }
 
     private IssueTypeChildrenStatusHierarchy getHierarchy(Map<String, HierarchyBuilder> hierarchyBuilder) {
