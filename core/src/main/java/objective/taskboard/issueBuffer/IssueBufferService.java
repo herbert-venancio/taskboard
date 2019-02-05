@@ -407,6 +407,11 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         return updateIssueBuffer(issueKey);
     }
 
+    public Issue saveBallPark(String issueKey, String fieldId, String size) {
+        jiraBean.saveBallpark(issueKey, fieldId, size);
+        return updateIssueBuffer(issueKey);
+    }
+
     private Issue syncIssueTeams(String issueKey, Issue issue) {
         jiraBean.setTeams(issue.getIssueKey(),issue.getRawAssignedTeamsIds());
         return updateIssueBuffer(issueKey);

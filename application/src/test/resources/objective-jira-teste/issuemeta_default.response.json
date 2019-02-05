@@ -1,0 +1,926 @@
+{
+    "fields":{
+        "issuetype":{
+            "required":true,
+            "schema":{
+                "type":"issuetype",
+                "system":"issuetype"
+            },
+            "name":"Issue Type",
+            "operations":[
+
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/issuetype/10004",
+                    "id":"10004",
+                    "description":"A problem which impairs or prevents the functions of the product.",
+                    "iconUrl":"http://10.44.3.170/secure/viewavatar?size=xsmall&avatarId=10678&avatarType=issuetype",
+                    "name":"Bug",
+                    "subtask":false,
+                    "avatarId":10678
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/issuetype/10104",
+                    "id":"10104",
+                    "description":"INTERNAL - GS Task Board",
+                    "iconUrl":"http://10.44.3.170/secure/viewavatar?size=xsmall&avatarId=10602&avatarType=issuetype",
+                    "name":"Feature",
+                    "subtask":false,
+                    "avatarId":10602
+                }
+            ]
+        },
+        "description":{
+            "required":false,
+            "schema":{
+                "type":"string",
+                "system":"description"
+            },
+            "name":"Description",
+            "operations":[
+                "set"
+            ]
+        },
+        "customfield_11457":{
+            "required":true,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11457
+            },
+            "name":"Task TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12656",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12656",
+                    "value": "XS"
+                },
+                {
+                    "id": "12657",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12657",
+                    "value": "S"
+                },
+                {
+                    "id": "12658",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12658",
+                    "value": "M"
+                },
+                {
+                    "id": "12659",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12659",
+                    "value": "L"
+                },
+                {
+                    "id": "12660",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12660",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_11444":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11444
+            },
+            "name":"Feature Planning TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12625",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12625",
+                    "value": "XS"
+                },
+                {
+                    "id": "12626",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12626",
+                    "value": "S"
+                },
+                {
+                    "id": "12627",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12627",
+                    "value": "M"
+                },
+                {
+                    "id": "12628",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12628",
+                    "value": "L"
+                },
+                {
+                    "id": "12629",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12629",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_11442":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11442
+            },
+            "name":"Feature Review TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12615",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12615",
+                    "value": "XS"
+                },
+                {
+                    "id": "12616",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12616",
+                    "value": "S"
+                },
+                {
+                    "id": "12617",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12617",
+                    "value": "M"
+                },
+                {
+                    "id": "12618",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12618",
+                    "value": "L"
+                },
+                {
+                    "id": "12619",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12619",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_10113":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":10113
+            },
+            "name":"Frontend Development TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10141",
+                    "value":"XS",
+                    "id":"10141"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10142",
+                    "value":"S",
+                    "id":"10142"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10143",
+                    "value":"M",
+                    "id":"10143"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10144",
+                    "value":"L",
+                    "id":"10144"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10145",
+                    "value":"XL",
+                    "id":"10145"
+                }
+            ]
+        },
+        "timetracking":{
+            "required":false,
+            "schema":{
+                "type":"timetracking",
+                "system":"timetracking"
+            },
+            "name":"Time Tracking",
+            "operations":[
+                "set",
+                "edit"
+            ]
+        },
+        "customfield_10104":{
+            "required":false,
+            "schema":{
+                "type":"array",
+                "items":"user",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+                "customId":10104
+            },
+            "name":"Co-Assignees",
+            "autoCompleteUrl":"http://10.44.3.170/rest/api/1.0/users/picker?fieldName=customfield_10104&query=",
+            "operations":[
+                "add",
+                "set",
+                "remove"
+            ]
+        },
+        "customfield_10126":{
+            "required":false,
+            "schema":{
+                "type":"string",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+                "customId":10126
+            },
+            "name":"Assumptions",
+            "operations":[
+                "set"
+            ]
+        },
+        "customfield_11441":{
+            "required":true,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11441
+            },
+            "name":"Alpha Test TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12610",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12610",
+                    "value": "XS"
+                },
+                {
+                    "id": "12611",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12611",
+                    "value": "S"
+                },
+                {
+                    "id": "12612",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12612",
+                    "value": "M"
+                },
+                {
+                    "id": "12613",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12613",
+                    "value": "L"
+                },
+                {
+                    "id": "12614",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12614",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_10106":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":10106
+            },
+            "name":"Backend Development TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10107",
+                    "value":"XS",
+                    "id":"10107"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10108",
+                    "value":"S",
+                    "id":"10108"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10109",
+                    "value":"M",
+                    "id":"10109"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10110",
+                    "value":"L",
+                    "id":"10110"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10111",
+                    "value":"XL",
+                    "id":"10111"
+                }
+            ]
+        },
+        "customfield_11440":{
+            "required":true,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11440
+            },
+            "name":"Class of Service",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10112",
+                    "value":"Standard",
+                    "id":"10112"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10113",
+                    "value":"Fixed Date",
+                    "id":"10113"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10114",
+                    "value":"Expedite",
+                    "id":"10114"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10115",
+                    "value":"Intangible",
+                    "id":"10115"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10200",
+                    "value":"Continuous",
+                    "id":"10200"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10300",
+                    "value":"Rework",
+                    "id":"10300"
+                }
+            ]
+        },
+        "attachment":{
+            "required":false,
+            "schema":{
+                "type":"array",
+                "items":"attachment",
+                "system":"attachment"
+            },
+            "name":"Attachment",
+            "operations":[
+
+            ]
+        },
+        "customfield_11449":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11449
+            },
+            "name":"Dev Support TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12650",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12650",
+                    "value": "XS"
+                },
+                {
+                    "id": "12651",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12651",
+                    "value": "S"
+                },
+                {
+                    "id": "12652",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12652",
+                    "value": "M"
+                },
+                {
+                    "id": "12653",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12653",
+                    "value": "L"
+                },
+                {
+                    "id": "12654",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12654",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_11447":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11447
+            },
+            "name":"Development TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12640",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12640",
+                    "value": "XS"
+                },
+                {
+                    "id": "12641",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12641",
+                    "value": "S"
+                },
+                {
+                    "id": "12642",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12642",
+                    "value": "M"
+                },
+                {
+                    "id": "12643",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12643",
+                    "value": "L"
+                },
+                {
+                    "id": "12644",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12644",
+                    "value": "XL"
+                }
+            ]
+        },
+        "summary":{
+            "required":true,
+            "schema":{
+                "type":"string",
+                "system":"summary"
+            },
+            "name":"Summary",
+            "operations":[
+                "set"
+            ]
+        },
+        "customfield_10120":{
+            "required":false,
+            "schema":{
+                "type":"string",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+                "customId":10120
+            },
+            "name":"Acceptance Criteria",
+            "operations":[
+                "set"
+            ]
+        },
+        "reporter":{
+            "required":true,
+            "schema":{
+                "type":"user",
+                "system":"reporter"
+            },
+            "name":"Reporter",
+            "autoCompleteUrl":"http://10.44.3.170/rest/api/latest/user/search?username=",
+            "operations":[
+                "set"
+            ]
+        },
+        "customfield_10122":{
+            "required":false,
+            "schema":{
+                "type":"string",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+                "customId":10122
+            },
+            "name":"Last Block Reason",
+            "operations":[
+                "set"
+            ]
+        },
+        "priority":{
+            "required":false,
+            "schema":{
+                "type":"priority",
+                "system":"priority"
+            },
+            "name":"Priority",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/1",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/highest.svg",
+                    "name":"Highest",
+                    "id":"1"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/10000",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/critical.svg",
+                    "name":"Critical",
+                    "id":"10000"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/10001",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/major.svg",
+                    "name":"Major",
+                    "id":"10001"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/10002",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/minor.svg",
+                    "name":"Minor",
+                    "id":"10002"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/10003",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/trivial.svg",
+                    "name":"Trivial",
+                    "id":"10003"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/2",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/high.svg",
+                    "name":"High",
+                    "id":"2"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/3",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/medium.svg",
+                    "name":"Medium",
+                    "id":"3"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/4",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/low.svg",
+                    "name":"Low",
+                    "id":"4"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/priority/5",
+                    "iconUrl":"http://10.44.3.170/images/icons/priorities/lowest.svg",
+                    "name":"Lowest",
+                    "id":"5"
+                }
+            ]
+        },
+        "customfield_10101":{
+            "required":false,
+            "schema":{
+                "type":"number",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:float",
+                "customId":10101
+            },
+            "name":"Additional Estimated Hours",
+            "operations":[
+                "set"
+            ]
+        },
+        "customfield_10300":{
+            "required":false,
+            "schema":{
+                "type":"string",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+                "customId":10300
+            },
+            "name":"Teams",
+            "operations":[
+                "set"
+            ]
+        },
+        "customfield_10102":{
+            "required":false,
+            "schema":{
+                "type":"array",
+                "items":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+                "customId":10102
+            },
+            "name":"Blocked",
+            "operations":[
+                "add",
+                "set",
+                "remove"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10100",
+                    "value":"Yes",
+                    "id":"10100"
+                }
+            ]
+        },
+        "customfield_10201":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":10201
+            },
+            "name":"Functional Test TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10301",
+                    "value":"XS",
+                    "id":"10301"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10302",
+                    "value":"S",
+                    "id":"10302"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10303",
+                    "value":"M",
+                    "id":"10303"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10304",
+                    "value":"L",
+                    "id":"10304"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/customFieldOption/10305",
+                    "value":"XL",
+                    "id":"10305"
+                }
+            ]
+        },
+        "customfield_10125":{
+            "required":false,
+            "schema":{
+                "type":"version",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:version",
+                "customId":10125
+            },
+            "name":"Release",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10129",
+                    "id":"10129",
+                    "name":"Phase 2",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10130",
+                    "id":"10130",
+                    "name":"Phase 3",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10131",
+                    "id":"10131",
+                    "name":"Phase 4",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10132",
+                    "id":"10132",
+                    "name":"Phase 5",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10133",
+                    "id":"10133",
+                    "description":"",
+                    "name":"Phase 0",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10134",
+                    "id":"10134",
+                    "description":"",
+                    "name":"Phase 1",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10135",
+                    "id":"10135",
+                    "description":"",
+                    "name":"Phase 6",
+                    "archived":false,
+                    "released":false
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10209",
+                    "id":"10209",
+                    "description":"Dev Complete Date for WBMI Release 1.1",
+                    "name":"Release 1.1",
+                    "archived":false,
+                    "released":false,
+                    "releaseDate":"2018-05-09"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10208",
+                    "id":"10208",
+                    "description":"Dev Complete Date for WBMI Release 1.0",
+                    "name":"Release 1.0",
+                    "archived":false,
+                    "released":false,
+                    "releaseDate":"2018-04-09"
+                },
+                {
+                    "self":"http://10.44.3.170/rest/api/2/version/10313",
+                    "id":"10313",
+                    "description":"",
+                    "name":"Release 2.0",
+                    "archived":false,
+                    "released":false
+                }
+            ]
+        },
+        "labels":{
+            "required":false,
+            "schema":{
+                "type":"array",
+                "items":"string",
+                "system":"labels"
+            },
+            "name":"Labels",
+            "autoCompleteUrl":"http://10.44.3.170/rest/api/1.0/labels/suggest?query=",
+            "operations":[
+                "add",
+                "set",
+                "remove"
+            ]
+        },
+        "customfield_11443":{
+            "required":true,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11443
+            },
+            "name":"QA Support TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12620",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12620",
+                    "value": "XS"
+                },
+                {
+                    "id": "12621",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12621",
+                    "value": "S"
+                },
+                {
+                    "id": "12622",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12622",
+                    "value": "M"
+                },
+                {
+                    "id": "12623",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12623",
+                    "value": "L"
+                },
+                {
+                    "id": "12624",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12624",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_11445":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11445
+            },
+            "name":"Tech Planning TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12630",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12630",
+                    "value": "XS"
+                },
+                {
+                    "id": "12631",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12631",
+                    "value": "S"
+                },
+                {
+                    "id": "12632",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12632",
+                    "value": "M"
+                },
+                {
+                    "id": "12633",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12633",
+                    "value": "L"
+                },
+                {
+                    "id": "12634",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12634",
+                    "value": "XL"
+                }
+            ]
+        },
+        "customfield_11446":{
+            "required":false,
+            "schema":{
+                "type":"option",
+                "custom":"com.atlassian.jira.plugin.system.customfieldtypes:select",
+                "customId":11446
+            },
+            "name":"UX TSize",
+            "operations":[
+                "set"
+            ],
+            "allowedValues":[
+                {
+                    "id": "12635",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12635",
+                    "value": "XS"
+                },
+                {
+                    "id": "12636",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12636",
+                    "value": "S"
+                },
+                {
+                    "id": "12637",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12637",
+                    "value": "M"
+                },
+                {
+                    "id": "12638",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12638",
+                    "value": "L"
+                },
+                {
+                    "id": "12639",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12639",
+                    "value": "XL"
+                }
+            ]
+        },
+        "duedate":{
+            "required":false,
+            "schema":{
+                "type":"date",
+                "system":"duedate"
+            },
+            "name":"Due Date",
+            "operations":[
+                "set"
+            ]
+        },
+        "issuelinks":{
+            "required":false,
+            "schema":{
+                "type":"array",
+                "items":"issuelinks",
+                "system":"issuelinks"
+            },
+            "name":"Linked Issues",
+            "autoCompleteUrl":"http://10.44.3.170/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=WBMI-2126&query=",
+            "operations":[
+                "add"
+            ]
+        },
+        "comment":{
+            "required":false,
+            "schema":{
+                "type":"comments-page",
+                "system":"comment"
+            },
+            "name":"Comment",
+            "operations":[
+                "add",
+                "edit",
+                "remove"
+            ]
+        },
+        "assignee":{
+            "required":false,
+            "schema":{
+                "type":"user",
+                "system":"assignee"
+            },
+            "name":"Assignee",
+            "autoCompleteUrl":"http://10.44.3.170/rest/api/latest/user/assignable/search?issueKey=WBMI-2126&username=",
+            "operations":[
+                "set"
+            ]
+        }
+    }
+}

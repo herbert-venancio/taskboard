@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -117,7 +118,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.changelog = scratch.changelog;
         this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
         this.coAssignees = scratch.coAssignees;
-
         this.metaDataService = metadataService;
         this.jiraProperties = properties;
         this.issueTeamService = issueTeamService;
@@ -350,18 +350,30 @@ public class Issue extends IssueScratch implements Serializable {
         return lastBlockReason;
     }
     
-    public List<CustomField> getSubtasksTshirtSizes() {
-        return jiraProperties.getCustomfield().getTShirtSize().getIds()
-                .stream()
-                .filter(tshirtSizes::containsKey)
-                .map(tshirtSizes::get)
+    public List<CustomField> getBallparks() {
+        List<BallparkMapping> list = jiraProperties.getFollowup().getBallparkMappings().get(getType());
+
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return list.stream()
+                .map(obj -> verifyTShirtSize(obj.getTshirtCustomFieldId()))
                 .collect(Collectors.toList());
+        }
     }
-    
+
+    private CustomField verifyTShirtSize(String fieldId) {
+        if (tshirtSizes.containsKey(fieldId)) {
+            return tshirtSizes.get(fieldId);
+        } else {
+            return new CustomField(fieldId, null);
+        }
+    }
+
     public String getCardTshirtSize() {
-        List<CustomField> tshirtSizes = getSubtasksTshirtSizes();
-        if (tshirtSizes.size() == 1)
-            return tshirtSizes.get(0).getValue().toString();
+        if (tshirtSizes.containsKey(jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId()))
+            return ""+tshirtSizes.get(jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId()).getValue();
+
         return "";
     }
 

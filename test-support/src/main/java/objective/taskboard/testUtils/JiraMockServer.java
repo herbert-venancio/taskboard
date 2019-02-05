@@ -147,6 +147,10 @@ public class JiraMockServer {
             return loadMockData("createmeta.response.json");
         });
 
+        get("/rest/api/latest/issue/:issueKey/editmeta", (req, res) ->{
+            return getIssueFieldsDataForKey(req.params(":issueKey"));
+        });
+        
         post("/rest/api/latest/issue",  (req, res) ->{
             countIssueCreated++;
             String loadMockData = loadMockData("createissue.response.json");
@@ -228,43 +232,52 @@ public class JiraMockServer {
             while(keys.hasNext()) {
                 String aKey = keys.next().toString();
 
-                switch(aKey) {
-                    case "assignee":
-                        setAssignee(fields, reqFields.getJSONObject(aKey));
-                        break;
-                    case "summary":
-                        setSummary(fields, reqFields);
-                        break;
-                    case "description":
-                        setDescription(fields, reqFields);
-                        break;
-                    case "customfield_11456"://co-assignee
-                        setCoassignee(fields, aKey, reqFields.getJSONArray(aKey));
-                        break;
-                    case "status":
-                        setStatus(fields, reqFields.getJSONObject(aKey));
-                        break;
-                    case "customfield_11440"://Class Of Service
-                        setClassOfService(fields, aKey, reqFields.getJSONObject(aKey));
-                        break;
-                    case "customfield_11457": //T-Shirt Size
-                        setTShirtSize(fields, aKey, reqFields.getJSONObject(aKey));
-                        break;
-                    case "customfield_11455"://Release
-                        setRelease(fields, aKey, reqFields.getJSONObject(aKey));
-                        break;
-                    case "customfield_10100"://Assigned team
-                        fields.put(aKey, reqFields.getString(aKey));
-                        break;
-                    case "customfield_11451"://blocked
-                        fields.put(aKey, reqFields.getJSONArray(aKey));
-                        break;
-                    case "customfield_11452"://last block reason
-                        fields.put(aKey, reqFields.getString(aKey));
-                        break;
-                    default:
-                        throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
+                String[] ballparkFields = {"customfield_11444", "customfield_11446", "customfield_11447", "customfield_11441",
+                        "customfield_11442", "customfield_11449", "customfield_11443", "customfield_11457"};
+                boolean isBallparkField = Arrays.stream(ballparkFields).anyMatch(aKey::equals);
+
+                if (isBallparkField) {
+                    fields.put(aKey, reqFields.getJSONObject(aKey));
+                } else  {
+                    switch(aKey) {
+                        case "assignee":
+                            setAssignee(fields, reqFields.getJSONObject(aKey));
+                            break;
+                        case "summary":
+                            setSummary(fields, reqFields);
+                            break;
+                        case "description":
+                            setDescription(fields, reqFields);
+                            break;
+                        case "customfield_11456"://co-assignee
+                            setCoassignee(fields, aKey, reqFields.getJSONArray(aKey));
+                            break;
+                        case "status":
+                            setStatus(fields, reqFields.getJSONObject(aKey));
+                            break;
+                        case "customfield_11440"://Class Of Service
+                            setClassOfService(fields, aKey, reqFields.getJSONObject(aKey));
+                            break;
+                        case "customfield_11457": //T-Shirt Size
+                            setTShirtSize(fields, aKey, reqFields.getJSONObject(aKey));
+                            break;
+                        case "customfield_11455"://Release
+                            setRelease(fields, aKey, reqFields.getJSONObject(aKey));
+                            break;
+                        case "customfield_10100"://Assigned team
+                            fields.put(aKey, reqFields.getString(aKey));
+                            break;
+                        case "customfield_11451"://blocked
+                            fields.put(aKey, reqFields.getJSONArray(aKey));
+                            break;
+                        case "customfield_11452"://last block reason
+                            fields.put(aKey, reqFields.getString(aKey));
+                            break;
+                        default:
+                            throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
+                    }
                 }
+
                 fields.put("updated", nowIso8601());
             }
             res.status(204);
@@ -422,6 +435,16 @@ public class JiraMockServer {
         return projectsByKey.computeIfAbsent(projectKey, key -> {
             try {
                 return new JSONObject(loadMockData("project_" + key + ".response.json"));
+            } catch (JSONException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+    }
+
+    private static JSONObject getIssueFieldsDataForKey(String issueKey) {
+        return issueByKey.computeIfAbsent(issueKey, key -> {
+            try {
+                return new JSONObject(loadMockData("issuemeta_default.response.json"));
             } catch (JSONException ex) {
                 throw new RuntimeException(ex);
             }
@@ -717,6 +740,7 @@ public class JiraMockServer {
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static Map<String, JSONObject> deletedSearchIssuesByKey = new LinkedHashMap<>();
     private static Map<String, JSONObject> projectsByKey = new LinkedHashMap<>();
+    private static Map<String, JSONObject> issueByKey = new LinkedHashMap<>();
     private static String username;
     private static boolean searchFailureEnabled = false;
     private static boolean searchAfterInitEnabled = false;

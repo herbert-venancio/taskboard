@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.client.JiraEditIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
@@ -42,9 +43,10 @@ public class ProjectServiceTest {
     private ProjectFilterConfigurationCachedRepository projectRepository = mock(ProjectFilterConfigurationCachedRepository.class);
     private ProjectProfileItemRepository projectProfileItemRepository = mock(ProjectProfileItemRepository.class);
     private JiraProjectService jiraProjectService = mock(JiraProjectService.class);
+    private JiraIssueService jiraIssueService = mock(JiraIssueService.class);
     private ProjectBaselineProvider projectBaselineProvider = mock(ProjectBaselineProvider.class);
     private ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);;
-    private ProjectService subject = new ProjectService(projectRepository, projectProfileItemRepository, jiraProjectService, projectBaselineProvider, eventPublisher);
+    private ProjectService subject = new ProjectService(projectRepository, projectProfileItemRepository, jiraProjectService, jiraIssueService, projectBaselineProvider, eventPublisher);
 
     @Before
     public void setup() {
@@ -78,7 +80,12 @@ public class ProjectServiceTest {
             projectMetadata.key = projectKey;
             return Optional.of(projectMetadata);
         });
-        
+
+        when(jiraIssueService.getIssueMetadata(any())).thenAnswer(i -> {
+            JiraEditIssue.FieldInfoMetadata fieldInfoMetaData = new JiraEditIssue.FieldInfoMetadata();
+            return fieldInfoMetaData;
+        });
+
         List<Version> versions = asList(new Version("12549", "0.3"), new Version("12550", "1.0"),  new Version("12551", "2.0"));
 
         when(jiraProjectService.getUserProjectKeys()).thenReturn(asList(PROJECT_ARCHIVED, PROJECT_REGULAR_1, PROJECT_REGULAR_2, PROJECT_WITHOUT_METADATA));

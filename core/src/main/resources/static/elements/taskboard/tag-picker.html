@@ -6,6 +6,7 @@
             }
             
             #tag-picker-input {
+                width:100%;
                 font-size: 12px;
                 color: white;
                 background-color: transparent;
@@ -151,7 +152,25 @@
                         value: []
                     },
                 },
-                
+
+                setup: function(el) {
+                    var tagPicker = el;
+
+                    tagPicker.open = function(label) {
+                        tagPicker.clear();
+                        $(tagPicker).show();
+                        tagPicker.focus();
+                        tagPicker.label = $(label);
+                        tagPicker.label.hide();
+                    }
+
+                    tagPicker.close = function() {
+                        $(tagPicker).hide();
+                        if (tagPicker.label)
+                            tagPicker.label.show();
+                    }
+                },
+
                 setQueryFn: function(queryFn) {
                     this.$$("paper-autocomplete-suggestions").queryFn = queryFn;
                 },
@@ -179,7 +198,7 @@
                 },
                 
                 _onClose: function(e) {
-                    this.fire("close-suggestions-clicked")
+                    e.target.close();
                 },
 
                 suggestions: function(s) {

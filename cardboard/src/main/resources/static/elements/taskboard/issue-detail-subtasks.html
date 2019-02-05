@@ -1,0 +1,179 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2016 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+
+<dom-module id="issue-detail-subtasks">
+    <template>
+        <style is="custom-property">
+            paper-tab {
+                --paper-tab-content-unselected: {
+                    opacity:1;
+                }
+            }
+        </style>
+        <iron-signals on-iron-signal-card-is-closed="_activeFirstTap"></iron-signals>
+
+        <div class="tabs-wrapper">
+            <paper-tabs selected="{{selected}}" noink no-slide>
+                <paper-tab id="tab-subtask">
+                    [[_subtaskHeader(item.type)]] ({{item.subtasks.length}})
+                </paper-tab>
+                <template is="dom-if" if="{{_hasMultipleTShirtSizes(item)}}">
+                    <paper-tab id="tab-ballparks">
+                        Ballparks
+                    </paper-tab>
+                </template>
+            </paper-tabs>
+            <iron-pages selected="{{selected}}">
+                <div class="tabs-content">
+                    <div class="details-row">
+                        <div id="subtasks_content" class="subtasks--panel">
+                            <template is="dom-repeat" items="{{item.subtasks}}" as="subtask">
+                                <paper-material class="subtask-panel" elevation="0">
+                                    <div class="subtask--issue-type">
+                                        <img class="icon-tiny" src$="{{subtask.issueTypeUri}}" title$="{{subtask.issueType}}"/>
+                                    </div>
+                                    <div class="subtask--issue-key">
+                                        <paper-button class="subtask-link" on-tap="_changeCard"  data-issue-key$="{{subtask.issueKey}}" id="child-issue-{{index}}">
+                                            {{subtask.issueKey}}
+                                        </paper-button>
+                                    </div>
+                                    <div class="subtask--summary">
+                                        {{subtask.summary}}
+                                    </div>
+                                    <div class="subtask--status" style$="background-color: {{subtask.color}}">
+                                        <span>{{subtask.status}}</span>
+                                    </div>
+                                </paper-material>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <template is="dom-if" if="{{_hasMultipleTShirtSizes(item)}}">
+                    <div class="tabs-content">
+                        <div class="details-row">
+                            <div id="subtasks_content" class="subtasks--panel">
+                                <template is="dom-repeat" items="{{issueBallparks}}" as="ballpark">
+                                    <ballpark-item
+                                        ballpark="[[ballpark]]"
+                                        index="[[index]]",
+                                        metadata="{{metadata}}"
+                                    >
+                                    </ballpark-item>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </iron-pages>
+        </div>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'issue-detail-subtasks',
+
+                properties: {
+                    item: {
+                        notify: true
+                    },
+                    
+                    isOpen: {
+                        type: Boolean,
+                        notify: true,
+                        value: () => false
+                    },
+
+                    issueBallparks: {
+                        type: Array,
+                        value: () => [],
+                        notify: true
+                    },
+
+                    selected: {
+                        type: Number,
+                        value: 0
+                    },
+
+                    metadata: {
+                        type: Array,
+                        observer: '_updateMeta'
+                    }
+                },
+
+                _activeFirstTap: function() {
+                    this.selected = 0;
+                },
+
+                _subtaskHeader: function (item) {
+                    if (this.item.type === ISSUETYPE_ID.DEMANDA)
+                        return "Tasks";
+                    else
+                        return "Sub-tasks";
+                },
+
+                _setBallparks(itemType) {
+                    var self = this;
+
+                    this.issueBallparks = taskboard._getBallparks(itemType);
+                    this.issueBallparks = this.issueBallparks.map(function(issueBallpark){
+                        self.item.ballparks.some(function(subtask){
+                           if (subtask.fieldId === issueBallpark.fieldId) {
+                               issueBallpark.value = subtask.value;
+                           } 
+                        });
+                        
+                        return issueBallpark;
+                    });
+
+                    this.issueBallparks = this.issueBallparks.filter(function(issueBallpark){
+                        return self.metadata.fields.some(function(item) {
+                            return (item.id === issueBallpark.fieldId);
+                        });
+                    });
+                    
+                    this.item.ballparks = this.issueBallparks;
+                },
+
+                _updateMeta: function() {
+                    var self = this;
+                    
+                    if (this._hasMultipleTShirtSizes(this.item)) {
+                        this._setBallparks(this.item.type);
+                    }
+                },
+
+                _hasMultipleTShirtSizes: function(item) {
+                    return item.ballparks.length > 1;
+                },
+
+                _changeCard: function(event) {
+                    var issueKey = event.target.getAttribute('data-issue-key');
+                    navigatorService.openCard(issueKey);
+                },
+
+                _activeFirstTab: function() {
+                    this.selected = 0;
+                }
+            });
+        })();
+    </script>
+</dom-module>

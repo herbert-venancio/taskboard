@@ -303,6 +303,31 @@ class IssueDetails extends AbstractUiFragment {
         return this;
     }
 
+    public IssueDetails setBallparkSize(String size) {
+        assertIsOpened();
+        String pickerSelector = "#tShirtSelector0";
+
+        WebElement tabBallpark = getElementWhenItExists(By.id("tab-ballparks"));
+        waitForClick(tabBallpark);
+        
+        WebElement ballparkTag = getElementWhenItExists(By.id("tshirt-selector-0"));
+        waitForClick(ballparkTag);
+
+        return selectStringInPicker(size, pickerSelector);
+    }
+
+    public IssueDetails assertBallparkSize(String size) {
+        assertIsOpened();
+
+        WebElement tabBallpark = getElementWhenItExists(By.id("tab-ballparks"));
+        waitForClick(tabBallpark);
+
+        WebElement tShirtValue = getElementWhenItExists(By.id("tshirt-value-0"));
+        waitTextInElement(tShirtValue, size);
+
+        return this;
+    }
+
     public IssueDetails assertIssueType(String issueTypeExpected) {
         assertIsOpened();
         waitUntilElementExistsWithText(cssSelector(".issue-detail.issue-type .text"), issueTypeExpected);

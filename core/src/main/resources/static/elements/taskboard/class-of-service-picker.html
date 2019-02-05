@@ -6,7 +6,6 @@
                 text-property="value"
                 value-property="value"
                 on-selected-value="_onSelect"
-                on-close-suggestions-clicked="_onClose"
                 >
         </tag-picker>
     </template>
@@ -36,7 +35,11 @@
                         return suggestions;
                     }.bind(this));
                 },
-                
+
+                setup: function() {
+                    this.$$('tag-picker').setup(this);
+                },
+
                 clear: function() {
                     this.tagPicker.clear();
                 },
@@ -51,10 +54,6 @@
                     if (classOfService)
                         this.selected = classOfService.value;
                     this.fire("selected-class-of-service", {target: this})
-                },
-                
-                _onClose: function(e) {
-                    this.fire("close-clicked", {target: this})
                 }
             });
         })();

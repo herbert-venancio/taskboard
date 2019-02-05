@@ -118,7 +118,7 @@ public class IssueController {
             return new ResponseEntity<>("Card: " +issueKey+" not found.", HttpStatus.NOT_FOUND);
         }
     }
-
+    
     @RequestMapping(path = "addMeAsAssignee", method = RequestMethod.POST)
     public CardDto addMeAsAssignee(@RequestBody String issueKey) {
         return toCardDto(issueBufferService.addMeAsAssignee(issueKey));
@@ -179,6 +179,11 @@ public class IssueController {
         return toCardDto(issueBufferService.saveTshirt(issueKey, size));
     }
     
+    @RequestMapping(path ="saveBallpark/{issue}", method = RequestMethod.POST)
+    public CardDto saveBallpark(@PathVariable("issue") String issueKey, @RequestBody Map<String, String> parameters) {
+        return toCardDto(issueBufferService.saveBallPark(issueKey, parameters.get("fieldId"), parameters.get("size")));
+    }
+
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public CardDto transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
         Map<String, Object> fields = tr.fields == null ? Collections.emptyMap() : tr.fields;
@@ -204,6 +209,7 @@ public class IssueController {
         map.put("priorities", metadataService.getPrioritiesMetadata());
         map.put("statuses", metadataService.getStatusesMetadataAsLoggedInUser());
         map.put("urlJira", jiraProperties.getUrl());
+        map.put("ballparks", jiraProperties.getFollowup().getBallparkMappings());
         map.put("urlLinkGraph", linkGraphProperties.getUrl());
         map.put("userPreferences", userPreferencesService.getLoggedUserPreferences().getPreferences());
         return map;

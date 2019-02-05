@@ -1,0 +1,186 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+
+<dom-module id="ballpark-item">
+
+    <template>
+        <style>
+             .size-value {
+                 text-indent:16px;
+                 cursor:pointer;
+                 display:inline-block;
+                 min-width:72px;
+                 height:24px;
+                 border:1px solid transparent;
+                 border-radius:4px;
+             }
+            
+             .size-value:hover {
+                 border-color:#e5e5e5;
+             }
+
+            .ballpark-wrapper {
+                width:60px;
+            }
+
+             paper-material, paper-button {
+                 box-shadow: none !important;
+             }
+
+             .size-value-wrapper {
+                position:relative;
+             }
+             
+            .size-value-wrapper:hover .wrapper-edit {
+                 display:block;
+             }
+         </style>
+    
+        <iron-signals on-iron-signal-close-ballparks-pickers="_closeOpenedPickers"></iron-signals>
+
+        <paper-material class="subtask-panel" elevation="0">
+            <div class="subtask--summary">
+                {{ballpark.name}}
+            </div>
+            <div class="subtask--summary ballpark-wrapper">
+                <paper-material id="tshirt-value-{{index}}" on-tap="_showTShirtPicker">
+                    <div class="size-value-wrapper">
+                        <span class="size-value" id="tshirt-selector-{{index}}" data-picker$="tShirtSelector{{index}}">
+                            {{_getBallparkvalue(ballpark.value)}}
+                        </span>
+                        <div class="wrapper-edit">
+                            <iron-icon class="description-edit" icon="taskboard-icons:edit"></iron-icon>
+                        </div>
+                    </div>
+                    <tshirt-picker
+                        id="tShirtSelector{{index}}"
+                        class="ballpark-picker"
+                        options="{{tShirtOptions}}"
+                        on-selected-tshirt = "_changeTShirt"
+                        on-tap="_stopPropagation"
+                        >
+                    </tshirt-picker>
+                </paper-material>
+
+            </div>
+        </paper-material>
+    </template>
+
+    <script>
+    (function(){
+        Polymer({
+            is: 'ballpark-item',
+
+            properties: {
+                ballpark: {
+                    type: Object,
+                    value: () => {}
+                },
+
+                index: {
+                    type: Number,
+                    value: () => 0,
+                    notify:true
+                },
+
+                metadata: {
+                    type: Array,
+                    observer: '_updateMeta'
+                },
+
+                tShirtOptions: {
+                    type: Array,
+                    value: () => [],
+                    notify: true
+                }
+            },
+
+            attached: function() {
+                var selector = "#tShirtSelector" + this.index;
+                this.$$(selector).setup();
+            },
+
+            _updateMeta: function() {
+                var self = this;
+                
+                taskboard.getFieldOptions(this.metadata, this.ballpark.fieldId, function(data, el) {
+                    self.tShirtOptions = data;
+                });
+            },
+
+            _getBallparkvalue: function(value) {
+                if (value === null) {
+                    return "-";
+                } else {
+                    return value;
+                }
+            },
+
+            _showTShirtPicker: function(e) {
+                e.stopPropagation();
+                this.fire('iron-signal', {name: 'close-ballparks-pickers'});
+                this.fire('iron-signal', {name: 'close-all-pickers'});
+
+                var selector = "#tShirtSelector" + this.index;
+
+                var label = this.$$('.size-value');
+                $(this.$$(selector)).css("width", $(label).width());
+                this.$$(selector).open(label);
+            },
+
+            _changeTShirt: function(e) {
+                var tShirtPicker = e.target,
+                selectedTShirt = tShirtPicker.selected;
+                
+                if (!selectedTShirt) {
+                    tShirtPicker.close();
+                    return;
+                }
+                
+                this.fire('iron-signal', {
+                    name: 'ballpark-updated',
+                    data: {
+                        fieldId: this.ballpark.fieldId,
+                        value: selectedTShirt,
+                        callback: function() {
+                            tShirtPicker.close();
+                        }
+                    }
+                });
+
+                tShirtPicker.close();
+            },
+
+            _closeOpenedPickers: function(e) {
+                var pickers = Polymer.dom(this.root).querySelectorAll(".ballpark-picker");
+
+                pickers.forEach(function(tp) {
+                    tp.close();
+                });
+            },
+
+            _stopPropagation: function (e) {
+                e.stopPropagation();
+            }
+        })
+    })();
+    </script>
+</dom-module>
