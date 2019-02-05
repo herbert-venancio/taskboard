@@ -100,13 +100,13 @@ public class DSLKpi {
             return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.environment.givenIssue(key)));
         }
 
-        public <T> ExceptionBehavior<T> expectExceptionFromBehavior(DSLSimpleBehavior<T> behavior){
-            ExceptionBehavior<T> exceptionBehavior = new ExceptionBehavior<>(behavior);
+        public ExceptionBehavior expectExceptionFromBehavior(DSLSimpleBehavior behavior){
+            ExceptionBehavior exceptionBehavior = new ExceptionBehavior(behavior);
             exceptionBehavior.behave(kpiContext.environment);
             return exceptionBehavior;
         }
 
-        public <T> DSLSimpleBehavior<T> appliesBehavior(DSLSimpleBehavior<T> behavior) {
+        public <T> DSLSimpleBehaviorWithAsserter<T> appliesBehavior(DSLSimpleBehaviorWithAsserter<T> behavior) {
             behavior.behave(kpiContext.environment);
             return behavior;
         }

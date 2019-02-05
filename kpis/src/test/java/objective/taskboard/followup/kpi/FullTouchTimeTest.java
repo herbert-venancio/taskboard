@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.MockedServices;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
@@ -621,7 +621,7 @@ public class FullTouchTimeTest {
         return new AllIssuesBehavior(project,zoneId);
     }
 
-    private class AllIssuesBehavior implements DSLSimpleBehavior<EffortAsserter>{
+    private class AllIssuesBehavior implements DSLSimpleBehaviorWithAsserter<EffortAsserter>{
 
         private String project;
         private ZoneId zoneId;

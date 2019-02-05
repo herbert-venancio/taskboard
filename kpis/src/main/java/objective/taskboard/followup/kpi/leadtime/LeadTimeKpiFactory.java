@@ -24,8 +24,10 @@ public class LeadTimeKpiFactory {
     public LeadTimeKpi create(IssueKpi issue) {
         String issueKey = issue.getIssueKey();
         String issueType = issue.getIssueTypeName();
+
         StatusTransitionChain statuses = issue.getStatusChain(timezone);
         String lastStatus = statuses.getCurrentStatusName();
+
         Set<String> leadStatusesNames = leadStatusMap.get(issue.getLevel());
         StatusTransitionChain leadStatuses = statuses.getStatusSubChain(leadStatusesNames);
         Optional<Instant> startDate = leadStatuses.getMinimumDate().map(ZonedDateTime::toInstant);

@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.assertj.core.api.AbstractThrowableAssert;
 
-public class ExceptionBehavior<T> implements DSLSimpleBehavior<ExceptionBehavior.ThrowableAsserter>{
+public class ExceptionBehavior implements DSLSimpleBehaviorWithAsserter<ExceptionBehavior.ThrowableAsserter>{
 
-    private DSLSimpleBehavior<T> delegateBehavior;
+    private DSLSimpleBehavior delegateBehavior;
     private AbstractThrowableAssert<?, ? extends Throwable> exception;
-    
-    public ExceptionBehavior(DSLSimpleBehavior<T> defaulBehavior) {
+
+    public ExceptionBehavior(DSLSimpleBehavior defaulBehavior) {
         this.delegateBehavior = defaulBehavior;
     }
 
@@ -23,24 +23,24 @@ public class ExceptionBehavior<T> implements DSLSimpleBehavior<ExceptionBehavior
     }
 
     public static class ThrowableAsserter {
-        
+
         private AbstractThrowableAssert<?, ? extends Throwable> subject;
 
         public ThrowableAsserter(AbstractThrowableAssert<?, ? extends Throwable> subject) {
             this.subject = subject;
         }
-        
+
         public ThrowableAsserter isFromException(Class<?> _class) {
             this.subject.isInstanceOf(_class);
             return this;
         }
-        
-        public ThrowableAsserter hasMessage(String message) { 
+
+        public ThrowableAsserter hasMessage(String message) {
            this.subject.hasMessage(message);
             return this;
         }
-        
-        
+
+
     }
 
 

@@ -211,7 +211,7 @@ public class LeadTimeKpiTest {
             .expectExceptionFromBehavior(generateLeadTimeKpiForIssue("I-1"))
         .then()
             .isFromException(IllegalArgumentException.class)
-            .hasMessage("Invalid end date.");
+            .hasMessage("Invalid exit date.");
     }
 
     @Test
@@ -240,7 +240,7 @@ public class LeadTimeKpiTest {
             .expectExceptionFromBehavior(generateLeadTimeKpiForIssue("I-1"))
         .then()
             .isFromException(IllegalArgumentException.class)
-            .hasMessage("Invalid end date.");
+            .hasMessage("Invalid exit date.");
     }
 
     @Test
@@ -336,9 +336,16 @@ public class LeadTimeKpiTest {
                     .hasType("Development");
     }
 
-    private CreateLeadTimeKpi generateLeadTimeKpiForIssue(String pKey) {
-        return new CreateLeadTimeKpi(pKey);
-    }
+    private DSLSimpleBehavior generateLeadTimeKpiForIssue(String pKey) {
+      return new DSLSimpleBehavior() {
+
+          @Override
+        public void behave(KpiEnvironment environment) {
+            environment.getLeadTimeKpi(pKey);
+        }
+
+    };
+  }
 
     private DSLKpi dsl() {
         DSLKpi dsl = new DSLKpi();
@@ -351,26 +358,5 @@ public class LeadTimeKpiTest {
             .withFeatureType("Task")
             .withDemandType("Demand");
         return dsl;
-    }
-
-    private class CreateLeadTimeKpi implements DSLSimpleBehavior<LeadTimeKpiAsserter<KpiEnvironment>> {
-
-        private String pKey;
-        private LeadTimeKpiAsserter<KpiEnvironment> asserter;
-
-        public CreateLeadTimeKpi(String pKey) {
-            this.pKey = pKey;
-        }
-
-        @Override
-        public void behave(KpiEnvironment environment) {
-            this.asserter = new LeadTimeKpiAsserter<KpiEnvironment>(environment.getLeadTimeKpi(pKey), environment);
-        }
-
-        @Override
-        public LeadTimeKpiAsserter<KpiEnvironment> then() {
-            return asserter;
-        }
-
     }
 }

@@ -11,7 +11,7 @@ import org.junit.Test;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiDataProvider;
@@ -91,21 +91,21 @@ public class LeadTimeKpiDataProviderTest {
             .appliesBehavior(generateDataSet("TASKB", KpiLevel.SUBTASKS))
         .then()
             .dataSetHasTotalSize(3)
-                .givenIssue("I-2")
+                .leadTimeForIssue("I-2")
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-06")
                     .hasTotalLeadTime(6)
                     .hasType("Backend Development")
                     .hasLastStatus("Done")
                 .eoLTKA()
-                .givenIssue("I-3")
+                .leadTimeForIssue("I-3")
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-07")
                     .hasTotalLeadTime(7)
                     .hasType("Backend Development")
                     .hasLastStatus("Done")
                 .eoLTKA()
-                .givenIssue("I-4")
+                .leadTimeForIssue("I-4")
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-04")
                     .hasTotalLeadTime(4)
@@ -249,7 +249,7 @@ public class LeadTimeKpiDataProviderTest {
         return dsl;
     }
 
-    private class GenerateLeadTimeData implements DSLSimpleBehavior<LeadTimeKpiDataAsserter>{
+    private class GenerateLeadTimeData implements DSLSimpleBehaviorWithAsserter<LeadTimeKpiDataAsserter>{
 
         private String projectKey;
         private KpiLevel level;
@@ -289,7 +289,7 @@ public class LeadTimeKpiDataProviderTest {
             assertThat(dataSet).hasSize(0);
         }
 
-        public LeadTimeKpiAsserter<LeadTimeKpiDataAsserter> givenIssue(String pkey) {
+        public LeadTimeKpiAsserter<LeadTimeKpiDataAsserter> leadTimeForIssue(String pkey) {
             Optional<LeadTimeKpi> opKpi = dataSet.stream().filter(c -> c.getIssueKey().equals(pkey)).findFirst();
             assertThat(opKpi).as("Lead Kpi for issue %s not found.",pkey).isPresent();
             return new LeadTimeKpiAsserter<LeadTimeKpiDataAsserter>(opKpi.get(), this);

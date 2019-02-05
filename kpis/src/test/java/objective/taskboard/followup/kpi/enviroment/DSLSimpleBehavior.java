@@ -1,8 +1,7 @@
 package objective.taskboard.followup.kpi.enviroment;
 
-public interface DSLSimpleBehavior<T> {
+public interface DSLSimpleBehavior {
 
     public void behave(KpiEnvironment environment);
 
-    public T then();
 }

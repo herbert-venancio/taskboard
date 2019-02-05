@@ -10,18 +10,14 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiController;
@@ -31,20 +27,7 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 import objective.taskboard.utils.DateTimeUtils;
 
-@RunWith(MockitoJUnitRunner.class)
 public class LeadTimeControllerTest {
-
-    @Mock
-    ProjectService projectService;
-
-    @Mock
-    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
-
-    @Mock
-    private LeadTimeKpiDataProvider cycleTimeDataProvider;
-
-    @InjectMocks
-    private LeadTimeKpiController subject;
 
     @Test
     public void requestLeadTimeChartData_happyPath() {
@@ -110,10 +93,6 @@ public class LeadTimeControllerTest {
                         + "\"lastStatus\": \"Cancelled\""
                     + "}"
                 + "]");
-    }
-
-    private long parseDateAsMillis(String date) {
-        return parseDateTime(date, "00:00:00", "America/Sao_Paulo").toEpochSecond() * 1000;
     }
 
     @Test
@@ -278,6 +257,10 @@ public class LeadTimeControllerTest {
         return new RequestDataBehaviorBuilder();
     }
 
+    private long parseDateAsMillis(String date) {
+        return parseDateTime(date, "00:00:00", "America/Sao_Paulo").toEpochSecond() * 1000;
+    }
+
     public class RequestDataBehaviorBuilder {
         private String projectKey;
         private String level;
@@ -327,7 +310,7 @@ public class LeadTimeControllerTest {
             }
         }
     }
-    public class RequestDataBehavior implements DSLSimpleBehavior<AssertResponse> {
+    public class RequestDataBehavior implements DSLSimpleBehaviorWithAsserter<AssertResponse> {
         private final String projectKey;
         private final String level;
         private final String zoneId;
@@ -349,6 +332,11 @@ public class LeadTimeControllerTest {
             ProjectService projectService = environment.services().projects().getService();
             LeadTimeKpiController subject = new LeadTimeKpiController(projectDashboardOperationalPermission, projectService, dataProvider);
             asserter = AssertResponse.of(subject.get(projectKey, zoneId, level));
+        }
+
+        @Override
+        public AssertResponse then() {
+            return asserter;
         }
 
         private LeadTimeKpiDataProvider mockProvider(KpiEnvironment environment) {
@@ -376,11 +364,6 @@ public class LeadTimeControllerTest {
             ProjectDashboardOperationalPermission projectDashboardOperationalPermission = Mockito.mock(ProjectDashboardOperationalPermission.class);
             Mockito.when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(hasPermission);
             return projectDashboardOperationalPermission;
-        }
-
-        @Override
-        public AssertResponse then() {
-            return asserter;
         }
     }
 }

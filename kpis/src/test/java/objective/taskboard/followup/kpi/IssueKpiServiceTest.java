@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
 import objective.taskboard.followup.kpi.enviroment.IssuesAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
@@ -315,7 +315,7 @@ public class IssueKpiServiceTest {
         return new ServeIssuesFromCurrentState(projectKey, level);
     }
 
-    private class ServeIssuesFromCurrentState implements DSLSimpleBehavior<IssuesAsserter> {
+    private class ServeIssuesFromCurrentState implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
         private String projectKey;
         private KpiLevel level;
         private IssuesAsserter asserter;
@@ -339,7 +339,7 @@ public class IssueKpiServiceTest {
         }
     }
     
-    private class ServeIssuesFromDatasets implements DSLSimpleBehavior<IssuesAsserter> {
+    private class ServeIssuesFromDatasets implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
         private KpiLevel level;
         private IssuesAsserter asserter;
 

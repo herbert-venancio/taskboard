@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
 public class SubtaskTouchTimeScenariosTest {
@@ -227,7 +227,7 @@ public class SubtaskTouchTimeScenariosTest {
         return new WorklogDistributor();
     }
     
-    private class WorklogDistributor implements DSLSimpleBehavior<StatusTransitionAsserter>{
+    private class WorklogDistributor implements DSLSimpleBehaviorWithAsserter<StatusTransitionAsserter>{
         
         private StatusTransitionAsserter asserter;
         private List<Worklog> worklogs = new LinkedList<>();

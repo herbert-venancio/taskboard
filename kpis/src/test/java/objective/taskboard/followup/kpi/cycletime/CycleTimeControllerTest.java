@@ -22,7 +22,7 @@ import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
@@ -369,7 +369,7 @@ public class CycleTimeControllerTest {
             }
         }
     }
-    public class RequestDataBehavior implements DSLSimpleBehavior<AssertResponse> {
+    public class RequestDataBehavior implements DSLSimpleBehaviorWithAsserter<AssertResponse> {
         private final String projectKey;
         private final String level;
         private final String zoneId;
