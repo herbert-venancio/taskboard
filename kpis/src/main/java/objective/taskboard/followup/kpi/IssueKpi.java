@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Range;
 
-import objective.taskboard.followup.kpi.touchTime.TouchTimeWeekRange;
+import objective.taskboard.data.Worklog;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
 
@@ -136,12 +136,8 @@ public class IssueKpi {
         return Optional.of(RangeUtils.between(firstDate, lastDate));
     }
 
-    public boolean isProgressingDuringWeek(TouchTimeWeekRange week) {
-        return getDateRangeBasedOnProgressingStatuses(week.getTimezone()).map(range -> week.overlaps(range)).orElse(false);
-    }
-
-    public boolean hasCompletedCycle(Set<String> cycleStatuses) {
-        StatusTransitionChain cycleStatusesChain = getStatusChain().getStatusSubChain(cycleStatuses);
+    public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
+        StatusTransitionChain cycleStatusesChain = getStatusChain(timezone).getStatusSubChain(cycleStatuses);
         return cycleStatusesChain.hasAnyEnterDate() && cycleStatusesChain.doAllHaveExitDate();
     }
 

@@ -3,7 +3,7 @@ package objective.taskboard.followup;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
+import static objective.taskboard.followup.FollowUpReportHelper.getEmptyFollowupData;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

@@ -4,7 +4,6 @@
 		<groupId>br.com.objective</groupId>
 		<artifactId>taskboard-parent</artifactId>
 		<version>0.0.82-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>application</artifactId>
 	<packaging>war</packaging>
@@ -56,11 +55,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
@@ -68,11 +62,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.sonar-plugins.java</groupId>
-			<artifactId>sonar-jacoco-listeners</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

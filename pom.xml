@@ -16,7 +16,9 @@
 	<modules>
 		<module>core</module>
 		<module>application</module>
+		<module>application-with-kpis</module>
 		<module>kpis</module>
+		<module>kpi-parent</module>
 		<module>followup-core</module>
 		<module>followup-report</module>
 		<module>dashboard</module>
@@ -399,7 +401,6 @@
 				<groupId>org.codehaus.sonar-plugins.java</groupId>
 				<artifactId>sonar-jacoco-listeners</artifactId>
 				<version>3.2</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
