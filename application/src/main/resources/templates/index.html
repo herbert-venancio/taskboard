@@ -78,6 +78,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="/static/elements/elements.html"/>
     <!-- endreplace-->
 
+    <th:block th:each="componentPath : ${extensionImports}">
+        <link rel="import" th:attr="href=${'/static/elements/'+componentPath}"/>
+    </th:block>
+
     <!-- analytics utility -->
     <script src="/static/scripts/analytics.js"></script>
 
@@ -106,8 +110,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!--  key.min-width + icons.width + issue-item.hpaddings -->
 <span id="browser-sync-binding"></span>
 <template is="dom-bind" id="app">
-    <taskboard-home class="fit"></taskboard-home>
+    <div th:utext="${modules}"></div>
 </template>
+
+<!-- build:js scripts/app.js -->
+<script src="/static/scripts/3rd/jstz.min.js"></script>
+<script src="/static/scripts/3rd/jira2md.js"></script>
+<script src="/static/scripts/app.js"></script>
+<script src="/static/scripts/md5.js"></script>
+<script src="/static/scripts/utils.js"></script>
+<script src="/static/scripts/countIssue.js"></script>
+<script src="/static/scripts/userPreferences.js"></script>
+<script src="/static/scripts/taskboard.js"></script>
+<script src="/static/scripts/searchFilter.js"></script>
+<script src="/static/scripts/authorizer.js"></script>
+<script src="/static/scripts/navigator-service.js"></script>
+<script src="/static/scripts/issue-selection-data.js"></script>
+<script src="/static/scripts/issue-selector-service.js"></script>
+<!-- endbuild-->
+
 <script th:inline="javascript">
     window.jsErrors = [];
     window.onerror = function(errorMessage) {
@@ -158,24 +179,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     var CLASSES_OF_SERVICE = JSON.parse([[${classesOfService}]]);
 
-    var HAS_FOLLOWUP_TEMPLATE_AVAILABLE = [[${hasFollowupTemplateAvailable}]];
-
+    var EXTENSION_TOOLBAR_ITEMS = JSON.parse([[${applicationToolbarItems}]]);
 </script>
-<!-- build:js scripts/app.js -->
-<script src="/static/scripts/3rd/jstz.min.js"></script>
-<script src="/static/scripts/3rd/jira2md.js"></script>
-<script src="/static/scripts/app.js"></script>
-<script src="/static/scripts/md5.js"></script>
-<script src="/static/scripts/utils.js"></script>
-<script src="/static/scripts/countIssue.js"></script>
-<script src="/static/scripts/userPreferences.js"></script>
-<script src="/static/scripts/taskboard.js"></script>
-<script src="/static/scripts/searchFilter.js"></script>
-<script src="/static/scripts/authorizer.js"></script>
-<script src="/static/scripts/navigator-service.js"></script>
-<script src="/static/scripts/issue-selection-data.js"></script>
-<script src="/static/scripts/issue-selector-service.js"></script>
-<!-- endbuild-->
+
 
 <script th:inline="javascript">
     /*<![CDATA[*/

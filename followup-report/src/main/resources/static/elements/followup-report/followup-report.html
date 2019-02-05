@@ -1,3 +1,6 @@
+<link rel="import" href="followup-report-type.html">
+<link rel="import" href="drag-and-drop-file.html">
+
 <dom-module id="followup-report">
     <template>
         <style>
@@ -84,6 +87,7 @@
                 icon="taskboard-icons:reports"
                 title="Followup reports"
                 loading="[[showLoadingSpinner]]"
+                on-close-clicked="close"
                 >
             <modal-wrap-content>
                 <tb-message-box></tb-message-box>
@@ -211,9 +215,22 @@
                     var btGenerate = ButtonBuilder('Generate').id("generate").disabled(true).onClick(this._downloadFollowup.bind(this)).build();
                     this.set('_btCancel', btCancel);
                     this.set('_btGenerate', btGenerate);
+                    window.addEventListener("hashchange", this.openByHash.bind(this));
+                    this.openByHash();
+                },
+
+                openByHash: function() {
+                   	var hash = window.location.hash;
+                   	if (hash === "#/followup-report/open")
+                   		this.open();
+                   	else if (this._isOpen) {
+                        this.$.modal.close();
+                        this._isOpen = false;
+                    }
                 },
 
                 open: function () {
+                    this._isOpen = true;
                     this.set('projects', undefined);
                     this.set('projectsTemplate', []);
                     this.set('selectedProjectKey', '');
@@ -232,7 +249,7 @@
                 },
 
                 close: function() {
-                    this.$.modal.close();
+                    navigatorService.resetUrlWithoutLoadForceHashChange()
                 },
 
                 _onSelectTemplate: function() {

@@ -24,7 +24,6 @@ import org.springframework.util.StringUtils;
 
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.kpi.FollowupIssueFilter;

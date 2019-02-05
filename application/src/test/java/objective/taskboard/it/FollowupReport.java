@@ -29,7 +29,7 @@ public class FollowupReport extends AbstractUiFragment {
     @FindBy(css=".followup-button")
     private WebElement followupButton;
 
-    @FindBy(id="followupReport")
+    @FindBy(tagName="followup-report")
     private WebElement followupReport;
 
     public static FollowupReport open(WebDriver webDriver) {
