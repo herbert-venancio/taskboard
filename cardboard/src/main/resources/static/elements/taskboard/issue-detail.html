@@ -936,7 +936,7 @@
                                     <class-of-service-picker
                                         id="classOfServiceSelector"
                                         class="people-picker"
-                                        options="{{classOfServiceOptions}}""
+                                        options="{{classOfServiceOptions}}"
                                         on-selected-class-of-service = "_changeClassOfService"
                                         on-tap="_stopPropagation"
                                         >
@@ -1155,9 +1155,9 @@
                 </div>
             </paper-card>
         </paper-dialog>
-        <transition-required-modal id="transitionRequiredDialog"></transition-required-modal>
         <confirm-modal id="confirmModal"></confirm-modal>
         <fields-required-modal id="fieldsRequiredDialog" on-close-clicked="blockCancelled"></fields-required-modal>
+        <alert-modal id="alertModal"></alert-modal>
     </template>
 
     <script>
@@ -1232,12 +1232,6 @@
                     canHaveSubtasks: {
                         type: Boolean,
                         value: true,
-                        notify: true
-                    },
-
-                    showFieldsRequiredDialog: {
-                        type: Boolean,
-                        value: false,
                         notify: true
                     },
 
@@ -1710,9 +1704,9 @@
 
                 block: function () {
                     var self = this;
-                    var callback = function(issue) {
+                    var callback = function(issue, fieldValuesRequired) {
                         self._setIssueLocalState(self.item, true, null);
-                        self._issueAction("block-task", "block issue " + issue.issueKey, issue.lastBlockReason)
+                        self._issueAction("block-task", "block issue " + issue.issueKey, fieldValuesRequired.lastBlockReason)
                             .fail(function(){
                                 self.blocked = false;
                             });
@@ -1726,7 +1720,7 @@
                 },
 
                 blockCancelled: function() {
-                    this.blocked = false;
+                    this.blocked = this.item.blocked;
                 },
 
                 unblock: function () {
@@ -1740,36 +1734,65 @@
                     var self =  this;
                     var issue = self.item;
                     var transition = this.getTransitionById(e.target.dataset.transitionId);
+
+                    if (transition.errorMessage) {
+                        self.$.alertModal.open(transition.name, transition.errorMessage);
+                        return;
+                    }
+
                     var status = taskboard.getStatus(e.target.dataset.transitionToStatusId);
                     var fieldsTransitions = self.getFieldsTransitions(transition);
                     var text = "Do you want to execute transition \""+ transition.name + "\"?";
-                    var callback = function(issue, fieldValuesRequired){
-                        if(self.isResolutionRequired(transition))
+                    var callback = function(issue, fieldValuesRequired) {
+                        if (self.isResolutionRequired(transition))
                             self.doResolution(transition, issue, status, fieldValuesRequired);
                         else
                             self.doTransition(transition, issue, status, fieldValuesRequired);
                     }
-                    if(self.showFieldsRequiredDialog)
-                        self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transition.name, issue, callback);
-                    else
+
+                    if (fieldsTransitions.length <= 0) {
                         self.$.confirmModal.openDialog("Confirmation", text, callback);
-                    self.showFieldsRequiredDialog = false;
+                        return;
+                    }
+
+                    self.$.fieldsRequiredDialog.openDialog(fieldsTransitions, transition.name, issue, callback);
                 },
 
-                getFieldsTransitions: function(transition){
+                getFieldsTransitions: function(transition) {
+                    if (!transition)
+                        return [];
+
                     var self = this;
                     var fieldsTransitions = [];
-                    if (transition){
-                        Object.values(transition.fields).forEach(function(field ) {
-                            if(field.required && !isFieldNameEquals(field.name, taskboard.getResolutionFieldName())){
-                                self.showFieldsRequiredDialog = true;
-                                fieldsTransitions.push(field);
-                            }
-                        })
-                        if(TRANSITION_REQUIRED_COMMENT.indexOf(transition.name) !== -1)
-                           self.showFieldsRequiredDialog = true;
+                    Object.keys(transition.fields).forEach(function(fieldId) {
+                        var field = this[fieldId];
+
+                        if (!field.required)
+                            return;
+
+                        if (self._isArrayOfVersion(field.schema)) {
+                            fieldsTransitions.push({
+                                id: fieldId,
+                                name: field.name,
+                                type: TYPE_FIELD.VERSIONS,
+                                versions: field.allowedValues
+                            });
+                        }
+                    }, transition.fields);
+
+                    if (TRANSITION_REQUIRED_COMMENT.indexOf(transition.name) !== -1) {
+                        fieldsTransitions.push({
+                            id: "comment",
+                            name: "Comment",
+                            type: TYPE_FIELD.TEXTAREA
+                        });
                     }
+
                     return fieldsTransitions;
+                },
+
+                _isArrayOfVersion: function(schema) {
+                    return schema && schema.type == "array" && schema.items == "version";
                 },
 
                 isResolutionRequired: function (transition) {
@@ -2012,7 +2035,6 @@
                 _afterClose: function () {
                     this.timetracking = {};
                     this.transitions = [];
-                    this.showFieldsRequiredDialog = false;
 
                     this.shouldShowTimetracking = true;
                     this.hasSubtasks = true;

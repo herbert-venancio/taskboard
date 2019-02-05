@@ -26,6 +26,11 @@
             .content-row {
                 width: auto;
                 display: flex;
+                margin-top: 10px;
+            }
+
+            .content-row:first-of-type {
+                margin-top: 0;
             }
 
             .column-block {
@@ -51,6 +56,7 @@
             }
 
             .error-message {
+                font-size: 13px;
                 white-space: pre;
                 margin-left: 10px;
                 color: red;
@@ -63,14 +69,8 @@
                 text-align: left;
             }
 
-            paper-menu {
-                right: 43.5%;
-                margin-top: 40px;
-                position: fixed;
-            }
-
-            .required {
-                color: red
+            .version-field {
+                width: 400px;
             }
         </style>
 
@@ -84,19 +84,27 @@
                     <template is="dom-repeat" items="{{fields}}" as="field">
                         <div class="content-row">
                             <div class="column-block">
-                                <span class="required">* </span>
-                                <span class="sub-header">[[field.name]]: </span>
-                                <br/>
-                                <template is="dom-if" if="{{!isTextArea(field.type)}}">
-                                    <input is="iron-input" id$="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"/>
-                                </template>
-                                <template is="dom-if" if="{{isTextArea(field.type)}}">
-                                    <textarea id$="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
-                                </template>
-                                <template is="dom-if" if="{{errorMessage}}">
-                                    <br/>
-                                    <span class="error-message">{{field.name}} Required</span>
-                                </template>
+                                <div>
+                                    <span class="sub-header">[[field.name]]: </span>
+                                </div>
+                                <div>
+                                    <template is="dom-if" if="{{_isTextArea(field.type)}}">
+                                        <textarea id$="{{field.id}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
+                                    </template>
+                                    <template is="dom-if" if="{{_isVersions(field.type)}}">
+                                        <version-field id$="{{field.id}}"
+                                                class="version-field"
+                                                value="{{getValue(field.id)}}"
+                                                versions="{{field.versions}}"
+                                                >
+                                        </version-field>
+                                    </template>
+                                </div>
+                                <div>
+                                    <template is="dom-if" if="{{_isFieldWithError(fieldsWithError, field.id)}}">
+                                        <span id$="error-{{field.id}}" class="error-message">{{field.name}} required</span>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -104,7 +112,8 @@
             </modal-wrap-content>
 
             <modal-wrap-footer>
-                <tb-button button="[[_btAction]]"></tb-button>
+                <tb-button button="[[_btCancel]]"></tb-button>
+                <tb-button button="[[_btConfirm]]"></tb-button>
             </modal-wrap-footer>
 
         </modal-wrap>
@@ -126,18 +135,23 @@
                     },
 
                     issue:{
-                        type:Object,
+                        type:Object
                     },
 
                     callback: {
                         type: Object
                     },
 
-                    errorMessage: {
-                        type:Boolean,
+                    fieldsWithError: {
+                        type: Array
                     },
 
-                    _btAction: {
+                    _btCancel: {
+                        type: Object,
+                        value: function () { return {} }
+                    },
+
+                    _btConfirm: {
                         type: Object,
                         value: function () { return {} }
                     }
@@ -145,25 +159,39 @@
 
                 openDialog: function(fields, action, issue, callback) {
                     this.issue = issue;
-                    $(this.$.fieldsModal).css('background-color', issue.color);
                     this.fields = fields;
                     this.callback = callback;
                     this.action = action;
+                    this.fieldsWithError = [];
                     this.$.fieldsModal.open();
                     setTimeout(function() { 
                         $(this.$$(".input-fields")).focus();
                     }.bind(this),10);
 
-                    var btAction = ButtonBuilder(this.action).id("action-button").onClick(this.confirmed.bind(this)).build();
-                    this.set('_btAction', btAction);
+                    var btCancel = ButtonBuilder("Cancel")
+                        .id("cancel-button")
+                        .type(buttonTypes.LINK)
+                        .onClick(() => { this.$.fieldsModal.close() })
+                        .build();
+                    this.set('_btCancel', btCancel);
+
+                    var btConfirm = ButtonBuilder("Confirm")
+                        .id("confirm-button")
+                        .onClick(this.confirm.bind(this))
+                        .build();
+                    this.set('_btConfirm', btConfirm);
                 },
 
                 hasRecords: function(records) {
                     return records && records.length > 0;
                 },
 
-                isTextArea: function(type) {
+                _isTextArea: function(type) {
                     return type == TYPE_FIELD.TEXTAREA;
+                },
+
+                _isVersions: function(type) {
+                    return type == TYPE_FIELD.VERSIONS;
                 },
 
                 getValue: function(id) {
@@ -176,69 +204,64 @@
                     this.fields = [];
                     this.issue = [];
                     this.callback = [];
-                    this.errorMessage = null;
+                    this.fieldsWithError = [];
                     this.clearFieldsValues();
                 },
 
                 clearFieldsValues: function() {
                     for (f in this.fields) {
-                        var fieldName = this.fields[f].name;
-                        document.getElementById(fieldName).value = "";
-                        document.getElementById(fieldName).selected = "";
+                        var fieldId = this.fields[f].id;
+                        document.getElementById(fieldId).value = "";
                     }
                 },
 
-                confirmed: function() {
+                confirm: function() {
                     var values = this.getValuesFields();
-                    for (fv in this.fields)
-                        this.errorMessage = this.fields[fv].required ? true : false;
 
-                    if (this.errorMessage)
+                    if (this.fieldsWithError.length > 0)
                         return;
 
-                    copyProperties(this.issue, values);
-                    this.callback(this.issue);
+                    this.callback(this.issue, values);
                     this.clearProperties();
                 },
-                
+
                 closed: function() {
+                    this.clearFieldsValues();
                     this.fire("close-clicked");
                 },
 
                 getValuesFields: function() {
-                    var jsonCustomField = {};
-                    var jsonField = {};
+                    this.fieldsWithError = [];
 
+                    var jsonField = {};
                     for (f in this.fields) {
                         var idField = this.fields[f].id;
-                        var nameField = this.fields[f].name;
-                        var valueField = document.getElementById(nameField).value;
-                        var selectedField = document.getElementById(nameField).selected;
-                        this.fields[f].required = false;
-                        var isCustomField = idField.indexOf("customfield") > -1;
+                        var valueField = this._getValueFieldByType(idField, this.fields[f].type);
 
-                        if (this.isValidValue(valueField)) {
-                            if (isCustomField)
-                                jsonCustomField[idField] = valueField;
-                            else
-                                jsonField[idField] = valueField;
-                        }
-                        else if (this.isValidValue(selectedField)) {
-                            if (isCustomField)
-                                jsonCustomField[idField] = selectedField;
-                            else
-                                jsonField[idField] = selectedField;
-                        }
+                        if (this.isValidValue(valueField))
+                            jsonField[idField] = valueField;
                         else
-                            this.fields[f].required = true;
+                            this.fieldsWithError = this.fieldsWithError.concat(idField);
                     }
-                    return $.extend(jsonField, {"customFields": jsonCustomField});
+                    return jsonField;
+                },
+
+                _getValueFieldByType: function(id, type) {
+                    var elementTag = "";
+                    if (this._isTextArea(type))
+                        elementTag = "textarea";
+                    else if (this._isVersions(type))
+                        elementTag = "version-field";
+                    return this.$$(elementTag + "#" + id).value;
                 },
 
                 isValidValue: function(value) {
                     return value != 0 && value != null;
-                }
+                },
 
+                _isFieldWithError: function(fieldsWithError, fieldId) {
+                    return fieldsWithError.indexOf(fieldId) >= 0;
+                }
             });
         })();
     </script>

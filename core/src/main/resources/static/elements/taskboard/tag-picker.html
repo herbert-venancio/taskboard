@@ -97,7 +97,7 @@
 
         <div id="elementSelector" class="select-input-wrapper">
             <iron-icon icon="search" class="tp-autocomplete__icon"></iron-icon>
-            <input slot='input' on-focus="triggerFocus" id="tag-picker-input" class="tag-picker-autocomplete__input" value="{{text::input}}"></paper-input>
+            <input slot='input' on-focus="triggerFocus" on-blur="close" id="tag-picker-input" class="tag-picker-autocomplete__input" value="{{text::input}}"></paper-input>
 
             <template is="dom-if" if="[[!searching]]">
                 <iron-icon id="close" icon="taskboard-icons:close" class="tp-autocomplete__icon clickable" on-tap="close"></iron-icon>

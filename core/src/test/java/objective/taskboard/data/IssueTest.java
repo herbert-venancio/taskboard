@@ -75,7 +75,8 @@ public class IssueTest {
                 new LinkedList<>(),
                 new LinkedList<>(),
                 assignedTeamsIds,
-                new LinkedHashMap<>()
+                new LinkedHashMap<>(),
+                new LinkedList<>()
                 );
 
         Issue subject = new Issue(issueScratch, null, null, null, null, null, null, null, null, null);

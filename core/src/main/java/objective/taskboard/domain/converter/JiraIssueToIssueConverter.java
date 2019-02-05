@@ -160,7 +160,8 @@ public class JiraIssueToIssueConverter {
                 extractChangelog(jiraIssue),
                 convertWorklog(jiraIssue.getWorklogs()),
                 extractAssignedTeamsIds(jiraProperties, jiraIssue),
-                extractExtraFields(jiraProperties, fieldMetadataService, jiraIssue));
+                extractExtraFields(jiraProperties, fieldMetadataService, jiraIssue),
+                jiraIssue.getFixVersions());
         
         return createIssueFromScratch(converted, provider);
     }

@@ -1,0 +1,147 @@
+<dom-module id="version-field">
+
+    <template>
+        <style>
+            :host {
+                display: flex;
+                flex-wrap: wrap;
+                margin-top: 7px;
+                margin-bottom: 7px;
+            }
+
+            .tag {
+                background-color: #666666;
+                font-size: 12px;
+                border-radius: 5px;
+                color: white;
+                padding: 2px 6px;
+                display: flex;
+                margin-right: 8px;
+                white-space: nowrap;
+                height: 2em;
+                margin-top: 2px;
+                margin-bottom: 2px;
+            }
+
+            .tag span {
+                display: inline-block;
+                margin-right: 2px;
+            }
+
+            .remove-button {
+                width: 10px;
+                height: 10px;
+                cursor: pointer;
+                color: #8E8E8E;
+                margin: auto 2px auto 5px;
+            }
+
+            .version-action-link {
+                cursor: pointer;
+                color: #5DAFFF;
+                font-size: 12px;
+                display: flex;
+                margin-top: 4px;
+                margin-bottom: 4px;
+            }
+
+            .version-action-link span {
+                margin: auto;
+            }
+
+            .add-version-icon {
+                width: 9px;
+                height: 9px;
+                margin: auto 2px;
+            }
+
+            .version-picker {
+                display: none;
+                background-color: #666666;
+                font-size: 12px;
+                border-radius: 5px;
+                color: white;
+                padding-left: 6px;
+                padding-right: 6px;
+                white-space: nowrap;
+                margin-top: 2px;
+                margin-bottom: 2px;
+                height: 24px;
+            }
+        </style>
+
+        <template is="dom-repeat" items="{{value}}" as="version">
+            <paper-material class="tag">
+                <span>{{version.name}}</span>
+                <iron-icon class="remove-button" icon="taskboard-icons:remove"
+                        on-tap="_removeVersion"
+                        title="Remove version {{version.name}}"></iron-icon>
+            </paper-material>
+        </template>
+        <div id="addVersionButton" class="version-action-link" on-tap="_pickerForAddVersion" title="Add a new version">
+            <iron-icon class="add-version-icon" icon="taskboard-icons:add-team"></iron-icon>
+            <span>Version</span>
+        </div>
+        <version-picker
+                id="pickerForAddVersion"
+                class="version-picker"
+                options="{{_getAvailableVersions(versions, value)}}"
+                on-selected-version="_addVersion"
+                >
+        </version-picker>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'version-field',
+
+                properties: {
+                    value: {
+                        type: Array
+                    },
+
+                    versions: {
+                        type: Array
+                    }
+                },
+
+                attached: function() {
+                    this.$.pickerForAddVersion.setup();
+                },
+
+                _removeVersion: function(e) {
+                    var versionIdToRemove = e.model.get("version.id");
+                    var newValue = this.value.filter(function(version) {
+                        return version.id != versionIdToRemove;
+                    });
+                    this.value = newValue;
+                },
+
+                _pickerForAddVersion: function(e) {
+                    e.stopPropagation();
+                    this.$.pickerForAddVersion.open(this.$.addVersionButton);
+                },
+
+                _addVersion: function(e) {
+                    this.$.pickerForAddVersion.close();
+
+                    var selected = e.detail.selected;
+                    if (!selected)
+                        return;
+
+                    this.value = this.value ? this.value.concat([selected]) : [selected];
+                },
+
+                _getAvailableVersions: function(versions, value) {
+                    if (!value || value.length == 0) return versions;
+                    return versions.filter(function(version) {
+                        var found = value.find(function(v) { return v.id == version.id; });
+                        return !found;
+                    }, this);
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+import objective.taskboard.jira.data.Version;
 import retrofit.http.GET;
 import retrofit.http.Path;
 
@@ -111,6 +112,10 @@ public class JiraIssueDto {
 
     public JiraTimeTrackingDto getTimeTracking() {
         return fields.timetracking;
+    }
+
+    public List<Version> getFixVersions() {
+        return fields.fixVersions;
     }
 
     public List<JiraSubtaskDto> getSubtasks() {

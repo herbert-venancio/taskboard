@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import objective.taskboard.jira.data.Version;
+
 public class IssueScratch implements Serializable {
     private static final long serialVersionUID = -8643342601909365442L;
 
@@ -40,7 +42,8 @@ public class IssueScratch implements Serializable {
     protected TaskboardTimeTracking timeTracking;
     protected String releaseId;
     protected List<Changelog> changelog; //NOSONAR
-    
+    protected List<Version> fixVersions; //NOSONAR
+
     @JsonIgnore
     protected String reporter;
     @JsonIgnore
@@ -89,7 +92,8 @@ public class IssueScratch implements Serializable {
             List<Changelog> changelog,
             List<Worklog> worklogs,
             List<Long> assignedTeamsIds,
-            Map<String, String> extraFields) {
+            Map<String, String> extraFields,
+            List<Version> fixVersions) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -126,6 +130,7 @@ public class IssueScratch implements Serializable {
         this.worklogs = worklogs;
 
         this.extraFields = extraFields;
+        this.fixVersions = fixVersions;
     }
 
     public String getIssueKey() {

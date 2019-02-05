@@ -49,6 +49,8 @@ import objective.taskboard.jira.ProjectUpdateEvent;
 import objective.taskboard.jira.RetrofitErrorParser;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.Transition;
+import objective.taskboard.jira.data.Transition.Field;
+import objective.taskboard.jira.data.FieldsRequiredInTransition;
 import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
@@ -316,9 +318,56 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
     public synchronized List<Transition> transitions(String issueKey) {
         Issue issue = getIssueByKey(issueKey);
         List<Transition> transitions = jiraBean.getTransitions(issueKey);
-        
+
+        List<Long> transitionIds = transitions.stream()
+            .map(t -> t.id)
+            .collect(toList());
+
+        List<FieldsRequiredInTransition> fieldsRequiredInTransitions = transitionIds.isEmpty() ? new ArrayList<>() :
+                jiraBean.getFieldsRequiredInTransitions(issueKey, transitionIds);
+
+        transitions.stream()
+            .filter(t -> !t.fields.isEmpty())
+            .forEach(t -> {
+                markFieldsRequiredInTransitions(t, fieldsRequiredInTransitions);
+                validateTransition(t);
+            });
+
         transitions.forEach(t -> t.order = (long) statusOrderCalculator.computeStatusOrder(issue.getType(), t.to.id) );
         return transitions;
+    }
+
+    private void markFieldsRequiredInTransitions(Transition transition, List<FieldsRequiredInTransition> fieldsRequiredInTransitions) {
+        Optional<List<String>> requiredFields = fieldsRequiredInTransitions.stream()
+            .filter(trf -> trf.id.equals(transition.id) && !trf.requiredFields.isEmpty())
+            .map(trf -> trf.requiredFields)
+            .findFirst();
+
+        requiredFields.ifPresent(rf -> {
+            transition.fields.entrySet().stream()
+                .filter(f -> rf.contains(f.getKey()))
+                .forEach(f -> f.getValue().required = true);
+        });
+    }
+
+    private void validateTransition(Transition transition) {
+        for (Field field : transition.fields.values()) {
+            if (!field.required)
+                continue;
+
+            if (field.isNotSupported()) {
+                transition.errorMessage = "Can't perform this transition because it requires fields not supported in taskboard."
+                        + " Please, perform the transition on Jira.";
+                return;
+            }
+
+            if (field.isArrayOfVersion() && (field.allowedValues == null
+                                             || field.allowedValues.isEmpty())) {
+                transition.errorMessage = "Can't perform this transition because '" + field.name
+                        + "' field is required, but the project doesn't have any versions.";
+                return;
+            }
+        }
     }
 
     public synchronized Issue addMeAsAssignee(String issueKey) {

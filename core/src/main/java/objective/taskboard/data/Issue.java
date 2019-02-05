@@ -118,6 +118,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.changelog = scratch.changelog;
         this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
         this.coAssignees = scratch.coAssignees;
+        this.fixVersions = scratch.fixVersions;
         this.metaDataService = metadataService;
         this.jiraProperties = properties;
         this.issueTeamService = issueTeamService;
@@ -439,6 +440,10 @@ public class Issue extends IssueScratch implements Serializable {
 
     public List<User> getCoAssignees() {
         return this.coAssignees;
+    }
+
+    public List<Version> getFixVersions() {
+        return fixVersions;
     }
     
     public List<User> getAssignees() {

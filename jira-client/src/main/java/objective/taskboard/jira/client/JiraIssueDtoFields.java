@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import objective.taskboard.jira.data.Version;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JiraIssueDtoFields {
     public JiraTimeTrackingDto timetracking;
@@ -24,6 +26,7 @@ public class JiraIssueDtoFields {
     public JiraPriorityDto priority;
     public String description;
     public List<JiraSubtaskDto> subtasks;
+    public List<Version> fixVersions;
 
     @JsonDeserialize(using=JodaDateTimeDeserializer.class)
     public DateTime dueDate;

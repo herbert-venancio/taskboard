@@ -5,6 +5,7 @@ import static objective.taskboard.jira.IssueFieldsUpdateSchema.Operation.ADD;
 import static objective.taskboard.jira.IssueFieldsUpdateSchema.Operation.SET;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,9 +81,21 @@ public class IssueFieldsUpdateSchemaTest {
         assertValueAndOperation(fieldOperation, makeMap("name", value), SET);
     }
 
-    private void assertValueAndOperation(Map<String, Object> valueToUpdate, Map<String, Object> expectedOperationMap, Operation operation) {
+    @Test
+    public void givenFixVersions_whenTryToGetUpdateMap_ThenReturnFixVersionsWithOperationSet() {
+        String fieldName = "fixVersions";
+        List<Map<String, Object>> value = Arrays.asList(makeMap("id", "1"));
+        fields.put(fieldName, value);
+
+        update.putAll(makeUpdateSchema(fields));
+
+        Map<String, Object> fieldOperation = getOperationsListFromField(fieldName).get(0);
+        assertValueAndOperation(fieldOperation, value, SET);
+    }
+
+    private void assertValueAndOperation(Map<String, Object> valueToUpdate, Object expectedOperationValue, Operation operation) {
         assertEquals(valueToUpdate.keySet().size(), 1);
-        assertEquals(valueToUpdate.get(operation.getValue()), expectedOperationMap);
+        assertEquals(valueToUpdate.get(operation.getValue()), expectedOperationValue);
     }
 
     @SuppressWarnings("unchecked")

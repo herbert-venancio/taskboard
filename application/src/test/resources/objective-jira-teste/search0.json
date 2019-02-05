@@ -43415,6 +43415,7 @@
                     "value": "S"
                 },
                 "description": "Desenvolvimento",
+                "fixVersions": [],
                 "issuelinks": [],
                 "issuetype": {
                     "avatarId": 12261,
@@ -43545,6 +43546,144 @@
                             "name": "Done",
                             "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                         }
+                    },
+                    "fields": {
+                        "fixVersions": {
+                            "required": false,
+                            "schema": {
+                                "type": "array",
+                                "items": "version",
+                                "system": "fixVersions"
+                            },
+                            "name": "Fix Version/s",
+                            "operations": [
+                                "set",
+                                "add",
+                                "remove"
+                            ],
+                            "allowedValues": [
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12550",
+                                    "id": "12550",
+                                    "name": "1.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12551",
+                                    "id": "12551",
+                                    "name": "2.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12552",
+                                    "id": "12552",
+                                    "name": "3.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12553",
+                                    "id": "12553",
+                                    "name": "4.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12554",
+                                    "id": "12554",
+                                    "name": "5.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12555",
+                                    "id": "12555",
+                                    "name": "6.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12556",
+                                    "id": "12556",
+                                    "name": "7.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12557",
+                                    "id": "12557",
+                                    "name": "8.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12558",
+                                    "id": "12558",
+                                    "name": "9.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12559",
+                                    "id": "12559",
+                                    "name": "10.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12560",
+                                    "id": "12560",
+                                    "name": "11.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12561",
+                                    "id": "12561",
+                                    "name": "12.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12562",
+                                    "id": "12562",
+                                    "name": "13.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12563",
+                                    "id": "12563",
+                                    "name": "14.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                },
+                                {
+                                    "self": "http://localhost:4567/rest/api/latest/version/12564",
+                                    "id": "12564",
+                                    "name": "15.0",
+                                    "archived": false,
+                                    "released": false,
+                                    "projectId": 11315
+                                }
+                            ]
+                        }
                     }
                 },
                 {
@@ -43563,6 +43702,18 @@
                             "name": "In Progress",
                             "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                         }
+                    },
+                    "fields": {
+                        "unsupported": {
+                            "required": true,
+                            "schema": {
+                                "type": "unsupported",
+                            },
+                            "name": "Unsupported",
+                            "operations": [
+                                "set"
+                            ]
+                        }
                     }
                 },
                 {
@@ -43580,6 +43731,23 @@
                             "key": "new",
                             "name": "To Do",
                             "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+                        }
+                    },
+                    "fields": {
+                        "fixVersions": {
+                            "required": true,
+                            "schema": {
+                                "type": "array",
+                                "items": "version",
+                                "system": "fixVersions"
+                            },
+                            "name": "Fix Version/s",
+                            "operations": [
+                                "set",
+                                "add",
+                                "remove"
+                            ],
+                            "allowedValues": []
                         }
                     }
                 },

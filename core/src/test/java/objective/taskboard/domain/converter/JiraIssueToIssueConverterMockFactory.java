@@ -92,7 +92,9 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
                     extractChangelog(jiraIssue),
                     convertWorklog(jiraIssue.getWorklogs()),
                     assignedTeamsIds,
-                    emptyMap());
+                    emptyMap(),
+                    new ArrayList<>()
+                    );
             return jiraIssueToIssueConverter.createIssueFromScratch(scratch, provider);
         }).given(jiraIssueToIssueConverter).convertSingleIssue(any(), any());
         

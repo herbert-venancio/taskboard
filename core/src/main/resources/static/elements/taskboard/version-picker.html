@@ -1,0 +1,58 @@
+<dom-module id="version-picker">
+    <template>
+        <tag-picker
+                id="version-selector-autocomplete"
+                source="{{options}}"
+                text-property="name"
+                value-property="id"
+                on-selected-value="_onSelect"
+                >
+        </tag-picker>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'version-picker',
+                properties: {
+                    options: {
+                        type: Array
+                    }
+                },
+
+                attached: function() {
+                    this.tagPicker = this.$$('tag-picker');
+                    this.tagPicker.setQueryFn(function(source, query) {
+                        var suggestions = source.filter(function(t) {
+                            return t.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                        });
+                        if (suggestions.length === 0)
+                            return [{"name":"No matches"}];
+
+                        return suggestions;
+                    }.bind(this));
+                },
+
+                setup: function() {
+                    this.$$('tag-picker').setup(this);
+                },
+
+                clear: function() {
+                    this.tagPicker.clear();
+                },
+
+                focus: function() {
+                    this.tagPicker.focus();
+                    this.tagPicker.suggestions(this.options);
+                },
+
+                _onSelect: function(e) {
+                    var version = e.detail;
+                    if (!version.id)
+                        version = null;
+                    this.fire("selected-version", {selected: version})
+                }
+            });
+        })();
+    </script>
+</dom-module>

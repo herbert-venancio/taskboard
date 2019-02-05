@@ -77,15 +77,8 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     private IssueDetails selectStringInPicker(String valueToSelect, String pickerSelector) {
-        WebElement pickerForAddTeam = issueDetailRoot.findElement(By.cssSelector(pickerSelector));
-        waitVisibilityOfElement(pickerForAddTeam);
-        WebElement pickerInput = pickerForAddTeam.findElement(By.cssSelector("input[slot='input']"));
-        waitVisibilityOfElement(pickerInput);
-        waitForClick(pickerInput);
-        pickerInput.sendKeys(valueToSelect);
-
-        waitUntilElementExistsWithText(By.cssSelector(pickerSelector + " #suggestionsWrapper paper-item.active .paper-autocomplete-suggestions"), valueToSelect);
-        waitForClick(By.cssSelector(pickerSelector +" #suggestionsWrapper paper-item.active"));
+        TagPicker tagPicker = TagPicker.init(webDriver, issueDetailRoot, pickerSelector);
+        tagPicker.select(valueToSelect);
         return this;
     }
 
@@ -158,10 +151,19 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails transitionClick(String transitionName) {
         assertIsOpened();
-        waitUntilElementExists(By.cssSelector("[data-transition-name='"+transitionName+"']"));
-        WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
+        waitUntilElementExists(By.cssSelector("[data-transition-name=\""+transitionName+"\"]"));
+        WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name=\""+transitionName+"\"]"));
         waitForClick(transitionButton);
         return this;
+    }
+
+    public FieldsRequiredModal fieldsRequiredModal() {
+        return FieldsRequiredModal.open(webDriver);
+    }
+
+    public AlertModal alertModal() {
+        WebElement alertModalIssueDetail = getElementWhenItExists(By.cssSelector("#alertModal.issue-detail"));
+        return AlertModal.init(webDriver, alertModalIssueDetail);
     }
 
     public void setDescription(String description) {

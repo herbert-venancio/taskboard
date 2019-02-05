@@ -35,6 +35,7 @@ import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.JiraUser.UserDetails;
 import objective.taskboard.jira.data.Transition;
+import objective.taskboard.jira.data.FieldsRequiredInTransition;
 import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
 import objective.taskboard.jira.data.plugin.RoleData;
@@ -147,6 +148,12 @@ public class JiraService {
         } else if(properties.getTransitionsCancelNames().contains(transitionName))
             return properties.getResolutions().getCanceled().getName();
         return null;
+    }
+
+    public List<FieldsRequiredInTransition> getFieldsRequiredInTransitions(String issueKey, List<Long> transitionIds) {
+        log.debug("⬣⬣⬣⬣⬣  getFieldsRequiredInTransitions");
+        Iterable<FieldsRequiredInTransition> response = jiraEndpointAsUser.request(FieldsRequiredInTransition.Service.class).post(issueKey, transitionIds);
+        return ImmutableList.copyOf(response);
     }
 
     public List<Transition> getTransitions(String issueKey) {
