@@ -18,8 +18,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 
-import objective.taskboard.jira.data.JiraUser;
-import objective.taskboard.jira.data.Version;
 import retrofit.http.GET;
 import retrofit.http.Path;
 
@@ -58,11 +56,7 @@ public class JiraEditIssue {
     public static class FieldInfoMetadata {
 
         static final Set<String> customFieldsTypesWithFieldOption = ImmutableSet.of(
-                "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
-                "com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons",
-                "com.atlassian.jira.plugin.system.customfieldtypes:select",
-                "com.atlassian.jira.plugin.system.customfieldtypes:cascadingselect",
-                "com.atlassian.jira.plugin.system.customfieldtypes:multiselect"
+                "com.atlassian.jira.plugin.system.customfieldtypes:select"
         );
 
         public String id;
@@ -122,18 +116,6 @@ public class JiraEditIssue {
         public static final FieldSchemaType date = valueOf("date");
         public static final FieldSchemaType array = valueOf("array");
         public static final FieldSchemaType option = valueOf("option", remap(CustomFieldOption.class));
-        public static final FieldSchemaType project = valueOf("project", remap(JiraProjectDto.class));
-        public static final FieldSchemaType user = valueOf("user", remap(JiraUser.class));
-        public static final FieldSchemaType priority = valueOf("priority", remap(JiraPriorityDto.class));
-        public static final FieldSchemaType issuetype = valueOf("issuetype", remap(JiraIssueTypeDto.class));
-        public static final FieldSchemaType issuelink = valueOf("issuelink", remap(JiraLinkDto.class));
-        public static final FieldSchemaType version = valueOf("version", remap(Version.class));
-        public static final FieldSchemaType timetracking = valueOf("timetracking");
-        public static final FieldSchemaType any = valueOf("any");
-
-        public static final FieldSchemaType component = valueOf("component");
-        public static final FieldSchemaType issuelinks = valueOf("issuelinks");
-        public static final FieldSchemaType attachment = valueOf("attachment");
 
         public final String text;
         public final Function<Object, ?> converter;
