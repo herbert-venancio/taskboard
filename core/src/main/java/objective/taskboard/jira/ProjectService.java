@@ -55,6 +55,7 @@ public class ProjectService {
     private final ProjectFilterConfigurationCachedRepository projectRepository;
     private final ProjectProfileItemRepository projectProfileItemRepository;
     private final JiraProjectService jiraProjectService;
+    private final JiraIssueService jiraIssueService;
     private final ProjectBaselineProvider baselineProvider;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -63,11 +64,13 @@ public class ProjectService {
             ProjectFilterConfigurationCachedRepository projectRepository,
             ProjectProfileItemRepository projectProfileItemRepository, 
             JiraProjectService jiraProjectService,
+            JiraIssueService jiraIssueService,
             ProjectBaselineProvider baselineProvider,
             ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
         this.projectProfileItemRepository = projectProfileItemRepository;
         this.jiraProjectService = jiraProjectService;
+        this.jiraIssueService = jiraIssueService;
         this.baselineProvider = baselineProvider;
         this.eventPublisher = eventPublisher;
     }
@@ -101,6 +104,10 @@ public class ProjectService {
             return Optional.empty();
 
         return jiraProjectService.getCreateIssueMetadata(projectKey);
+    }
+
+    public Object getIssueMeta(String issueKey) {
+        return jiraIssueService.getIssueMetadata(issueKey);
     }
 
     public boolean isNonArchivedAndUserHasAccess(String projectKey) {

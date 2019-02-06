@@ -494,6 +494,56 @@ paper-checkbox.tb-paper-checkbox #checkboxLabel {
 }
 
 /*
+....Paper Tabs
+*/
+ .tabs-wrapper {
+     margin-top:30px;
+     margin-bottom:30px;
+     border: 1px solid #e5e5e5;
+     border-radius: 4px;
+ }
+
+ .tabs-wrapper paper-tabs {
+     background-color:#f5f5f5;
+     position:relative;
+/*     border-bottom:1px solid #e5e5e5;*/
+     color:#555555;
+ }
+ 
+ .tabs-wrapper paper-tabs:after {
+    content: " ";
+    position:absolute;
+    left:0px;
+    bottom:0px;
+    width:100%;
+    border-bottom:1px solid #e5e5e5;
+ }
+
+ .tabs-wrapper paper-tabs paper-tab {
+     float:left;
+     flex:inherit;
+     padding:0px 12px;
+     border-right:1px solid #e5e5e5;
+ }
+
+ .tabs-wrapper .tabs-content {
+     padding:12px;
+ }
+
+.paper-tab-0 .tab-content.paper-tab,
+.paper-tab-0:focus .tab-content.paper-tab {
+    font-weight:normal !important;
+}
+
+paper-tab.iron-selected {
+    background-color:#fff;
+}
+
+.paper-tabs-0 #selectionBar.paper-tabs {
+    border-bottom:1px solid #fff;
+    z-index:1;
+}
+/*
     Follow Up Dropdown
 */
 .followup-dropdown {

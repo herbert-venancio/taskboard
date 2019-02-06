@@ -89,7 +89,7 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
 
         mainPage.errorToast().close();
 
-        mainPage.issue("TASKB-624")
+        mainPage.issue("TASKB-535")
             .click()
             .issueDetails()
             .assertTShirtSize("S")
@@ -97,8 +97,26 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
 
         mainPage.reload();
 
-        mainPage.issue("TASKB-624")
+        mainPage.issue("TASKB-535")
             .issueDetails()
             .assertTShirtSize("M");
+    }
+
+    @Test
+    public void whenBallparkSizeIsChanged_ShouldUpdateIssueImmediatlyWithNewBallparkSize() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+    mainPage.errorToast().close();
+
+    mainPage.issue("TASKB-235")
+        .click()
+        .issueDetails()
+        .setBallparkSize("XL");
+
+    mainPage.reload();
+
+    mainPage.issue("TASKB-235")
+        .issueDetails()
+        .assertBallparkSize("XL");
     }
 }

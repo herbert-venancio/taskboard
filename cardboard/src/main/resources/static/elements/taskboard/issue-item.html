@@ -404,7 +404,7 @@
 
                 <div class="bottom">
                     <div class="info-issue">
-                        <template is="dom-if" if="{{item.cardTshirtSize}}">
+                        <template is="dom-if" if="{{canShowTshirtSize(item)}}">
                             <div class="size">
                                 <span class="issue-size">{{item.cardTshirtSize}}</span>
                             </div>
@@ -502,9 +502,13 @@
                     this.async(function() {
                         if (typeof self.item === 'undefined' || typeof self.item.__eventInfo === 'undefined')
                             return;
-
+                        
                         self.highlightChangedIssue();
                     });
+                },
+
+                canShowTshirtSize: function(item) {
+                    return (item.subTask && item.cardTshirtSize);
                 },
 
                 filterUpdated: function() {

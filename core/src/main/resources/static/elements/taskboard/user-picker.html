@@ -3,7 +3,6 @@
         <tag-picker
             id = "user-selector-autocomplete"
             on-selected-value="_onSelect"
-            on-close-suggestions-clicked="_onClose"
             text="{{text}}"
             remoteSource="true"
             searching="{{searching}}"
@@ -65,11 +64,7 @@
                     this.selected = e.detail.value;
                     this.fire("selected-user", {target: this})
                 },
-                
-                _onClose: function(e) {
-                    this.fire("close-clicked", {target: this})
-                },
-                
+
                 _onChangeText: function(text) {
                     var tagPicker = this.tagPicker;
                     if (text.length < 3) {

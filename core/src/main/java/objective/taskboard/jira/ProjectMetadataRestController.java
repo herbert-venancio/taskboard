@@ -1,5 +1,7 @@
 package objective.taskboard.jira;
 
+
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -36,11 +38,16 @@ public class ProjectMetadataRestController {
 
     @Autowired
     private ProjectService projectService;
-
+    
     @RequestMapping(path = "/ws/issues/project-metadata", method = RequestMethod.GET)
     public ResponseEntity<JiraCreateIssue.ProjectMetadata> getProjectMetadata(@RequestParam(name = "projectKey") String projectKey) {
         return projectService.getProjectMetadata(projectKey)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @RequestMapping(path = "/ws/issues/issue-metadata", method = RequestMethod.GET)
+    public Object getIssuesMetadata(@RequestParam(name = "issueKey") String issueKey) {
+        return projectService.getIssueMeta(issueKey);
     }
 }

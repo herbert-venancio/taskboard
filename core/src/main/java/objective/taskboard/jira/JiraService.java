@@ -4,6 +4,7 @@ import static objective.taskboard.jira.JiraSearchService.postProcessWorklogs;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValueOrId;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -237,6 +238,15 @@ public class JiraService {
 
         if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
             throw new FrontEndMessageException("Unexpected return code during saveTshirt: " + result.getStatus());
+    }
+
+    public void saveBallpark(String issueKey, String fieldId, String size) {
+         Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                    .field(fieldId, byValueOrId(size))
+                    .build());
+
+         if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during saveBallpark: " + result.getStatus());
     }
 
     public void setTeams(String issueKey, List<Long> teamsIds) {

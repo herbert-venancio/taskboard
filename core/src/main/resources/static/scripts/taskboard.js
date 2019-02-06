@@ -124,6 +124,34 @@ function Taskboard() {
         return findInArray(this.issues, i => i.issueKey === issueKey);
     };
 
+    this.getIssueMetadata = function(issueKey, callback) {
+        $.ajax({
+            url: 'ws/issues/issue-metadata?issueKey=' + issueKey,
+            type: 'get',
+            success: function (data) {
+                callback.apply(null, [data]);
+            }
+        });
+    };
+
+    this.getFieldOptions = function(selectedIssue, fieldId, callback) {
+        var fieldFromIssue = selectedIssue.fields.filter(function(field) {
+            return (field.id == fieldId);
+        });
+        
+        var fieldOptions = fieldFromIssue['0'] ? fieldFromIssue['0'].allowedValues : [];
+
+        if (fieldOptions.length > 0 && !fieldFromIssue['0'].required) {
+            fieldOptions.unshift({
+               value: "None" 
+            });
+        }
+
+        callback.apply(null, [fieldOptions]);
+        return fieldOptions;
+        
+    };
+
     this.setLaneConfiguration = function(laneConfiguration) {
         _laneConfiguration = laneConfiguration;
     };
@@ -488,9 +516,9 @@ function Taskboard() {
         if (issue.additionalEstimatedHoursField)
             issue.additionalEstimatedHoursField.name = this.getFieldName(issue.additionalEstimatedHoursField);
 
-        issue.subtasksTshirtSizes.forEach(function(ts) {
+        issue.ballparks.forEach(function(ts) {
             ts.name = this.getFieldName(ts);
-        }.bind(this))
+        }.bind(this));
 
         return issue;
     }

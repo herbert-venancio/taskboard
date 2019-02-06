@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+
 import objective.taskboard.jira.properties.JiraProperties;
 import retrofit.client.Response;
 import retrofit.http.Body;
@@ -221,6 +223,13 @@ public class JiraIssue {
             return new FieldBuilder((builder, field) ->
                     builder.fields.put(field, singletonMap("value", value))
             );
+        }
+
+        public static FieldBuilder byValueOrId(String size) {
+            if (size.contentEquals("None"))
+                return byId(-1);
+            else
+                return byValue(size);
         }
     }
 

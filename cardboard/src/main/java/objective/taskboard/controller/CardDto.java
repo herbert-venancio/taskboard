@@ -62,7 +62,7 @@ public class CardDto {
     public CustomField additionalEstimatedHoursField;
     public boolean cancelled;
     public boolean completed;
-    public List<CustomField> subtasksTshirtSizes;
+    public List<CustomField> ballparks;
     public String cardTshirtSize;
     public String cardTshirtSizeFieldId;
     public String typeIconUri;
@@ -114,7 +114,7 @@ public class CardDto {
         cardDto.completed = issue.isCompleted();
         cardDto.additionalEstimatedHoursField = issue.getAdditionalEstimatedHoursField();
 
-        cardDto.subtasksTshirtSizes = issue.getSubtasksTshirtSizes();
+        cardDto.ballparks = issue.getBallparks();
         cardDto.cardTshirtSize = issue.getCardTshirtSize();
         cardDto.cardTshirtSizeFieldId = issue.getCardTshirtSizeFieldId();
         cardDto.typeIconUri = issue.getTypeIconUri();
@@ -175,7 +175,7 @@ public class CardDto {
                 , dto.completed
                 , dto.blocked
                 , dto.lastBlockReason
-                , dto.subtasksTshirtSizes
+                , dto.ballparks
                 , dto.additionalEstimatedHoursField
                 , dto.parentSummary
                 , dto.release

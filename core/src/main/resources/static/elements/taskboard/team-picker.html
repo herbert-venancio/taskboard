@@ -6,7 +6,6 @@
                 text-property="teamName"
                 value-property="id"
                 on-selected-value="_onSelect"
-                on-close-suggestions-clicked="_onClose"
                 >
         </tag-picker>
     </template>
@@ -40,25 +39,40 @@
 
                     this.availableTeams = taskboard.getAvailableTeams();
                 },
-                
+
+                setup: function() {
+                    var teamPicker = this;
+
+                    teamPicker.open = function(label, id) {
+                        teamPicker.clear();
+                        $(teamPicker).show();
+                        teamPicker.focus();
+                        teamPicker.label = $(label);
+                        teamPicker.label.hide();
+                        teamPicker.idOfteamToReplace = id;
+                    }
+                    teamPicker.close = function() {
+                        $(teamPicker).hide();
+                        if (teamPicker.label)
+                            teamPicker.label.show();
+                        teamPicker.idOfteamToReplace = null;
+                    }
+                },
+
                 clear: function() {
                     this.tagPicker.clear();
                 },
-                
+
                 focus: function() {
                     this.tagPicker.focus();
                     this.tagPicker.suggestions(this.availableTeams);
                 },
-                
+
                 _onSelect: function(item) {
                     var team = item.detail;
                     if (team)
                         this.selected = team.id;
                     this.fire("selected-team", {target: this})
-                },
-                
-                _onClose: function() {
-                    this.fire("close-clicked", {target: this})
                 }
             });
         })();
