@@ -4,7 +4,6 @@ import static objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZoneId;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
 
 public class CycleTimeDataProviderTest {

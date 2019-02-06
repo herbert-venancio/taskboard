@@ -36,7 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.Constants;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
-import objective.taskboard.followup.kpi.properties.CumulativeFlowDiagramProperties;
+import objective.taskboard.followup.kpi.properties.KpiCfdProperties;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -54,7 +54,7 @@ public class CumulativeFlowDiagramDataProviderTest {
     private FollowUpSnapshotService snapshotService;
 
     @Spy
-    private CumulativeFlowDiagramProperties cfdProperties = new CumulativeFlowDiagramProperties();
+    private KpiCfdProperties properties = new KpiCfdProperties();
 
     @Mock
     private MetadataService metaDataService;
@@ -95,12 +95,12 @@ public class CumulativeFlowDiagramDataProviderTest {
             issueTypeIds.add(i);
 
             String issueTypeName = issueTypes[i.intValue()];
-            Optional<JiraIssueTypeDto> issueType = Optional.of(new JiraIssueTypeDto(i.longValue(), issueTypeName, false));
+            Optional<JiraIssueTypeDto> issueType = Optional.of(new JiraIssueTypeDto(i, issueTypeName, false));
 
             doReturn(issueType).when(metaDataService).getIssueTypeByName(eq(issueTypeName));
         }
 
-        cfdProperties.setExcludeIssueTypes(issueTypeIds);
+        properties.getCumulativeFlowDiagram().setExcludeIssueTypes(issueTypeIds);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class CumulativeFlowDiagramDataProviderTest {
     }
 
     private void assertTypes(CumulativeFlowDiagramDataSet cfd, String... expectedIssueTypeNames) {
-        String expectedTypes = Stream.of(expectedIssueTypeNames).collect(joining(","));
+        String expectedTypes = String.join(",", expectedIssueTypeNames);
 
         String actualTypes = cfd.dataByStatus.get("To Do").stream()
                 .map(each -> each.type)

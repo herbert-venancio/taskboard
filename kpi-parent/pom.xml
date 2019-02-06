@@ -18,16 +18,15 @@
 
     <modules>
         <module>kpi-testutils</module>
+        <module>kpi-budget-chart</module>
         <module>kpi-cfd</module>
-        <module>kpi-scope-by-type</module>
-        <module>kpi-progress-chart</module>
-        <!--<module>kpi-scope-progress</module>-->
+        <module>kpi-cycle-time</module>
         <module>kpi-planned-x-ballpark</module>
-        <module>kpi-wip</module>
+        <module>kpi-progress-chart</module>
+        <module>kpi-scope-by-type</module>
         <module>kpi-throughput</module>
         <module>kpi-touch-time</module>
-        <module>kpi-cycle-time</module>
-        <module>kpi-budget-chart</module>
+        <module>kpi-wip</module>
     </modules>
 
     <properties>

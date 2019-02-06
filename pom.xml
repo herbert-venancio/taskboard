@@ -16,7 +16,6 @@
 	<modules>
 		<module>core</module>
 		<module>application</module>
-		<module>application-with-kpis</module>
 		<module>kpis</module>
 		<module>kpi-parent</module>
 		<module>followup-core</module>

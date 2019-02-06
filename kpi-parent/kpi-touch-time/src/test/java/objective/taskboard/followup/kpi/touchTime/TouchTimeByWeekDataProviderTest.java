@@ -22,9 +22,7 @@ import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
-import objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 

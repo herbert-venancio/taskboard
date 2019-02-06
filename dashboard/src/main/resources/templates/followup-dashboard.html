@@ -54,8 +54,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- endbuild -->
 
     <link rel="import" href="/static/elements/dashboard-elements.html"/>
-    <th:block th:each="webcomponentImport : ${webcomponentImports}">
-    <link ref="import" href="${webcomponentImport.url}"/>
+    <th:block th:each="extension : ${extensionImports}">
+        <link rel="import" th:attr="href=${extension.componentPath}"/>
     </th:block>
 
     <!-- build:js scripts/app.js -->

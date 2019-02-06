@@ -48,6 +48,54 @@
 			<version>${project.version}</version>
 			<artifactId>sizing-importer</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-budget-chart</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-cfd</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-cycle-time</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-planned-x-ballpark</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-progress-chart</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-scope-by-type</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-throughput</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-touch-time</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-wip</artifactId>
+			<version>0.0.80-SNAPSHOT</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>

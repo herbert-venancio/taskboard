@@ -20,7 +20,8 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
     private Map<String, HierarchyBuilder> featureHierarchyBuilder = new LinkedHashMap<>();
     private Map<String, HierarchyBuilder> demandHierarchyBuilder = new LinkedHashMap<>();
     private boolean shouldCollectProgressingStatuses = true;
-    private Map<Class<?>, KpiEnvironment.KpiPropertiesMockBuilder> mockBuilderMap = new HashMap<>();
+    @SuppressWarnings("rawtypes")
+	private Map<Class<?>, KpiEnvironment.KpiPropertiesMockBuilder> mockBuilderMap = new HashMap<>();
     private Map<Class<?>, Object> instanceMap = new HashMap<>();
 
     public KpiPropertiesMocker(KpiEnvironment environment) {
@@ -54,7 +55,7 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
         return (T) instanceMap.get(propertiesClass);
     }
 
-    public void put(KpiEnvironment.KpiPropertiesMockBuilder builder) {
+    public void put(KpiEnvironment.KpiPropertiesMockBuilder<?> builder) {
         mockBuilderMap.put(builder.propertiesClass(), builder);
     }
 

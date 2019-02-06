@@ -12,6 +12,7 @@ import objective.taskboard.TaskboardProperties;
 import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardViewPermission;
 import objective.taskboard.data.User;
+import objective.taskboard.followup.kpi.extension.KpiExtensionService;
 import objective.taskboard.jira.JiraService;
 
 @Controller
@@ -29,6 +30,9 @@ public class FollowUpDashboardController {
     @Autowired
     private ProjectDashboardViewPermission projectDashboardViewPermission;
 
+    @Autowired
+    private KpiExtensionService kpiExtensionService;
+
     @RequestMapping("/followup-dashboard")
     public String followUpDashboard(Model model) {
         if (!projectDashboardViewPermission.isAuthorized())
@@ -38,6 +42,7 @@ public class FollowUpDashboardController {
         model.addAttribute("logo", serialize(taskboardProperties.getLogo()));
         model.addAttribute("user", serialize(user));
         model.addAttribute("permissions", serialize(authorizer.getPermissions()));
+        model.addAttribute("extensionImports", kpiExtensionService.getItems());
         return "followup-dashboard";
     }
 

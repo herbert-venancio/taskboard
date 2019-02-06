@@ -1,9 +1,6 @@
 package objective.taskboard.followup.kpi.cycletime;
 
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +13,6 @@ import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
 
 @Service

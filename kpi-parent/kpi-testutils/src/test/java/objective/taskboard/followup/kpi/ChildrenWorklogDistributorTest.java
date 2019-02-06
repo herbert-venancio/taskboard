@@ -6,7 +6,6 @@ import objective.taskboard.followup.kpi.enviroment.DSLBehavior;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.IssueKpiMocker;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
 
 public class ChildrenWorklogDistributorTest {
 

@@ -80,7 +80,7 @@ public class KpiEnvironment {
         return kpiPropertiesMocker;
     }
 
-    public KpiEnvironment withKpiProperties(KpiPropertiesMockBuilder builder) {
+    public KpiEnvironment withKpiProperties(KpiPropertiesMockBuilder<?> builder) {
         kpiPropertiesMocker.put(builder);
         return this;
     }
