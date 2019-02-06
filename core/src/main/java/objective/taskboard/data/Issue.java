@@ -357,12 +357,12 @@ public class Issue extends IssueScratch implements Serializable {
             return Collections.emptyList();
         } else {
             return list.stream()
-                .map(obj -> verifyTShirtSize(obj.getTshirtCustomFieldId()))
+                .map(obj -> makeTshirtField(obj.getTshirtCustomFieldId()))
                 .collect(Collectors.toList());
         }
     }
 
-    private CustomField verifyTShirtSize(String fieldId) {
+    private CustomField makeTshirtField(String fieldId) {
         if (tshirtSizes.containsKey(fieldId)) {
             return tshirtSizes.get(fieldId);
         } else {
