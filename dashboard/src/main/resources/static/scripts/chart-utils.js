@@ -185,24 +185,33 @@ class ChartBuilderBase {
         this.options.credits = false;
         this.hasPlotLine = false;
         this.options.chart.events = {
-            selection: function (event) {
+            selection: (event) => {
+                const chart = event.target;
                 const hideResetButton = () => {
-                    this.resetZoomButton = this.resetZoomButton.destroy();
+                    chart.resetZoomButton = chart.resetZoomButton.destroy();
                 };
                 const preventZoomOut = (zoomOutEvent) => {
                     zoomOutEvent.preventDefault();
                 };
                 const zoomOutYAxis = () => {
-                    this.yAxis[0].setExtremes(null, null);
+                    chart.yAxis[0].setExtremes(null, null);
                 };
                 const zoomOutXAxisToTimelineExtent = () => {
-                    dcDateRangeChartsService.applySelection(this);
+                    dcDateRangeChartsService.applySelection(chart);
                 };
                 if (event.resetSelection) {
                     hideResetButton();
                     preventZoomOut(event);
                     zoomOutYAxis();
                     zoomOutXAxisToTimelineExtent();
+                }
+            }
+        };
+        this.options.plotOptions.series.events = {
+            legendItemClick: (event) => {
+                const chart = event.target.chart;
+                if (chart.resetZoomButton) {
+                    Highcharts.fireEvent(chart.resetZoomButton.element, 'click');
                 }
             }
         };
@@ -439,6 +448,28 @@ class CFDChartBuilder extends ChartBuilderBase {
                 series: {
                     marker: {
                         enabled: false
+                    },
+                    events: {
+                        legendItemClick: (event) => {
+                            const chart = event.target.chart;
+                            if (chart.resetZoomButton) {
+                                Highcharts.fireEvent(chart.resetZoomButton.element, 'click');
+                            }
+                            const legendName = event.target.name;
+                            const shouldIncludeTargetLegend = !event.target.visible;
+                            const xAxis = chart.xAxis[0];
+                            const visibleSeries = xAxis.series.filter(s => s.name === legendName ? shouldIncludeTargetLegend : s.visible);
+                            if (!visibleSeries) {
+                                return;
+                            }
+                            const baseStackSeries = visibleSeries[0];
+                            const xMinPoint = baseStackSeries.points.find((point) => point.x === ChartUtils.truncateDate(xAxis.userMin));
+                            if (xMinPoint === undefined){
+                                return;
+                            }
+                            const yMin = xMinPoint.y;
+                            chart.yAxis[0].setExtremes(yMin, null);
+                        }
                     }
                 }
             }
@@ -470,16 +501,19 @@ class CFDChartBuilder extends ChartBuilderBase {
                 if (xMin === null || xMax === null) {
                     return;
                 }
-                const baseStackSeries = event.target.series[0];
+                const xAxis = event.target;
+                const visibleSeries = xAxis.series.filter(s => s.visible);
+                if (!visibleSeries) {
+                    return;
+                }
+                const baseStackSeries = visibleSeries[0];
                 const xMinPoint = baseStackSeries.points.find((point) => point.x === xMin);
-                const xMaxPoint = baseStackSeries.points.find((point) => point.x === xMax);
-                if (xMinPoint === undefined || xMaxPoint === undefined){
+                if (xMinPoint === undefined) {
                     return;
                 }
                 const yMin = xMinPoint.y;
-                const yMax = xMaxPoint.stackTotal;
-                const yAxis = event.target.chart.axes[1];
-                yAxis.setExtremes(yMin, yMax);
+                const yAxis = xAxis.chart.yAxis[0];
+                yAxis.setExtremes(yMin, null);
             }
         };
     }
