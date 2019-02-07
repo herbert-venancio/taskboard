@@ -120,7 +120,7 @@
                 },
 
                 ready: function () {
-                    dcUtils.registerOptions(this);
+                    ChartUtils.registerOptions(this);
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Ok').onClick(() => {
                         let savedLevel = this._getSavedLevel();

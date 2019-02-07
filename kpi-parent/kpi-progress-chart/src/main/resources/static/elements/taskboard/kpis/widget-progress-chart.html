@@ -175,18 +175,19 @@
                 ready: function () {
                     this._createChartOptions();
                 },
-                
+
                 _createChartOptions: function() {
-                    this.set('options', [
-                        {
-                           icon:'taskboard-icons:dashboard-filter',
-                           title: 'Chart filters',
-                           tap: function() {
-                               this.$.modal.open();
-                           },
-                           hidden: true
-                        }
-                    ]);
+                    this.options = new WidgetOptionsBuilder(this)
+                        .withCustomOption(
+                            new WidgetOptionBuilder()
+                                .withIcon('taskboard-icons:dashboard-filter')
+                                .withTitle('Chart filters')
+                                .withOnTap(() => this.$.modal.open())
+                                .withHidden(true)
+                                .build()
+                        )
+                        .withFullscreen()
+                        .build();
                 },
 
                 reset: function () {

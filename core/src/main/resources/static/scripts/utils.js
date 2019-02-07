@@ -105,6 +105,33 @@ function makeSVGEl(tag, attrs) {
     return el;
 }
 
+function elementScroll(element, positionInPixels, durationInMillis) {
+    const scrollAbove = positionInPixels <= element.scrollTop;
+    const biggerScroll = scrollAbove ? element.scrollTop : positionInPixels;
+    const scrollStep = biggerScroll / (durationInMillis / 15);
+    const scrollInterval = setInterval(() => {
+        if ( scrollAbove && element.scrollTop > positionInPixels )
+            element.scrollTop -= scrollStep;
+        else if (!scrollAbove && element.scrollTop < positionInPixels)
+            element.scrollTop += scrollStep;
+        else
+            clearInterval(scrollInterval);
+    }, 15);
+}
+
+function executeOnWindowResizingEnds(callback, timeout) {
+    if (!timeout)
+        timeout = 200;
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            callback();
+        }, timeout);
+    });
+}
+
 var _MS_PER_DAY = 1000 * 60 * 60 * 24;
 function dateDiffInDays(dateA, dateB) {
     var utc1 = Date.UTC(dateA.getFullYear(), dateA.getMonth(), dateA.getDate());

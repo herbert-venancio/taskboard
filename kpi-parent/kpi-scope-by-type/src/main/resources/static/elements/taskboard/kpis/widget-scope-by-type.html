@@ -29,7 +29,7 @@
             }
         </style>
 
-        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" highcharts-chart="{{chart}}" has-reset="true" error-message="{{errorMessage}}">
+        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" highcharts-chart="{{chart}}" has-reset="true" error-message="{{errorMessage}}" options="{{options}}">
 
             <div id="scope-by-type" class="tb-chart"></div>
 
@@ -61,7 +61,15 @@
                         type: Boolean,
                         notify: true,
                         value: false
+                    },
+                    options: {
+                        type: Array,
+                        value: () => []
                     }
+                },
+
+                ready: function() {
+                    this.options = new WidgetOptionsBuilder(this).withFullscreen().build();
                 },
 
                 _onProjectSelected: function(newSelectedProjectKey, oldSelectedProjectKey) {

@@ -194,25 +194,5 @@ function DcUtils() {
             }); 
     };
 
-    this.registerOptions = function(widget) {
-        const options = [
-            {
-                icon:'taskboard-icons:dashboard-filter'
-                , title: 'Filters'
-                , tap: () => widget.$$('.filters-modal').open()
-                , hidden: true
-            },
-            {
-                icon: 'taskboard-icons:settings'
-                , title: 'Settings'
-                , tap: () => {
-                    widget.settingIssueLevel = widget._getSavedLevel();
-                    widget.$$('.settings-modal').open();
-                }
-                , cssClasses: ''
-            }
-        ]
-        widget.options = options;
-    };
 }
 var dcUtils = new DcUtils();
