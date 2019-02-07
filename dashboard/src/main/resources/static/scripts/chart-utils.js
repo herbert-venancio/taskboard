@@ -176,6 +176,12 @@ class ChartUtils {
         ];
         widget.options = options;
     }
+
+    static zoomOut (chart) {
+        if (chart.resetZoomButton) {
+            Highcharts.fireEvent(chart.resetZoomButton.element, 'click');
+        }
+    }
 }
 
 class ChartBuilderBase {
@@ -210,9 +216,7 @@ class ChartBuilderBase {
         this.options.plotOptions.series.events = {
             legendItemClick: (event) => {
                 const chart = event.target.chart;
-                if (chart.resetZoomButton) {
-                    Highcharts.fireEvent(chart.resetZoomButton.element, 'click');
-                }
+                ChartUtils.zoomOut(chart);
             }
         };
         this._tooltipHeader = {
@@ -451,24 +455,18 @@ class CFDChartBuilder extends ChartBuilderBase {
                     },
                     events: {
                         legendItemClick: (event) => {
-                            const chart = event.target.chart;
-                            if (chart.resetZoomButton) {
-                                Highcharts.fireEvent(chart.resetZoomButton.element, 'click');
-                            }
-                            const legendName = event.target.name;
-                            const shouldIncludeTargetLegend = !event.target.visible;
+                            const legend = event.target;
+                            const chart = legend.chart;
+                            ChartUtils.zoomOut(chart);
                             const xAxis = chart.xAxis[0];
-                            const visibleSeries = xAxis.series.filter(s => s.name === legendName ? shouldIncludeTargetLegend : s.visible);
-                            if (!visibleSeries) {
-                                return;
-                            }
-                            const baseStackSeries = visibleSeries[0];
-                            const xMinPoint = baseStackSeries.points.find((point) => point.x === ChartUtils.truncateDate(xAxis.userMin));
-                            if (xMinPoint === undefined){
-                                return;
-                            }
-                            const yMin = xMinPoint.y;
-                            chart.yAxis[0].setExtremes(yMin, null);
+                            const shouldIncludeTargetLegend = !legend.visible;
+                            /*
+                             * if legend is visible it means this callback will hide the series
+                             * so we need to filter out the target series from visible series when
+                             * finding base visible series from stack.
+                             */
+                            const visibleSeries = xAxis.series.filter(s => s.name === legend.name ? shouldIncludeTargetLegend : s.visible);
+                            this._resizeYAxis(visibleSeries, xAxis.userMin);
                         }
                     }
                 }
@@ -496,24 +494,12 @@ class CFDChartBuilder extends ChartBuilderBase {
     get _xAxisEvents () {
         return {
             afterSetExtremes: (event) => {
-                const xMin = ChartUtils.truncateDate(event.min);
-                const xMax = ChartUtils.ceilDate(event.max);
-                if (xMin === null || xMax === null) {
-                    return;
-                }
                 const xAxis = event.target;
+                if (event.min === null || event.max === null) {
+                    return;
+                }
                 const visibleSeries = xAxis.series.filter(s => s.visible);
-                if (!visibleSeries) {
-                    return;
-                }
-                const baseStackSeries = visibleSeries[0];
-                const xMinPoint = baseStackSeries.points.find((point) => point.x === xMin);
-                if (xMinPoint === undefined) {
-                    return;
-                }
-                const yMin = xMinPoint.y;
-                const yAxis = xAxis.chart.yAxis[0];
-                yAxis.setExtremes(yMin, null);
+                this._resizeYAxis(visibleSeries, event.min);
             }
         };
     }
@@ -531,6 +517,28 @@ class CFDChartBuilder extends ChartBuilderBase {
                 startOnTick: false
             }
         };
+    }
+
+    _resizeYAxis (visibleSeries, xMin) {
+        if (!visibleSeries) {
+            return;
+        }
+        const baseStackVisibleSerie = visibleSeries[0];
+        if (!baseStackVisibleSerie) {
+            return;
+        }
+        const yMin = this._getYFromBaseSerieForX(baseStackVisibleSerie, xMin);
+        const yAxis = baseStackVisibleSerie.yAxis;
+        yAxis.setExtremes(yMin, null);
+    }
+
+    _getYFromBaseSerieForX (baseStackVisibleSerie, x) {
+        const xTruncated = ChartUtils.truncateDate(x);
+        const xPoint = baseStackVisibleSerie.points.find((point) => point.x === xTruncated);
+        if (xPoint === undefined) {
+            return null;
+        }
+        return xPoint.y;
     }
 }
 
