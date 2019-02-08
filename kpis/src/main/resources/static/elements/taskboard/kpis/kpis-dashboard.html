@@ -485,7 +485,7 @@
                     var categoryClicked = event.target.dataset.category;
                     this._activeCategory(categoryClicked);
 
-                    ChartUtils.resizeAllHighchartsCharts();
+                    ChartUtils.scheduleResize(100);
                     dc.renderAll();
                 },
 
