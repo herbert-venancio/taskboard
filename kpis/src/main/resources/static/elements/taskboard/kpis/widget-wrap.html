@@ -240,7 +240,7 @@
                         value: ''
                     },
                     hasReset: {
-                    	type: Boolean,
+                        type: Boolean,
                         value: false
                     },
                     tags: {
@@ -272,7 +272,7 @@
                 _onTapReset: function() {
                     this.chart.filterAll();
                     if (this.chart.brushOn)
-                    	this.chart.brushOn(false);
+                        this.chart.brushOn(false);
                     dc.renderAll();
                     dc.redrawAll();
                 },
@@ -285,8 +285,8 @@
 
                     var self = this;
                     var registerChartFiltered = function(chartFiltered, filter) {
-                    	if (!self.get('hasReset'))
-                    		return;
+                        if (!self.get('hasReset'))
+                            return;
                         if (chartFiltered.anchorName() === chart.anchorName()) {
                             this.set('_isChartFiltered', chart.hasFilter());
                         }
@@ -328,13 +328,15 @@
 
                 _onTapDownload: function() {
                     const exportOptions = {
-                        filename: this.title.replace(/ /g, '_') + "_" + getDateHour()
-                    }
+                        filename: `${this.title.replace(/ /g, '_')}_${getDateHour()}`,
+                        sourceWidth: this.highchartsChart.chartWidth,
+                        sourceHeight: this.highchartsChart.chartHeight 
+                    };
                     const chartOptions = {
                         chart: {
                             backgroundColor: '#565656'
                         }
-                    }
+                    };
                     this.highchartsChart.exportChartLocal(exportOptions, chartOptions);
                 }
             });
