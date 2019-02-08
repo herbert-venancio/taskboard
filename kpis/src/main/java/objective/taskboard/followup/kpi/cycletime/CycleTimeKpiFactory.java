@@ -1,7 +1,6 @@
 package objective.taskboard.followup.kpi.cycletime;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -20,18 +19,16 @@ import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi.SubCycleKpi;
 public class CycleTimeKpiFactory {
     private static final String DEFAULT_COLOR = "#A1423C";
     private Map<KpiLevel, Set<String>> cycleStatusesByLevel;
-    private ZoneId timezone;
     private IssueColorService colorService;
 
-    public CycleTimeKpiFactory(Map<KpiLevel, Set<String>> cycleStatusesByLevel, ZoneId timezone, IssueColorService colorService) {
-        this.timezone = timezone;
+    public CycleTimeKpiFactory(Map<KpiLevel, Set<String>> cycleStatusesByLevel, IssueColorService colorService) {
         this.cycleStatusesByLevel = cycleStatusesByLevel;
         this.colorService = colorService;
     }
 
     public CycleTimeKpi create(IssueKpi issue) {
         Set<String> cycleStatuses = cycleStatusesByLevel.get(issue.getLevel());
-        StatusTransitionChain cycleStatusChain = issue.getStatusChain(timezone).getStatusSubChain(cycleStatuses);
+        StatusTransitionChain cycleStatusChain = issue.getStatusChain().getStatusSubChain(cycleStatuses);
         Instant enterDate = cycleStatusChain.getMinimumDate().map(ZonedDateTime::toInstant).orElse(null);
         Instant exitDate = cycleStatusChain.getMaximumDate().map(ZonedDateTime::toInstant).orElse(null);
         long duration = cycleStatusChain.getDurationInDaysEndDateIncluded();
@@ -52,8 +49,8 @@ public class CycleTimeKpiFactory {
                 type -> colorService.getStatusColor(type.getId(), status.getStatusName()));
         return new SubCycleKpi(
                 status.getStatusName(),
-                status.getEnterDate(timezone),
-                status.getExitDate(timezone),
+                status.getEnterDate(),
+                status.getExitDate(),
                 color.orElse(DEFAULT_COLOR));
     }
 

@@ -354,7 +354,7 @@ public class LeadTimeControllerTest {
 
         private LeadTimeKpi transformIntoLeadTimeKpi(IssueKpi issue, KpiEnvironment environment, ZoneId timezone) {
             Map<KpiLevel, Set<String>> leadStatusMap = environment.withKpiProperties().getLeadStatusMap();
-            LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusMap, timezone);
+            LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusMap);
             return factory.create(issue);
         }
 

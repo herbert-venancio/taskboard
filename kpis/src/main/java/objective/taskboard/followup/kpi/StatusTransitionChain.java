@@ -2,7 +2,6 @@ package objective.taskboard.followup.kpi;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -15,16 +14,14 @@ public class StatusTransitionChain {
     private List<StatusTransition> statuses;
     private Optional<ZonedDateTime> minDate = Optional.empty();
     private Optional<ZonedDateTime> maxDate = Optional.empty();
-    private ZoneId timezone;
     private List<StatusTransition> tail;
 
-    public StatusTransitionChain(List<StatusTransition> statuses, ZoneId timezone) {
-        this(statuses, Collections.emptyList(), timezone);
+    public StatusTransitionChain(List<StatusTransition> statuses) {
+        this(statuses, Collections.emptyList());
     }
 
-    public StatusTransitionChain(List<StatusTransition> statuses, List<StatusTransition> tail, ZoneId timezone) {
+    public StatusTransitionChain(List<StatusTransition> statuses, List<StatusTransition> tail) {
         this.statuses = statuses;
-        this.timezone = timezone;
         this.tail = tail;
     }
 
@@ -46,13 +43,13 @@ public class StatusTransitionChain {
         if (lastSelectedStatusIndex > -1) {
             tail2 = statuses.subList(lastSelectedStatusIndex + 1, statuses.size());
         }
-        return new StatusTransitionChain(chain, tail2, timezone);
+        return new StatusTransitionChain(chain, tail2);
     }
 
     public Optional<ZonedDateTime> getMinimumDate() {
         if (!minDate.isPresent()) {
             minDate = statuses.stream()
-                    .map(s -> s.getEnterDate(timezone))
+                    .map(StatusTransition::getEnterDate)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .min(ZonedDateTime::compareTo);
@@ -63,7 +60,7 @@ public class StatusTransitionChain {
     public Optional<ZonedDateTime> getMaximumDate() {
         if (!maxDate.isPresent()) {
             maxDate = statuses.stream()
-                    .map(s -> s.getExitDate(timezone))
+                    .map(StatusTransition::getExitDate)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .max(ZonedDateTime::compareTo);
@@ -73,7 +70,7 @@ public class StatusTransitionChain {
 
     public Optional<ZonedDateTime> getExitDate() {
         long count = tail.stream()
-            .map(s -> s.getEnterDate(timezone))
+            .map(StatusTransition::getEnterDate)
             .filter(Optional::isPresent)
             .count();
         return count > 0 ? getMaximumDate() : Optional.empty();
@@ -95,17 +92,17 @@ public class StatusTransitionChain {
 
     public boolean doAllHaveExitDate() {
         return statuses.stream()
-            .filter(s -> !s.getExitDate(timezone).isPresent())
+            .filter(s -> !s.getExitDate().isPresent())
             .count() == 0;
     }
 
     public boolean hasAnyEnterDate() {
-        return statuses.stream().anyMatch(s -> s.getEnterDate(timezone).isPresent());
+        return statuses.stream().anyMatch(s -> s.getEnterDate().isPresent());
     }
 
     public String getCurrentStatusName() {
         return statuses.stream()
-                .filter(s -> s.getEnterDate(timezone).isPresent())
+                .filter(s -> s.getEnterDate().isPresent())
                 .reduce((first, second) -> second)
                 .map(StatusTransition::getStatusName).orElse("NOSTATUS");
     }

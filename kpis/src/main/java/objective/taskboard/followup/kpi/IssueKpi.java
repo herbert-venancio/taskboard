@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Range;
 
-import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.touchTime.TouchTimeWeekRange;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
@@ -102,10 +101,10 @@ public class IssueKpi {
                 .collect(Collectors.summingLong(effortInSeconds -> effortInSeconds));
     }
 
-    public List<Worklog> getWorklogFromChildrenTypeId(Long subtaskType) {
+    public List<ZonedWorklog> getWorklogFromChildrenTypeId(Long subtaskType) {
         return children.stream()
                 .filter(c -> c.issueType.map(type -> type.getId().equals(subtaskType)).orElse(false))
-                .map(c -> c.collectWorklogs())
+                .map(IssueKpi::collectWorklogs)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
@@ -114,7 +113,7 @@ public class IssueKpi {
         return firstStatus.flatMap(s -> s.find(status));
     }
 
-    public List<Worklog> getWorklogFromChildrenStatus(String childrenStatus) {
+    public List<ZonedWorklog> getWorklogFromChildrenStatus(String childrenStatus) {
         return children.stream()
                 .map(c -> c.findStatus(childrenStatus))
                 .flatMap(s -> s.map(x -> x.getWorklogs().stream()).orElse(Stream.empty()))
@@ -123,13 +122,13 @@ public class IssueKpi {
 
     public Optional<Range<LocalDate>> getDateRangeBasedOnProgressingStatuses(ZoneId timezone) {
 
-        Optional<LocalDate> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
+        Optional<LocalDate> firstDateOp = firstStatus.flatMap(StatusTransition::firstDateOnProgressing);
         if(!firstDateOp.isPresent())
             return Optional.empty();
 
         LocalDate firstDate = firstDateOp.get();
         LocalDate now = ZonedDateTime.ofInstant(clock.now(),timezone).toLocalDate();
-        LocalDate lastDate = firstStatus.flatMap(s -> s.getDateAfterLeavingLastProgressingStatus()).orElse(now);
+        LocalDate lastDate = firstStatus.flatMap(StatusTransition::getDateAfterLeavingLastProgressingStatus).orElse(now);
 
         if(firstDate.isAfter(lastDate))
             return Optional.of(RangeUtils.between(firstDate, firstDate));
@@ -141,12 +140,12 @@ public class IssueKpi {
         return getDateRangeBasedOnProgressingStatuses(week.getTimezone()).map(range -> week.overlaps(range)).orElse(false);
     }
 
-    public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
-        StatusTransitionChain cycleStatusesChain = getStatusChain(timezone).getStatusSubChain(cycleStatuses);
+    public boolean hasCompletedCycle(Set<String> cycleStatuses) {
+        StatusTransitionChain cycleStatusesChain = getStatusChain().getStatusSubChain(cycleStatuses);
         return cycleStatusesChain.hasAnyEnterDate() && cycleStatusesChain.doAllHaveExitDate();
     }
 
-    public StatusTransitionChain getStatusChain(ZoneId timezone) {
+    public StatusTransitionChain getStatusChain() {
         List<StatusTransition> statusChain = new LinkedList<>();
         Optional<StatusTransition> current = firstStatus;
         do {
@@ -156,11 +155,11 @@ public class IssueKpi {
                 current = status.next;
             }
         } while (current.isPresent());
-        return new StatusTransitionChain(statusChain, timezone);
+        return new StatusTransitionChain(statusChain);
     }
 
-    private List<Worklog> collectWorklogs() {
-        return firstStatus.map(s -> s.collectWorklog()).orElseGet(Collections::emptyList);
+    private List<ZonedWorklog> collectWorklogs() {
+        return firstStatus.map(StatusTransition::collectWorklog).orElseGet(Collections::emptyList);
     }
 
     private Stream<DatedStatusTransition> getStatusesWithTransition(String... statuses) {

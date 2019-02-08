@@ -402,16 +402,16 @@ public class CycleTimeControllerTest {
             KpiLevel kpiLevel = KpiLevel.valueOf(level.toUpperCase());
             Map<KpiLevel, List<IssueKpi>> issues = environment.services().issueKpi().getIssuesByLevel();
             List<CycleTimeKpi> cycleTimeKpis = issues.get(kpiLevel).stream()
-                .map(i -> transformIntoCycleTimeKpi(i, environment, timezone))
+                .map(i -> transformIntoCycleTimeKpi(i, environment))
                 .collect(Collectors.toList());
             Mockito.when(cycleTimeDataProvider.getDataSet(projectKey, kpiLevel, timezone)).thenReturn(cycleTimeKpis);
             return cycleTimeDataProvider;
         }
 
-        private CycleTimeKpi transformIntoCycleTimeKpi(IssueKpi issue, KpiEnvironment environment, ZoneId timezone) {
+        private CycleTimeKpi transformIntoCycleTimeKpi(IssueKpi issue, KpiEnvironment environment) {
             Map<KpiLevel, Set<String>> cycleStatusMap = environment.withKpiProperties().getCycleStatusMap();
             IssueColorService colorService = environment.services().issueColor().getService();
-            CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusMap, timezone, colorService);
+            CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusMap, colorService);
             return factory.create(issue);
         }
 

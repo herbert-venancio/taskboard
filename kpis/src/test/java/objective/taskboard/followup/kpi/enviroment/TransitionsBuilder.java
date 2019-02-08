@@ -16,22 +16,23 @@ import org.assertj.core.api.Assertions;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.DatedStatusTransition;
 import objective.taskboard.followup.kpi.StatusTransition;
+import objective.taskboard.followup.kpi.ZonedWorklog;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.StatusDto;
 
 public class TransitionsBuilder {
 
     private TransitionDto firstTransition;
     private IssueKpiMocker kpiMocker;
-    private final KpiEnvironment fatherEnvironment;
+    private final KpiEnvironment parentEnvironment;
     private Optional<TransitionDto> lastTransitionWithDate = Optional.empty();
 
     public TransitionsBuilder(KpiEnvironment fatherEnvironment) {
-        this.fatherEnvironment = fatherEnvironment;
+        this.parentEnvironment = fatherEnvironment;
     }
 
     public TransitionsBuilder(IssueKpiMocker kpiMocker) {
         this.kpiMocker = kpiMocker;
-        this.fatherEnvironment = kpiMocker.fatherEnvironment;
+        this.parentEnvironment = kpiMocker.parentEnvironment;
     }
 
     public TransitionDto status(String step) {
@@ -40,7 +41,7 @@ public class TransitionsBuilder {
         return transition;
     }
 
-    private void put(Worklog worklog, String step) {
+    private void put(ZonedWorklog worklog, String step) {
         TransitionDto transition = firstTransition;
         while (transition != null) {
             if (step.equals(transition.status.name()))
@@ -68,7 +69,7 @@ public class TransitionsBuilder {
     }
 
     public KpiEnvironment eoSt() {
-        return fatherEnvironment;
+        return parentEnvironment;
     }
     public Optional<StatusTransition> getFirstStatusTransition() {
         if (firstTransition == null)
@@ -109,10 +110,10 @@ public class TransitionsBuilder {
         private StatusDto status;
         private Optional<ZonedDateTime> date = Optional.empty();
         private Optional<TransitionDto> next = Optional.empty();
-        private List<Worklog> worklogs = new LinkedList<>();
+        private List<ZonedWorklog> worklogs = new LinkedList<>();
 
         private TransitionDto(String name) {
-            this.status = fatherEnvironment.getStatus(name);
+            this.status = parentEnvironment.getStatus(name);
         }
 
         private void setNext(TransitionDto last) {
@@ -144,7 +145,7 @@ public class TransitionsBuilder {
             return Optional.of(chain);
         }
 
-        public TransitionsBuilder addWorklog(Worklog worklog) {
+        public TransitionsBuilder addWorklog(ZonedWorklog worklog) {
             this.worklogs.add(worklog);
             return TransitionsBuilder.this;
         }
@@ -203,7 +204,8 @@ public class TransitionsBuilder {
         private void registerWorklog() {
             Assertions.assertThat(date).as("Date can't be null").isNotNull();
             Assertions.assertThat(status).as("Status can't be null").isNotNull();
-            TransitionsBuilder.this.put(new Worklog("a.developer", parseStringToDate(date), timeSpentInSeconds),status);
+            ZonedWorklog zonedWorklog = new ZonedWorklog(new Worklog("a.developer", parseStringToDate(date), timeSpentInSeconds), parentEnvironment.getTimezone());
+            TransitionsBuilder.this.put(zonedWorklog,status);
         }
     }
 }

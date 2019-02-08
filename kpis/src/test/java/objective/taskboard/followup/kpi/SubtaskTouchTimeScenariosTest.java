@@ -2,9 +2,11 @@ package objective.taskboard.followup.kpi;
 
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 
+import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -99,7 +101,7 @@ public class SubtaskTouchTimeScenariosTest {
             .status("Review").hasTotalEffortInSeconds(0l)
             .status("Done").hasTotalEffortInSeconds(0l);
     }
-    
+
     @Test
     public void straightToReview() {
         dsl()
@@ -120,7 +122,7 @@ public class SubtaskTouchTimeScenariosTest {
             .status("Review").hasTotalEffortInSeconds(2100l)
             .status("Done").hasTotalEffortInSeconds(0l);
     }
-    
+
     @Test
     public void issueClosed_doingAndReviewAtTheSameDay() {
         dsl()
@@ -141,7 +143,7 @@ public class SubtaskTouchTimeScenariosTest {
             .status("Review").hasTotalEffortInSeconds(2000l)
             .status("Done").hasTotalEffortInSeconds(0l);
     }
-    
+
     @Test
     public void worklogBeforeOpen() {
         dsl()
@@ -188,7 +190,7 @@ public class SubtaskTouchTimeScenariosTest {
             .status("Done").hasTotalEffortInSeconds(0l);
     }
 
-    
+
     @Test
     public void whenWronglyConfigured_doesNotAddWorklog() {
         new DSLKpi()
@@ -222,27 +224,32 @@ public class SubtaskTouchTimeScenariosTest {
             .eoS();
         return dsl;
     }
-    
+
     private WorklogDistributor worklogDistributions() {
         return new WorklogDistributor();
     }
-    
+
     private class WorklogDistributor implements DSLSimpleBehaviorWithAsserter<StatusTransitionAsserter>{
-        
+
         private StatusTransitionAsserter asserter;
-        private List<Worklog> worklogs = new LinkedList<>();
+        private List<ZonedWorklog> worklogs = new LinkedList<>();
         private SubtaskWorklogDistributor distributor = new SubtaskWorklogDistributor();
-        
+        private ZoneId timezone = ZoneId.systemDefault();
+
         private WorklogDistributor withDefaultWorklogs() {
+            List<Worklog> worklogs = new LinkedList<>();
             worklogs.add(new Worklog("a.developer", parseStringToDate("2020-01-01"), 100));
             worklogs.add(new Worklog("a.developer", parseStringToDate("2020-01-02"), 200));
             worklogs.add(new Worklog("a.developer", parseStringToDate("2020-01-03"), 300));
             worklogs.add(new Worklog("a.developer", parseStringToDate("2020-01-04"), 400));
             worklogs.add(new Worklog("a.developer", parseStringToDate("2020-01-05"), 500));
             worklogs.add(new Worklog("a.developer", parseStringToDate("2020-01-06"), 600));
+            this.worklogs = worklogs.stream()
+                    .map(w -> new ZonedWorklog(w, timezone))
+                    .collect(Collectors.toList());
             return this;
         }
-               
+
         public WorklogBuilder withWorklogAt(String date) {
             return new WorklogBuilder(date);
         }
@@ -252,9 +259,9 @@ public class SubtaskTouchTimeScenariosTest {
             Optional<StatusTransition> status = environment.statusTransition().getFirstStatusTransition();
             Assertions.assertThat(status).as("Status not configured").isPresent();
             configureWorklogs(status.get());
-            asserter = new StatusTransitionAsserter(environment.getTimezone(), status);
+            asserter = new StatusTransitionAsserter(timezone, status);
         }
-        
+
         private void configureWorklogs(StatusTransition status) {
             worklogs.stream().forEach(w -> distributor.findStatus(status, w).ifPresent(s -> s.putWorklog(w)));
         }
@@ -263,7 +270,7 @@ public class SubtaskTouchTimeScenariosTest {
         public StatusTransitionAsserter then() {
             return asserter;
         }
-        
+
         private class WorklogBuilder {
             private String date;
 
@@ -272,10 +279,10 @@ public class SubtaskTouchTimeScenariosTest {
             }
 
             public WorklogDistributor withValue(int value) {
-                worklogs.add(new Worklog("a.developer", parseStringToDate(date), value));
+                worklogs.add(new ZonedWorklog(new Worklog("an.author", parseStringToDate(date), value), timezone));
                 return WorklogDistributor.this;
             }
         }
-        
+
     }
 }

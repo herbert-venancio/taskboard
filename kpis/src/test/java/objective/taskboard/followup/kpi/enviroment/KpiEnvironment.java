@@ -188,9 +188,7 @@ public class KpiEnvironment {
 
     public LeadTimeKpi getLeadTimeKpi(String pKey) {
         IssueKpi kpi = kpiContext.getIssueKpi(pKey);
-        LeadTimeKpiFactory factory = new LeadTimeKpiFactory(
-                withKpiProperties().getLeadStatusMap(),
-                getTimezone());
+        LeadTimeKpiFactory factory = new LeadTimeKpiFactory(withKpiProperties().getLeadStatusMap());
         return factory.create(kpi);
     }
 

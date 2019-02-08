@@ -21,7 +21,6 @@ import org.apache.commons.lang3.Range;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 
-import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
 import objective.taskboard.utils.DateTimeUtils;
@@ -58,12 +57,12 @@ public class IssueKpiAsserter<T> {
     }
 
     public IssueKpiAsserter<T> hasCompletedCycle(String...statuses) {
-        assertThat(subject.hasCompletedCycle(new HashSet<>(asList(statuses)), environment.getTimezone())).isTrue();
+        assertThat(subject.hasCompletedCycle(new HashSet<>(asList(statuses)))).isTrue();
         return this;
     }
 
     public IssueKpiAsserter<T> hasNotCompletedCycle(String...statuses) {
-        assertThat(subject.hasCompletedCycle(new HashSet<>(asList(statuses)), environment.getTimezone())).isFalse();
+        assertThat(subject.hasCompletedCycle(new HashSet<>(asList(statuses)))).isFalse();
         return this;
     }
 
@@ -98,7 +97,7 @@ public class IssueKpiAsserter<T> {
     }
 
     public class SubtaskChecker {
-        private List<Worklog> childrenWorklogs;
+        private List<ZonedWorklog> childrenWorklogs;
 
         public SubtaskChecker(IssueTypeDTO type) {
             this.childrenWorklogs = subject.getWorklogFromChildrenTypeId(type.id());
@@ -114,7 +113,8 @@ public class IssueKpiAsserter<T> {
         }
 
         public SubtaskChecker withTotalValue(int totalExpected) {
-            Integer totalEffort = childrenWorklogs.stream().map(w -> w.timeSpentSeconds).reduce(Integer::sum).orElse(0);
+            Integer totalEffort = childrenWorklogs.stream()
+                    .map(ZonedWorklog::getTimeSpentSeconds).reduce(Integer::sum).orElse(0);
             assertThat(totalEffort,is(totalExpected));
             return this;
         }

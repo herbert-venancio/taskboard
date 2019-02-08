@@ -1,17 +1,12 @@
 package objective.taskboard.followup.kpi;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import objective.taskboard.data.Worklog;
-import objective.taskboard.utils.DateTimeUtils;
 
 public class DatedStatusTransition extends StatusTransition {
 
@@ -45,12 +40,12 @@ public class DatedStatusTransition extends StatusTransition {
     }
 
     @Override
-    public Optional<ZonedDateTime> getEnterDate(ZoneId timezone) {
+    public Optional<ZonedDateTime> getEnterDate() {
         if (enterDate.isPresent()) {
             return enterDate;
         }
-        Optional<ZonedDateTime> minWorklogsDate = minimumDateFromWorklogs(timezone);
-        Optional<ZonedDateTime> minNextWorklogsDate = minimumDateFromNextWorklogs(timezone);
+        Optional<ZonedDateTime> minWorklogsDate = minimumDateFromWorklogs();
+        Optional<ZonedDateTime> minNextWorklogsDate = minimumDateFromNextWorklogs();
         Optional<ZonedDateTime> minWorklogDate = min(minWorklogsDate, minNextWorklogsDate);
         enterDate = min(Optional.of(this.date.truncatedTo(ChronoUnit.DAYS)), minWorklogDate);
         return enterDate;
@@ -60,16 +55,12 @@ public class DatedStatusTransition extends StatusTransition {
         return date;
     }
 
-    protected boolean isOnDate(Worklog worklog) {
+    protected boolean isOnDate(ZonedWorklog worklog) {
         return isSameDate(worklog) || dateIsBefore(worklog);
     }
 
-    private boolean isSameDate(Worklog worklog) {
-        ZonedDateTime worklogZonedDateTime = DateTimeUtils.get(worklog.started, date.getZone());
-        if (worklogZonedDateTime == null)
-            return false;
-
-        LocalDate worklogDate = worklogZonedDateTime.toLocalDate();
+    private boolean isSameDate(ZonedWorklog worklog) {
+        LocalDate worklogDate = worklog.getStarted().toLocalDate();
         return worklogDate.equals(date.toLocalDate());
     }
 
@@ -83,7 +74,7 @@ public class DatedStatusTransition extends StatusTransition {
     }
 
     @Override
-    boolean hasAnyNextThatReceivesWorklog(Worklog worklog) {
+    boolean hasAnyNextThatReceivesWorklog(ZonedWorklog worklog) {
         if (!isSameDate(worklog))
             return super.hasAnyNextThatReceivesWorklog(worklog);
 
@@ -95,7 +86,7 @@ public class DatedStatusTransition extends StatusTransition {
         return !nextWithSameDateDontReceive && super.hasAnyNextThatReceivesWorklog(worklog);
     }
 
-    private boolean hasNextDatedStatusThatCanReceiveWorklog(Worklog worklog) {
+    private boolean hasNextDatedStatusThatCanReceiveWorklog(ZonedWorklog worklog) {
         Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
         return nextWithDate.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, true)).orElse(false);
     }
@@ -106,31 +97,25 @@ public class DatedStatusTransition extends StatusTransition {
     }
 
     @Override
-    public Optional<LocalDate> firstDateOnProgressing(ZoneId timezone) {
+    public Optional<LocalDate> firstDateOnProgressing() {
         if (!this.isProgressingStatus)
-            return super.firstDateOnProgressing(timezone);
+            return super.firstDateOnProgressing();
 
         ZonedDateTime currentDate = this.date;
-        List<LocalDate> allDates = collectAllDates(currentDate.getZone());
+        List<LocalDate> allDates = collectAllDates();
         allDates.add(currentDate.toLocalDate());
         return allDates.stream().min(Comparator.naturalOrder());
     }
 
-    private List<LocalDate> collectAllDates(ZoneId timezone) {
+    private List<LocalDate> collectAllDates() {
         return this.getWorklogs().stream()
-                .map(w -> DateTimeUtils.get(w.started, timezone))
-                .map(d -> d.toLocalDate())
-                .filter(Objects::nonNull)
+                .map(ZonedWorklog::getStarted)
+                .map(ZonedDateTime::toLocalDate)
                 .collect(Collectors.toList());
     }
 
-    public boolean dateIsBefore(Worklog worklog) {
-        ZonedDateTime worklogZonedDateTime = DateTimeUtils.get(worklog.started, date.getZone());
-        if (worklogZonedDateTime == null)
-            return false;
-
-        LocalDate worklogDate = worklogZonedDateTime.toLocalDate();
-
+    public boolean dateIsBefore(ZonedWorklog worklog) {
+        LocalDate worklogDate = worklog.getStarted().toLocalDate();
         return worklogDate.isAfter(date.toLocalDate());
     }
 

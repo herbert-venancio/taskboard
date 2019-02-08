@@ -74,7 +74,6 @@ public class DSLKpi {
             IssueKpi kpi = getIssueKpi(pkey);
             CycleTimeKpiFactory cycleTimeKpiFactory = new CycleTimeKpiFactory(
                     environment.withKpiProperties().getCycleStatusMap(),
-                    environment.getTimezone(),
                     environment.services().issueColor().getService());
             CycleTimeKpi cKpi = cycleTimeKpiFactory.create(kpi);
             return new CycleTimeKpiAsserter<DSLKpi.AsserterFactory>(cKpi, this);

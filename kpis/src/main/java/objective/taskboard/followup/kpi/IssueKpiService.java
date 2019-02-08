@@ -57,11 +57,10 @@ public class IssueKpiService {
 
         List<IssueKpiDataItemAdapter> items = factory.getItems(issuesVisibleToUser,timezone);
         List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties, clock)
-
                                         .withItems(items)
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()
-                                        .settingWorklog()
+                                        .settingWorklogWithTimezone(timezone)
                                         .filter(new TouchTimeFilter(timezone, range))
                                         .transform();
 

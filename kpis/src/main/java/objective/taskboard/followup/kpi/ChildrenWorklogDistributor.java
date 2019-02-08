@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 
@@ -12,7 +11,7 @@ public class ChildrenWorklogDistributor {
 
     private IssueTypeChildrenStatusHierarchy hierarchies;
     private IssueKpi issueKpi;
-    private Set<Worklog> worklogsAlreadyDistributed = new HashSet<>();
+    private Set<ZonedWorklog> worklogsAlreadyDistributed = new HashSet<>();
 
     public static void distributeWorklogs(IssueTypeChildrenStatusHierarchy hierarchies, IssueKpi issueKpi) {
         new ChildrenWorklogDistributor(hierarchies, issueKpi).distributeWorklogs();
@@ -38,8 +37,8 @@ public class ChildrenWorklogDistributor {
 
     private void distributeWorklogsFromChildrenTypeIds(StatusTransition statusTransition, List<Long> childrenTypeIds) {
         for (long childTypeId : childrenTypeIds) {
-            List<Worklog> worklogs = issueKpi.getWorklogFromChildrenTypeId(childTypeId);
-            for (Worklog worklog : worklogs) {
+            List<ZonedWorklog> worklogs = issueKpi.getWorklogFromChildrenTypeId(childTypeId);
+            for (ZonedWorklog worklog : worklogs) {
                 statusTransition.putWorklog(worklog);
                 worklogsAlreadyDistributed.add(worklog);
             }
@@ -48,8 +47,8 @@ public class ChildrenWorklogDistributor {
 
     private void distributeWorklogsFromChildrenStatus(StatusTransition statusTransition, List<String> childrenStatuses) {
         for (String childStatus : childrenStatuses) {
-            List<Worklog> worklogs = issueKpi.getWorklogFromChildrenStatus(childStatus);
-            for (Worklog worklog : worklogs) {
+            List<ZonedWorklog> worklogs = issueKpi.getWorklogFromChildrenStatus(childStatus);
+            for (ZonedWorklog worklog : worklogs) {
                 if (!worklogsAlreadyDistributed.contains(worklog)) {
                     statusTransition.putWorklog(worklog);
                 }
