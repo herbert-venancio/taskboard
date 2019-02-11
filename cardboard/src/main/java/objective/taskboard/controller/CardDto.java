@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializ
 import com.google.common.base.Objects;
 
 import objective.taskboard.data.Changelog;
+import objective.taskboard.data.Comment;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Issue.CardTeam;
@@ -36,7 +37,7 @@ public class CardDto {
 
     public long created;
     public String description;
-    public String comments;
+    public List<Comment> comments;
     public List<String> labels;
     public List<String> components;
     public boolean blocked;

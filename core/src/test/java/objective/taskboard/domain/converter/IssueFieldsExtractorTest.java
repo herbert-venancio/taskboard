@@ -20,22 +20,29 @@
  */
 package objective.taskboard.domain.converter;
 
+
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
+
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,31 +50,31 @@ import java.util.Map;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import objective.taskboard.data.Comment;
+import objective.taskboard.data.CustomField;
 import objective.taskboard.jira.client.JiraCommentDto;
+import objective.taskboard.jira.client.JiraCommentResultSetDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraProjectDto;
+import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.jira.properties.JiraProperties.CustomField;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.ClassOfServiceDetails;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
-import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDetails;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueFieldsExtractorTest {
@@ -108,27 +115,27 @@ public class IssueFieldsExtractorTest {
     @Mock
     private JiraProperties jiraProperties;
     @Mock
-    private CustomField customField;
+    private JiraProperties.CustomField customField;
     @Mock
-    private CustomFieldDetails coAssigneesDetails;
+    private JiraProperties.CustomField.CustomFieldDetails coAssigneesDetails;
     @Mock
-    private Blocked blocked;
+    private JiraProperties.CustomField.Blocked blocked;
     @Mock
-    private TShirtSize tShirtSize;
+    private JiraProperties.CustomField.TShirtSize tShirtSize;
     @Mock
-    private CustomFieldDetails lastBlockReason;
+    private JiraProperties.CustomField.CustomFieldDetails lastBlockReason;
     @Mock
-    private CustomFieldDetails additionalEstimatedHours;
+    private JiraProperties.CustomField.CustomFieldDetails additionalEstimatedHours;
     @Mock
-    private CustomFieldDetails release;
+    private JiraProperties.CustomField.CustomFieldDetails release;
     @Mock
-    private ClassOfServiceDetails classOfServiceDetails;
+    private JiraProperties.CustomField.ClassOfServiceDetails classOfServiceDetails;
     @Mock
     private objective.taskboard.jira.properties.JiraProperties.IssueLink issueLinkProperty;
     @Mock
     private objective.taskboard.jira.properties.JiraProperties.IssueType issueTypeProperty;
     @Mock
-    private IssueTypeDetails issueTypeDetails;
+    private JiraProperties.IssueType.IssueTypeDetails issueTypeDetails;
     @Mock
     private JiraIssueTypeDto issueType;
     @Mock
@@ -136,13 +143,15 @@ public class IssueFieldsExtractorTest {
     @Mock
     private JiraIssueLinkTypeDto issueLinkType;
     @Mock
-    private JiraCommentDto comment;
-    @Mock
     private Logger log;
     @Mock
     private JiraComponentDto basicComponent;
     @Mock
     private JiraProjectDto basicProject;
+    @Mock
+    private JiraCommentResultSetDto commentsDto;
+    private List<JiraCommentDto> comments = new ArrayList<>();
+
 
     private void mockIssueField(String fieldId, Object fieldValue) {
         when(issue.getField(fieldId)).thenReturn(fieldValue);
@@ -184,6 +193,9 @@ public class IssueFieldsExtractorTest {
 
         when(issue.getIssueType()).thenReturn(issueType);
         when(issue.getProject()).thenReturn(basicProject);
+        when(issue.getComments()).thenReturn(commentsDto);
+
+        commentsDto.comments = comments;
 
         when(issueLink.getTargetIssueKey()).thenCallRealMethod();
     }
@@ -420,7 +432,7 @@ public class IssueFieldsExtractorTest {
         mockIssueField(T_SHIRT_SIZE_ID1, jsonTShirtSize);
         mockIssueField(T_SHIRT_SIZE_ID2, jsonTShirtSize);
 
-        Map<String, objective.taskboard.data.CustomField> tShirtSizes = IssueFieldsExtractor.extractTShirtSizes(jiraProperties, issue);
+        Map<String, CustomField> tShirtSizes = IssueFieldsExtractor.extractTShirtSizes(jiraProperties, issue);
         assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 2, tShirtSizes.size());
         assertEquals("T-Shirt size 1 value", "M", tShirtSizes.get(T_SHIRT_SIZE_ID1).getValue());
         assertEquals("T-Shirt size 2 value", "M", tShirtSizes.get(T_SHIRT_SIZE_ID2).getValue());
@@ -456,12 +468,27 @@ public class IssueFieldsExtractorTest {
 
     @Test
     public void extractCommentsValid() {
-        when(comment.toString()).thenReturn("Comment");
-        when(issue.getComments()).thenReturn(asList(comment));
+        URI uri;
 
-        List<String> comments = IssueFieldsExtractor.extractComments(issue);
+        try{
+            uri = new URI("http://example");
+        } catch (URISyntaxException ex) {
+            uri = null; //NOSONAR
+        }
+
+        JiraCommentDto comment = new JiraCommentDto();
+        JiraUserDto user = mock(JiraUserDto.class);
+        when(user.getDisplayName()).thenReturn("user");
+        when(user.getAvatarUri(anyString())).thenReturn(uri);
+        comment.author = user;
+        comment.body = "Comment";
+        comment.created = new Date();
+
+        comments.add(comment);
+
+        List<Comment> comments = IssueFieldsExtractor.extractComments(issue);
         assertEquals(MSG_COMMENTS_QUANTITY, 1, comments.size());
-        assertEquals("Comment", "Comment", comments.get(0));
+        assertEquals("Comment", "Comment", comments.get(0).body);
     }
 
     @Test

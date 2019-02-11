@@ -21,16 +21,18 @@
 package objective.taskboard.domain.converter;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+
 import static objective.taskboard.domain.converter.FieldValueExtractor.extractExtraFieldValue;
 import static objective.taskboard.domain.converter.FieldValueExtractor.from;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.hibernate.validator.internal.util.CollectionHelper.newArrayList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.LinkedList;
@@ -44,10 +46,10 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import objective.taskboard.data.Changelog;
+import objective.taskboard.data.Comment;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.jira.FieldMetadataService;
-import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraFieldDataDto;
 import objective.taskboard.jira.client.JiraIssueDto;
@@ -129,7 +131,7 @@ public class IssueFieldsExtractor {
         return coAssignees;
     }
 
-    public static CustomField extractClassOfService(JiraProperties jiraProperties,JiraIssueDto issue) {
+    public static CustomField extractClassOfService(JiraProperties jiraProperties, JiraIssueDto issue) {
         String fieldId = jiraProperties.getCustomfield().getClassOfService().getId();
         JSONObject json = issue.getField(fieldId);
 
@@ -211,13 +213,10 @@ public class IssueFieldsExtractor {
         }
     }
 
-    public  static List<String> extractComments(JiraIssueDto issue) {
-        if (issue.getComments() == null)
-            return newArrayList();
-
-        return issue.getComments().stream()
-               .map(JiraCommentDto::toString)
-               .collect(toList());
+    public  static List<Comment> extractComments(JiraIssueDto issue) {
+        return issue.getComments().comments.stream()
+                .map(Comment::from)
+                .collect(Collectors.toList());
     }
 
     public  static List<String> extractDependenciesIssues(JiraProperties jiraProperties, JiraIssueDto issue) {
@@ -228,8 +227,8 @@ public class IssueFieldsExtractor {
         
         return issue.getIssueLinks().stream()
                 .filter(link ->{
-					return dependencies.contains(link.getIssueLinkType().getName()) && link.getIssueLinkType().getDirection() == JiraIssueLinkTypeDto.Direction.OUTBOUND;
-				})
+                    return dependencies.contains(link.getIssueLinkType().getName()) && link.getIssueLinkType().getDirection() == JiraIssueLinkTypeDto.Direction.OUTBOUND;
+                })
                 .map(link -> link.getTargetIssueKey())
                 .collect(toList());
     }

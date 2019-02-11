@@ -160,6 +160,7 @@ public class JiraCreateIssue {
         public static final FieldSchemaType issuetype = valueOf("issuetype", remap(JiraIssueTypeDto.class));
         public static final FieldSchemaType issuelink = valueOf("issuelink", remap(JiraLinkDto.class));
         public static final FieldSchemaType version = valueOf("version", remap(Version.class));
+        public static final FieldSchemaType comment = valueOf("comment", remap(JiraCommentResultSetDto.class));
         public static final FieldSchemaType timetracking = valueOf("timetracking");
         public static final FieldSchemaType any = valueOf("any");
 

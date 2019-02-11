@@ -1,0 +1,114 @@
+<dom-module id="issue-detail-comments">
+    <template>
+        <style>
+
+            :host {
+                display: block;
+                width: 100%;
+            }
+
+            .comment-panel {
+                margin-top: 16px;
+            }
+
+            .comment-panel:first-child {
+                margin-top: 0;
+            }
+
+            .comment-header {
+                display: flex;
+                align-items: center;
+            }
+
+            .comment-author {
+                display: flex;
+                align-items: center;
+            }
+
+            .comment-avatar {
+                width: 32px;
+                height: 32px;
+                overflow: hidden;
+                color: #ccc;
+                background-color: #ccc;
+                margin-right: 8px;
+                border-radius: 50%;
+            }
+
+            .author-name {
+                margin: 0;
+                font-weight: normal;
+                font-size: 14px;
+            }
+
+            .comment-time-since {
+                margin-left: auto;
+                border-radius: 5px;
+                background-color: #8E8E8E;
+                height: 16px;
+                line-height: 16px;
+                font-size: 12px;
+                color: white;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .comment-body {
+                margin-top: 8px;
+                font-size: 14px;
+            }
+
+            marked-element {
+                margin-left: 8px;
+                margin-right: 8px;
+                word-break: break-all;
+            }
+
+        </style>
+
+        <div class="comments--panel comments-content">
+            <template is="dom-repeat" items="{{item.comments}}" as="comment">
+                <div class="comment-panel">
+                    <div class="comment-header">
+                        <div class="comment-author">
+                            <img class="comment-avatar" src$="[[comment.avatar]]" alt$="[[comment.author]]"/>
+                            <h5 class="author-name">[[comment.author]]</h5>
+                        </div>
+                        <div class="comment-time-since">
+                            [[_formatCreatedDate(comment.created)]]
+                        </div>
+                    </div>
+                    <div class="comment-body description-box" >
+                        <marked-element markdown="[[_formatCommentBody(comment.body)]]"></marked-element>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'issue-detail-comments',
+
+                properties: {
+                    item: {
+                        notify: true
+                    },
+                    selected: {
+                        type: Number,
+                        value: 0
+                    }
+                },
+
+                _formatCreatedDate: (created) =>  {
+                    return new Date(created).toLocaleDateString();
+                },
+
+                _formatCommentBody: (body) => {
+                    return jira2md.to_markdown(body);
+                }
+            });
+        })();
+    </script>
+</dom-module>

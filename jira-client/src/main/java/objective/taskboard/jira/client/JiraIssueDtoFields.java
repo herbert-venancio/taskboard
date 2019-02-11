@@ -44,6 +44,7 @@ public class JiraIssueDtoFields {
     public JiraUserDto assignee;
 
     public JiraWorklogResultSetDto worklog;
+    public JiraCommentResultSetDto comment;
 
     private Map<String, JiraIssueDto.JSONObjectAdapter> other = new HashMap<>();
 

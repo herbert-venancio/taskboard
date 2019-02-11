@@ -82,7 +82,7 @@ public class JiraSearchService {
             "parent", "project", "status", "created", "updated", "issuelinks",
             "issuetype", "summary", "description", "name", "assignee", "reporter", 
             "priority", "labels", "components", "timetracking",
-            "worklog", "fixVersions",
+            "worklog", "fixVersions", "comment"
             properties.getCustomfield().getClassOfService().getId(),
             properties.getCustomfield().getCoAssignees().getId(),
             properties.getCustomfield().getBlocked().getId(),

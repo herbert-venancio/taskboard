@@ -367,7 +367,8 @@ issue-detail .content-box {
      display:flex;
  }
 
- issue-detail .wrapper-edit iron-icon {
+
+issue-detail .wrapper-edit iron-icon {
      cursor:pointer;
      color:#8e8e8e;
      width:12px;

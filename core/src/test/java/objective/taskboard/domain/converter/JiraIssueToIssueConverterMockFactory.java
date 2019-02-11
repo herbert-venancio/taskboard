@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -78,7 +79,7 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
                     jiraIssue.getCreationDate().getMillis(),
                     jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate(),
                     defaultIfNull(jiraIssue.getDescription(), ""),
-                    "",
+                    Collections.emptyList(),
                     extractLabels(jiraIssue),
                     extractComponents(jiraIssue),
                     false,

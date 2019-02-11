@@ -32,7 +32,7 @@ public class IssueScratch implements Serializable {
 
     protected long created;
     protected String description;
-    protected String comments;
+
     protected List<String> labels;       //NOSONAR
     protected List<String> components;   //NOSONAR
     protected boolean blocked;
@@ -50,6 +50,8 @@ public class IssueScratch implements Serializable {
     protected CustomField classOfService;
     @JsonIgnore
     protected List<Worklog> worklogs; //NOSONAR
+
+    protected List<Comment> comments; //NOSONAR
     @JsonIgnore
     protected List<Long> assignedTeamsIds = new LinkedList<>();//NOSONAR
 
@@ -78,7 +80,7 @@ public class IssueScratch implements Serializable {
             long created,
             Date remoteIssueUpdatedDate,
             String description,
-            String comments,
+            List<Comment> comments,
             List<String> labels,
             List<String> components,
             boolean blocked,
