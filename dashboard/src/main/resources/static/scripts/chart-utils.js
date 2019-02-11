@@ -731,21 +731,21 @@ class CycleTimeChartBuilder extends ScatterChartBuilder {
                 const cycleHtml = [];
                 this.extraData.subCycles.forEach((subcycle) => {
                     if (subcycle.duration > 0) {
-                        cycleHtml.push('<div class="highcharts-tooltip-item">');
-                        cycleHtml.push(`<div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status" style="background-color: ${subcycle.color}">${subcycle.status}</div>`);
-                        cycleHtml.push(`<div class="highcharts-tooltip-item__value">${subcycle.duration} days</div>`);
-                        cycleHtml.push('</div>');
+                        cycleHtml.push(`<div class="highcharts-tooltip-item">
+                            <div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status" style="background-color: ${subcycle.color}">${subcycle.status}</div>
+                            <div class="highcharts-tooltip-item__value">${subcycle.duration} days</div>
+                        </div>`);
                     }
                 });
-                cycleHtml.push('<div class="highcharts-tooltip-item">');
-                cycleHtml.push('<div class="highcharts-tooltip-item__label">Conclusion Date:</div>');
-                cycleHtml.push(`<div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>`);
-                cycleHtml.push('</div>');
+                cycleHtml.push(`<div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Conclusion Date:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>
+                </div>`);
                 return cycleHtml.join('\n');
             }
         });
         super.withTooltipFooterLabel('Total Cycle Time:');
-        super.withTooltipFooterValue('{point.y}');
+        super.withTooltipFooterValue('{point.y} days');
     }
 }
 
@@ -754,20 +754,18 @@ class LeadTimeChartBuilder extends ScatterChartBuilder {
         super(divID);
         Highcharts.merge(true, this.options.tooltip, {
             pointFormatter: function () {
-                const leadHtml = [];
-                leadHtml.push('<div class="highcharts-tooltip-item">');
-                leadHtml.push('<div class="highcharts-tooltip-item__label">Enter Date:</div>');
-                leadHtml.push(`<div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.enterDate.toDateString()}</div>`);
-                leadHtml.push('</div>');
-                leadHtml.push('<div class="highcharts-tooltip-item">');
-                leadHtml.push('<div class="highcharts-tooltip-item__label">Conclusion Date:</div>');
-                leadHtml.push(`<div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>`);
-                leadHtml.push('</div>');
-                return leadHtml.join('\n');
+                return `<div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Enter Date:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.enterDate.toDateString()}</div>
+                </div>
+                <div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Conclusion Date:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>
+                </div>`;
             }
         });
         super.withTooltipFooterLabel('Total Lead Time:');
-        super.withTooltipFooterValue('{point.y}');
+        super.withTooltipFooterValue('{point.y} days');
     }
 }
 

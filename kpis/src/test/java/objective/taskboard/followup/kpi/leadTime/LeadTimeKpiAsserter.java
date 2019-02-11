@@ -1,13 +1,11 @@
 package objective.taskboard.followup.kpi.leadTime;
 
-import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-
 import java.time.Instant;
 
 import org.assertj.core.api.Assertions;
 
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
+import objective.taskboard.utils.DateTimeUtils;
 
 public class LeadTimeKpiAsserter<T> {
     private LeadTimeKpi subject;
@@ -48,7 +46,7 @@ public class LeadTimeKpiAsserter<T> {
     }
 
     private Instant parseInstant(String date) {
-        return parseDateTime(date, "00:00:00", determineTimeZoneId("America/Sao_Paulo")).toInstant();
+        return DateTimeUtils.parseDateTime(date, "00:00:00", "America/Sao_Paulo").toInstant();
     }
 
 }

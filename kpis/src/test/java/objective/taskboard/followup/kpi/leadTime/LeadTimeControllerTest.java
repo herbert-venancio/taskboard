@@ -1,7 +1,5 @@
 package objective.taskboard.followup.kpi.leadTime;
 
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -80,16 +78,16 @@ public class LeadTimeControllerTest {
                         + "\"issueKey\": \"I-1\","
                         + "\"issueType\": \"Backend Development\","
                         + "\"leadTime\": 6,"
-                        + "\"enterDate\": " + parseDateAsMillis("2020-01-01") + ","
-                        + "\"exitDate\": " + parseDateAsMillis("2020-01-06") + ","
+                        + "\"enterDate\": " + parseZonedDateAsMillis("2020-01-01", "America/Sao_Paulo") + ","
+                        + "\"exitDate\": " + parseZonedDateAsMillis("2020-01-06", "America/Sao_Paulo") + ","
                         + "\"lastStatus\": \"Done\""
                     + "},"
                     + "{"
                         + "\"issueKey\": \"I-2\","
                         + "\"issueType\": \"Alpha Bug\","
                         + "\"leadTime\": 6,"
-                        + "\"enterDate\": " + parseDateAsMillis("2020-01-02") + ","
-                        + "\"exitDate\": "+ parseDateAsMillis("2020-01-07") + ","
+                        + "\"enterDate\": " + parseZonedDateAsMillis("2020-01-02", "America/Sao_Paulo") + ","
+                        + "\"exitDate\": "+ parseZonedDateAsMillis("2020-01-07", "America/Sao_Paulo") + ","
                         + "\"lastStatus\": \"Cancelled\""
                     + "}"
                 + "]");
@@ -257,8 +255,8 @@ public class LeadTimeControllerTest {
         return new RequestDataBehaviorBuilder();
     }
 
-    private long parseDateAsMillis(String date) {
-        return parseDateTime(date, "00:00:00", "America/Sao_Paulo").toEpochSecond() * 1000;
+    private long parseZonedDateAsMillis(String date, String timezone) {
+        return DateTimeUtils.parseDateTime(date, "00:00:00", timezone).toEpochSecond() * 1000;
     }
 
     public class RequestDataBehaviorBuilder {

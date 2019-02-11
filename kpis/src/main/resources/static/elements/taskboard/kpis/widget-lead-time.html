@@ -21,7 +21,7 @@
                 <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
             </modal-wrap-content>
             <modal-wrap-footer>
-                <tb-button button=[[_btFilterClose]]></tb-button>
+                <tb-button button="[[_btFilterClose]]"></tb-button>
             </modal-wrap-footer>
         </modal-wrap>
 
@@ -52,22 +52,18 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true,
                         observer: '_onProjectSelected'
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
                         type: String,
-                        notify: true,
                         value: ''
                     },
                     chart: {
                         type: Object,
-                        notify: true,
                         value: null
                     },
                     tags: {
@@ -79,7 +75,6 @@
                     },
                     settingIssueLevel: {
                         type: String,
-                        notify: true,
                         value: 'Subtasks'
                     },
                     localStorageLevelItemName: {

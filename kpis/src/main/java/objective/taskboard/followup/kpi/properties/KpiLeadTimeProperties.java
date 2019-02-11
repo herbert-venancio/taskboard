@@ -1,21 +1,12 @@
 package objective.taskboard.followup.kpi.properties;
 
+import java.util.Collections;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
 public class KpiLeadTimeProperties {
-    @NotNull
-    @NotEmpty
-    public List<String> demands;
-    @NotNull
-    @NotEmpty
-    public List<String> features;
-    @NotNull
-    @NotEmpty
-    public List<String> subtasks;
+    private List<String> demands = Collections.emptyList();
+    private List<String> features = Collections.emptyList();
+    private List<String> subtasks = Collections.emptyList();
     public List<String> getDemands() {
         return demands;
     }

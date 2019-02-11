@@ -27,7 +27,7 @@ public class LeadTimeKpiDataProvider {
     @Autowired
     public LeadTimeKpiDataProvider(IssueKpiService issueKpiService, KPIProperties kpiProperties) {
         this.issueKpiService = issueKpiService;
-        initMap(kpiProperties.getLeadTime());
+        mapLeadPropertiesByLevel(kpiProperties.getLeadTime());
     }
 
     public List<LeadTimeKpi> getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
@@ -39,7 +39,7 @@ public class LeadTimeKpiDataProvider {
                 .collect(Collectors.toList());
     }
 
-    private void initMap(KpiLeadTimeProperties leadTimeProperties) {
+    private void mapLeadPropertiesByLevel(KpiLeadTimeProperties leadTimeProperties) {
         leadStatusesByLevel.put(KpiLevel.DEMAND, new HashSet<>(leadTimeProperties.getDemands()));
         leadStatusesByLevel.put(KpiLevel.FEATURES, new HashSet<>(leadTimeProperties.getFeatures()));
         leadStatusesByLevel.put(KpiLevel.SUBTASKS, new HashSet<>(leadTimeProperties.getSubtasks()));

@@ -40,7 +40,7 @@ public class KPIProperties {
     private KpiCycleTimeProperties cycleTime;
 
     @Valid
-    private KpiLeadTimeProperties leadTime;
+    private KpiLeadTimeProperties leadTime = new KpiLeadTimeProperties();
 
     public KpiLeadTimeProperties getLeadTime() {
         return leadTime;

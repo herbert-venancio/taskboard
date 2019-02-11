@@ -337,14 +337,14 @@ public class LeadTimeKpiTest {
     }
 
     private DSLSimpleBehavior generateLeadTimeKpiForIssue(String pKey) {
-      return new DSLSimpleBehavior() {
+        return new DSLSimpleBehavior() {
 
-          @Override
-        public void behave(KpiEnvironment environment) {
-            environment.getLeadTimeKpi(pKey);
-        }
+            @Override
+            public void behave(KpiEnvironment environment) {
+                environment.getLeadTimeKpi(pKey);
+            }
 
-    };
+        };
   }
 
     private DSLKpi dsl() {
