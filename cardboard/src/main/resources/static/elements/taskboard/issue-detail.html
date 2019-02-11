@@ -1007,15 +1007,12 @@
                                     </div>
                                 </template>
                             </div>
-
-                            <template is="dom-if" if="{{canHaveSubtasks}}">
-                                <issue-detail-tabs
-                                    item={{item}}
-                                    isOpen=[[isOpen]]
-                                    metadata={{issueMetadata}}
-                                    on-selected-card="changeCard"
-                                ></issue-detail-tabs>
-                            </template>
+                            <issue-detail-tabs
+                                item={{item}}
+                                isOpen=[[isOpen]]
+                                metadata={{issueMetadata}}
+                                on-selected-card="changeCard"
+                            ></issue-detail-tabs>
                         </div>
                         <div class="rightPanel">
                             <div class="subtitle">People</div>
