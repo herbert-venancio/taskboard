@@ -7,21 +7,20 @@
     <parent>
         <groupId>br.com.objective</groupId>
         <artifactId>kpi-parent</artifactId>
-        <version>0.0.80-SNAPSHOT</version>
+        <version>0.0.81-SNAPSHOT</version>
     </parent>
 
     <artifactId>kpi-testutils</artifactId>
-    <version>0.0.80-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <version>${taskboard.api.version}</version>
             <artifactId>followup-core</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <version>${taskboard.api.version}</version>
             <artifactId>kpis</artifactId>
         </dependency>
 
@@ -43,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <version>${taskboard.api.version}</version>
             <artifactId>test-support</artifactId>
         </dependency>
     </dependencies>

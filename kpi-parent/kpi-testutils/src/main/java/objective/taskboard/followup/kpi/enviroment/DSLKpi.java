@@ -12,11 +12,6 @@ import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiAsserter;
 import objective.taskboard.followup.kpi.StatusTransition;
 import objective.taskboard.followup.kpi.StatusTransitionAsserter;
-import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
-import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiAsserter;
-import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiFactory;
-import objective.taskboard.followup.kpi.leadTime.LeadTimeKpiAsserter;
-import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 
 public class DSLKpi {
 
