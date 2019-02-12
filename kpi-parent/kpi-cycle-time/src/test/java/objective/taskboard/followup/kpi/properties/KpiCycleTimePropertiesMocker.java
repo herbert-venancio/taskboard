@@ -25,7 +25,7 @@ public class KpiCycleTimePropertiesMocker implements KpiEnvironment.KpiPropertie
 
     public static KpiCycleTimePropertiesMocker withSubtaskCycleTimeProperties(String...statuses) {
         return new KpiCycleTimePropertiesMocker()
-                .addAll(statuses);
+                .addAll(KpiLevel.SUBTASKS, statuses);
     }
 
     @Override
@@ -44,8 +44,8 @@ public class KpiCycleTimePropertiesMocker implements KpiEnvironment.KpiPropertie
         return kpiProperties;
     }
 
-    private KpiCycleTimePropertiesMocker addAll(String...statuses) {
-        cycleTimeConfigurations.get(KpiLevel.SUBTASKS).addAll(asList(statuses));
+    private KpiCycleTimePropertiesMocker addAll(KpiLevel level, String...statuses) {
+        cycleTimeConfigurations.get(level).addAll(asList(statuses));
         return this;
     }
 

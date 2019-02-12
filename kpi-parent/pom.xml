@@ -26,6 +26,7 @@
         <module>kpi-budget-chart</module>
         <module>kpi-cfd</module>
         <module>kpi-cycle-time</module>
+        <module>kpi-lead-time</module>
         <module>kpi-planned-x-ballpark</module>
         <module>kpi-progress-chart</module>
         <module>kpi-scope-by-type</module>

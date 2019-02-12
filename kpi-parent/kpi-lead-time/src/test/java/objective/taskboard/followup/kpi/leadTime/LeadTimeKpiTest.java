@@ -1,10 +1,19 @@
 package objective.taskboard.followup.kpi.leadTime;
 
+import static objective.taskboard.followup.kpi.leadTime.LeadTimeKpiAsserter.leadTimeKpi;
+import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesMocker.withDemandLeadTimeProperties;
+import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesMocker.withFeatureLeadTimeProperties;
+import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesMocker.withSubtaskLeadTimeProperties;
+
 import org.junit.Test;
 
+import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
+import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 
 public class LeadTimeKpiTest {
 
@@ -24,12 +33,11 @@ public class LeadTimeKpiTest {
                    .status("Cancelled").noDate()
                .eoT()
            .eoI()
-           .withKpiProperties()
-               .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-           .eoKP()
+           .withKpiProperties(
+               withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+           )
        .then()
-           .assertThat()
-               .leadTimeKpi("I-1")
+           .assertThat(leadTimeKpi("I-1"))
                    .startsAt("2019-01-01")
                    .endsAt("2019-01-06")
                    .hasTotalLeadTime(6)
@@ -53,12 +61,11 @@ public class LeadTimeKpiTest {
                    .status("Cancelled").noDate()
                .eoT()
            .eoI()
-           .withKpiProperties()
-               .withFeatureLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-           .eoKP()
+           .withKpiProperties(
+               withFeatureLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+           )
        .then()
-           .assertThat()
-               .leadTimeKpi("I-1")
+           .assertThat(leadTimeKpi("I-1"))
                    .startsAt("2019-01-01")
                    .endsAt("2019-01-06")
                    .hasTotalLeadTime(6)
@@ -82,12 +89,11 @@ public class LeadTimeKpiTest {
                    .status("Cancelled").noDate()
                .eoT()
            .eoI()
-           .withKpiProperties()
-               .withDemandLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-           .eoKP()
+           .withKpiProperties(
+               withDemandLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+           )
        .then()
-           .assertThat()
-               .leadTimeKpi("I-1")
+           .assertThat(leadTimeKpi("I-1"))
                    .startsAt("2019-01-01")
                    .endsAt("2019-01-06")
                    .hasTotalLeadTime(6)
@@ -111,12 +117,11 @@ public class LeadTimeKpiTest {
                    .status("Cancelled").date("2019-01-06")
                .eoT()
            .eoI()
-           .withKpiProperties()
-               .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-           .eoKP()
+           .withKpiProperties(
+               withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+           )
        .then()
-           .assertThat()
-               .leadTimeKpi("I-1")
+           .assertThat(leadTimeKpi("I-1"))
                    .startsAt("2019-01-01")
                    .endsAt("2019-01-06")
                    .hasTotalLeadTime(6)
@@ -143,12 +148,11 @@ public class LeadTimeKpiTest {
                    .at("2019-01-03").timeSpentInHours(5.0)
                .eoW()
            .eoI()
-           .withKpiProperties()
-               .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-           .eoKP()
+           .withKpiProperties(
+               withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+           )
        .then()
-           .assertThat()
-               .leadTimeKpi("I-1")
+           .assertThat(leadTimeKpi("I-1"))
                    .startsAt("2019-01-01")
                    .endsAt("2019-01-06")
                    .hasTotalLeadTime(6)
@@ -175,12 +179,11 @@ public class LeadTimeKpiTest {
                     .at("2019-01-03").timeSpentInHours(1)
                 .eoW()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            )
         .then()
-            .assertThat()
-                .leadTimeKpi("I-1")
+            .assertThat(leadTimeKpi("I-1"))
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-06")
                     .hasTotalLeadTime(6)
@@ -204,9 +207,9 @@ public class LeadTimeKpiTest {
                     .status("Cancelled").noDate()
                 .eoT()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            )
         .when()
             .expectExceptionFromBehavior(generateLeadTimeKpiForIssue("I-1"))
         .then()
@@ -233,9 +236,9 @@ public class LeadTimeKpiTest {
                     .at("2019-01-03").timeSpentInHours(1)
                 .eoW()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            )
         .when()
             .expectExceptionFromBehavior(generateLeadTimeKpiForIssue("I-1"))
         .then()
@@ -259,12 +262,11 @@ public class LeadTimeKpiTest {
                     .status("Cancelled").noDate()
                 .eoT()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            )
         .then()
-            .assertThat()
-                .leadTimeKpi("I-1")
+            .assertThat(leadTimeKpi("I-1"))
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-01")
                     .hasTotalLeadTime(1)
@@ -291,12 +293,11 @@ public class LeadTimeKpiTest {
                     .at("2019-01-07").timeSpentInHours(5.0)
                 .eoW()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            )
         .then()
-            .assertThat()
-                .leadTimeKpi("I-1")
+            .assertThat(leadTimeKpi("I-1"))
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-07")
                     .hasTotalLeadTime(7)
@@ -323,12 +324,11 @@ public class LeadTimeKpiTest {
                     .at("2019-01-01").timeSpentInHours(5.0)
                 .eoW()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            )
         .then()
-            .assertThat()
-                .leadTimeKpi("I-1")
+            .assertThat(leadTimeKpi("I-1"))
                     .startsAt("2019-01-01")
                     .endsAt("2019-01-07")
                     .hasTotalLeadTime(7)
@@ -341,9 +341,13 @@ public class LeadTimeKpiTest {
 
             @Override
             public void behave(KpiEnvironment environment) {
-                environment.getLeadTimeKpi(pKey);
+                DSLKpi kpiContext = environment.then();
+                IssueKpi kpi = kpiContext.getIssueKpi(pKey);
+                LeadTimeKpiFactory factory = new LeadTimeKpiFactory(
+                        environment.getKPIProperties(KpiLeadTimeProperties.class).getLeadTime().toMap(),
+                        environment.getTimezone());
+                factory.create(kpi);
             }
-
         };
   }
 

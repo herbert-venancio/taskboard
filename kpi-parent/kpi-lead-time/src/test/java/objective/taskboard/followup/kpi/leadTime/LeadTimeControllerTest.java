@@ -1,5 +1,7 @@
 package objective.taskboard.followup.kpi.leadTime;
 
+import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesMocker.withSubtaskLeadTimeProperties;
+
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiController;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiDataProvider;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
+import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 import objective.taskboard.utils.DateTimeUtils;
@@ -245,9 +248,9 @@ public class LeadTimeControllerTest {
             .types()
                 .addSubtasks("Backend Development","Alpha Bug")
             .eoT()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
-            .eoKP();
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
+            );
         return dsl;
     }
 
@@ -353,7 +356,7 @@ public class LeadTimeControllerTest {
         }
 
         private LeadTimeKpi transformIntoLeadTimeKpi(IssueKpi issue, KpiEnvironment environment, ZoneId timezone) {
-            Map<KpiLevel, Set<String>> leadStatusMap = environment.withKpiProperties().getLeadStatusMap();
+            Map<KpiLevel, Set<String>> leadStatusMap = environment.getKPIProperties(KpiLeadTimeProperties.class).getLeadTime().toMap();
             LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusMap);
             return factory.create(issue);
         }

@@ -21,8 +21,6 @@ import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi.BehaviorFactory;
-import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
-import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -195,18 +193,11 @@ public class KpiEnvironment {
         return getAllIssueMockers().stream().map(IssueKpiMocker::buildAsAdapter).collect(Collectors.toList());
     }
 
-    public LeadTimeKpi getLeadTimeKpi(String pKey) {
-        IssueKpi kpi = kpiContext.getIssueKpi(pKey);
-        LeadTimeKpiFactory factory = new LeadTimeKpiFactory(withKpiProperties().getLeadStatusMap());
-        return factory.create(kpi);
-    }
-
     public List<Long> collectTypeIds(List<String> childrenTypes) {
         return typeRepository.types.values().stream()
                 .filter(type -> childrenTypes.contains(type.name))
                 .map(type -> type.id)
                 .collect(Collectors.toList());
-
     }
 
     public class IssueTypeRepository {

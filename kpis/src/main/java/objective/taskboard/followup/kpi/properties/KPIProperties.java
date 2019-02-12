@@ -30,17 +30,6 @@ public class KPIProperties {
     @Valid
     private List<String> progressingStatuses;
 
-    @Valid
-    private KpiLeadTimeProperties leadTime = new KpiLeadTimeProperties();
-
-    public KpiLeadTimeProperties getLeadTime() {
-        return leadTime;
-    }
-
-    public void setLeadTime(KpiLeadTimeProperties leadTime) {
-        this.leadTime = leadTime;
-    }
-
     public IssueTypeChildrenStatusHierarchy getFeaturesHierarchy() {
         return featuresHierarchy;
     }

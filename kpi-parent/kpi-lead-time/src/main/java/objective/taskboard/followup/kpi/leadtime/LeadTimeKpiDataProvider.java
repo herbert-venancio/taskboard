@@ -17,6 +17,7 @@ import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
+import objective.taskboard.followup.kpi.properties.LeadTimeProperties;
 
 @Service
 public class LeadTimeKpiDataProvider {
@@ -25,7 +26,7 @@ public class LeadTimeKpiDataProvider {
     private Map<KpiLevel, Set<String>> leadStatusesByLevel = new EnumMap<>(KpiLevel.class);
 
     @Autowired
-    public LeadTimeKpiDataProvider(IssueKpiService issueKpiService, KPIProperties kpiProperties) {
+    public LeadTimeKpiDataProvider(IssueKpiService issueKpiService, KpiLeadTimeProperties kpiProperties) {
         this.issueKpiService = issueKpiService;
         mapLeadPropertiesByLevel(kpiProperties.getLeadTime());
     }
@@ -39,7 +40,7 @@ public class LeadTimeKpiDataProvider {
                 .collect(Collectors.toList());
     }
 
-    private void mapLeadPropertiesByLevel(KpiLeadTimeProperties leadTimeProperties) {
+    private void mapLeadPropertiesByLevel(LeadTimeProperties leadTimeProperties) {
         leadStatusesByLevel.put(KpiLevel.DEMAND, new HashSet<>(leadTimeProperties.getDemands()));
         leadStatusesByLevel.put(KpiLevel.FEATURES, new HashSet<>(leadTimeProperties.getFeatures()));
         leadStatusesByLevel.put(KpiLevel.SUBTASKS, new HashSet<>(leadTimeProperties.getSubtasks()));

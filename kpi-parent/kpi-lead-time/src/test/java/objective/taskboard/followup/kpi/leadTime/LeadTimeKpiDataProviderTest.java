@@ -1,11 +1,13 @@
 package objective.taskboard.followup.kpi.leadTime;
 
+import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesMocker.withSubtaskLeadTimeProperties;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import objective.taskboard.followup.kpi.IssueKpiService;
@@ -16,6 +18,7 @@ import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiDataProvider;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 
 public class LeadTimeKpiDataProviderTest {
 
@@ -23,9 +26,9 @@ public class LeadTimeKpiDataProviderTest {
     public void getDataSet_happyPath() {
         dsl().environment()
             .todayIs("2019-01-08")
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
+            )
             .givenFeature("I-1")
                 .project("TASKB")
                 .type("Task")
@@ -117,9 +120,9 @@ public class LeadTimeKpiDataProviderTest {
     @Test
     public void getDataSet_whenNoIssues_thenEmptyDataSet() {
         dsl().environment()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
+            )
         .when()
             .appliesBehavior(generateDataSet("TASKB", KpiLevel.SUBTASKS))
         .then()
@@ -130,9 +133,9 @@ public class LeadTimeKpiDataProviderTest {
     public void getDataSet_whenNoIssuesForLevel_thenEmptyDataSet() {
         dsl().environment()
             .todayIs("2019-01-10")
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
+            )
             .givenDemand("I-1")
                 .project("TASKB")
                 .type("Demand")
@@ -156,9 +159,9 @@ public class LeadTimeKpiDataProviderTest {
     public void getDataSet_whenAllIssuesAreInProgress_thenEmptyDataSet() {
         dsl().environment()
             .todayIs("2019-01-10")
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Open", "To Do", "Doing", "To Review", "Reviewing")
+            )
             .givenDemand("I-1")
                 .project("TASKB")
                 .type("Demand")
@@ -195,9 +198,9 @@ public class LeadTimeKpiDataProviderTest {
                     .status("Cancelled").noDate()
                 .eoT()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties()
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties()
+            )
         .when()
             .appliesBehavior(generateDataSet("TASKB", KpiLevel.DEMAND))
         .then()
@@ -221,9 +224,9 @@ public class LeadTimeKpiDataProviderTest {
                     .status("Cancelled").noDate()
                 .eoT()
             .eoI()
-            .withKpiProperties()
-                .withSubtaskLeadTimeProperties("Foo")
-            .eoKP()
+            .withKpiProperties(
+                withSubtaskLeadTimeProperties("Foo")
+            )
         .when()
             .appliesBehavior(generateDataSet("TASKB", KpiLevel.DEMAND))
         .then()
@@ -263,7 +266,7 @@ public class LeadTimeKpiDataProviderTest {
         @Override
         public void behave(KpiEnvironment environment) {
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
-            KPIProperties kpiProperties = environment.getKPIProperties();
+            KpiLeadTimeProperties kpiProperties = environment.getKPIProperties(KpiLeadTimeProperties.class);
             ZoneId timezone = environment.getTimezone();
 
             LeadTimeKpiDataProvider subject = new LeadTimeKpiDataProvider(issueKpiService, kpiProperties);
@@ -286,17 +289,17 @@ public class LeadTimeKpiDataProviderTest {
         }
 
         public void emptyDataSet() {
-            assertThat(dataSet).hasSize(0);
+            Assertions.assertThat(dataSet).hasSize(0);
         }
 
         public LeadTimeKpiAsserter<LeadTimeKpiDataAsserter> leadTimeForIssue(String pkey) {
             Optional<LeadTimeKpi> opKpi = dataSet.stream().filter(c -> c.getIssueKey().equals(pkey)).findFirst();
-            assertThat(opKpi).as("Lead Kpi for issue %s not found.",pkey).isPresent();
+            Assertions.assertThat(opKpi).as("Lead Kpi for issue %s not found.",pkey).isPresent();
             return new LeadTimeKpiAsserter<LeadTimeKpiDataAsserter>(opKpi.get(), this);
         }
 
         public LeadTimeKpiDataAsserter dataSetHasTotalSize(int size) {
-            assertThat(dataSet).hasSize(size);
+            Assertions.assertThat(dataSet).hasSize(size);
             return this;
         }
 
