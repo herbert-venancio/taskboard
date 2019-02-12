@@ -305,7 +305,7 @@ public class IssueKpiTransformerTest {
             if(mappingHierarchally)
                 transformer.mappingHierarchically();
             if(setupWorklog)
-                transformer.settingWorklog();
+                transformer.settingWorklogWithTimezone(environment.getTimezone());
 
             return transformer;
         }

@@ -32,9 +32,9 @@ public class LeadTimeKpiDataProvider {
 
     public List<LeadTimeKpi> getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
-        LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusesByLevel, timezone);
+        LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusesByLevel);
         return issues.stream()
-                .filter(i -> i.hasCompletedCycle(leadStatusesByLevel.get(i.getLevel()), timezone))
+                .filter(i -> i.hasCompletedCycle(leadStatusesByLevel.get(i.getLevel())))
                 .map(factory::create)
                 .collect(Collectors.toList());
     }

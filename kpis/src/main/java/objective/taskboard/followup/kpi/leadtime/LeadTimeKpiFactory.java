@@ -1,7 +1,6 @@
 package objective.taskboard.followup.kpi.leadtime;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -14,18 +13,16 @@ import objective.taskboard.followup.kpi.StatusTransitionChain;
 public class LeadTimeKpiFactory {
 
     private Map<KpiLevel, Set<String>> leadStatusMap;
-    private ZoneId timezone;
 
-    public LeadTimeKpiFactory(Map<KpiLevel, Set<String>> leadStatusMap, ZoneId timezone) {
+    public LeadTimeKpiFactory(Map<KpiLevel, Set<String>> leadStatusMap) {
         this.leadStatusMap = leadStatusMap;
-        this.timezone = timezone;
     }
 
     public LeadTimeKpi create(IssueKpi issue) {
         String issueKey = issue.getIssueKey();
         String issueType = issue.getIssueTypeName();
 
-        StatusTransitionChain statuses = issue.getStatusChain(timezone);
+        StatusTransitionChain statuses = issue.getStatusChain();
         String lastStatus = statuses.getCurrentStatusName();
 
         Set<String> leadStatusesNames = leadStatusMap.get(issue.getLevel());

@@ -37,9 +37,9 @@ public class CycleTimeDataProvider {
     public List<CycleTimeKpi> getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
         Map<KpiLevel, Set<String>> cycleStatusesByLevel = getCycleStatusesMapFromProperties();
-        CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusesByLevel, timezone, colorService);
+        CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusesByLevel, colorService);
         return issues.stream()
-                .filter(i -> i.hasCompletedCycle(cycleStatusesByLevel.get(i.getLevel()), timezone))
+                .filter(i -> i.hasCompletedCycle(cycleStatusesByLevel.get(i.getLevel())))
                 .map(factory::create)
                 .collect(Collectors.toList());
     }

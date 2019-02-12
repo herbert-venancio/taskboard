@@ -42,7 +42,7 @@ public class StatusTransitionAsserter {
     }
 
     public DateChecker firstDateOnProgressing() {
-        Optional<LocalDate> date = status.firstDateOnProgressing(timezone);
+        Optional<LocalDate> date = status.firstDateOnProgressing();
         return new DateChecker(date);
     }
 
@@ -117,24 +117,26 @@ public class StatusTransitionAsserter {
         }
 
         public StatusTransitionAsserter hasEnterDate(String date) {
-            Assertions.assertThat(subject.getEnterDate(timezone)).isPresent();
-            Assertions.assertThat(subject.getEnterDate(timezone).get()).isEqualTo(parseZonedDateTime(date));
+            Assertions.assertThat(subject.getEnterDate()).hasValueSatisfying(enterDate ->
+                Assertions.assertThat(enterDate).isEqualTo(parseZonedDateTime(date))
+            );
             return StatusTransitionAsserter.this;
         }
 
         public StatusTransitionAsserter hasNoEnterDate() {
-            Assertions.assertThat(subject.getEnterDate(timezone)).isEmpty();
+            Assertions.assertThat(subject.getEnterDate()).isEmpty();
             return StatusTransitionAsserter.this;
         }
 
         public StatusTransitionAsserter hasExitDate(String date) {
-            Assertions.assertThat(subject.getExitDate(timezone)).isPresent();
-            Assertions.assertThat(subject.getExitDate(timezone).get()).isEqualTo(parseZonedDateTime(date));
+            Assertions.assertThat(subject.getExitDate()).hasValueSatisfying(exitDate ->
+                Assertions.assertThat(exitDate).isEqualTo(parseZonedDateTime(date))
+            );
             return StatusTransitionAsserter.this;
         }
 
         public StatusTransitionAsserter hasNoExitDate() {
-            Assertions.assertThat(subject.getExitDate(timezone)).isEmpty();
+            Assertions.assertThat(subject.getExitDate()).isEmpty();
             return StatusTransitionAsserter.this;
         }
 

@@ -3,6 +3,7 @@ package objective.taskboard.followup.kpi;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -58,7 +59,7 @@ public class SubtaskWorklogDistributorTest {
             .worklogAt("2020-01-05").isDistributedToStatus("Review")
             .worklogAt("2020-01-06").isDistributedToStatus("Review");
 }
-    
+
     @Test
     public void skippingQueue() {
         dsl()
@@ -80,7 +81,7 @@ public class SubtaskWorklogDistributorTest {
             .worklogAt("2020-01-05").isDistributedToStatus("Review")
             .worklogAt("2020-01-06").isDistributedToStatus("Review");
 }
-    
+
     @Test
     public void openIssue() {
         dsl()
@@ -102,7 +103,7 @@ public class SubtaskWorklogDistributorTest {
             .worklogAt("2020-01-05").isDistributedToStatus("Doing")
             .worklogAt("2020-01-06").isDistributedToStatus("Doing");
     }
-    
+
     @Test
     public void straightToReview() {
         dsl()
@@ -124,7 +125,7 @@ public class SubtaskWorklogDistributorTest {
             .worklogAt("2020-01-05").isDistributedToStatus("Review")
             .worklogAt("2020-01-06").isDistributedToStatus("Review");
     }
-    
+
     @Test
     public void issueClosed_doingAndReviewAtTheSameDay() {
         dsl()
@@ -146,7 +147,7 @@ public class SubtaskWorklogDistributorTest {
             .worklogAt("2020-01-05").isDistributedToStatus("Review")
             .worklogAt("2020-01-06").isDistributedToStatus("Review");
     }
-    
+
     @Test
     public void jumpingProgressingStatuses() {
         dsl()
@@ -234,7 +235,7 @@ public class SubtaskWorklogDistributorTest {
             .worklogAt("2020-01-06").isDistributedToStatus("Review");
 
     }
-    
+
     private DSLKpi dsl() {
         DSLKpi dsl = new DSLKpi();
         dsl.environment()
@@ -254,7 +255,7 @@ public class SubtaskWorklogDistributorTest {
             public void behave(KpiEnvironment environment) {
                 Optional<StatusTransition> opStatus = environment.statusTransition().getFirstStatusTransition();
                 Assertions.assertThat(opStatus).as("Status misconfigured").isPresent();
-                asserter = new SubtaskWorklogDistributorAsserter(opStatus.get());
+                asserter = new SubtaskWorklogDistributorAsserter(opStatus.get(), environment.getTimezone());
             }
 
             @Override
@@ -263,41 +264,43 @@ public class SubtaskWorklogDistributorTest {
             }
         };
     }
-    
+
     private class SubtaskWorklogDistributorAsserter {
-        
+
         private SubtaskWorklogDistributor subject = new SubtaskWorklogDistributor();
         private StatusTransition status;
+        private ZoneId timezone;
 
-        public SubtaskWorklogDistributorAsserter(StatusTransition status) {
+        public SubtaskWorklogDistributorAsserter(StatusTransition status, ZoneId timezone) {
             this.status = status;
+            this.timezone = timezone;
         }
 
         public DateAsserter worklogAt(String date) {
             return new DateAsserter(date);
         }
-        
+
         private class DateAsserter {
             String date;
 
             private DateAsserter(String date) {
                 this.date = date;
             }
-            
+
             private SubtaskWorklogDistributorAsserter isDistributedToStatus(String expectedStatus) {
                 Worklog worklog = new Worklog("a.developer",parseStringToDate(date),100);
-                
-                Optional<StatusTransition> statusFound = subject.findStatus(status, worklog);
-                
+                ZonedWorklog zonedWorklog = new ZonedWorklog(worklog, timezone);
+                Optional<StatusTransition> statusFound = subject.findStatus(status, zonedWorklog);
+
                 assertThat(statusFound).isPresent();
                 assertThat(statusFound).hasValueSatisfying( s -> {
                     assertThat(s.status).isEqualTo(expectedStatus);
                 });
                 return SubtaskWorklogDistributorAsserter.this;
             }
-            
+
         }
-        
+
     }
 
 }

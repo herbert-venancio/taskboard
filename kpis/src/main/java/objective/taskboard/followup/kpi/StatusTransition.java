@@ -1,7 +1,6 @@
 package objective.taskboard.followup.kpi;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
@@ -12,15 +11,12 @@ import org.eclipse.collections.impl.block.factory.Comparators;
 
 import com.google.common.base.Function;
 
-import objective.taskboard.data.Worklog;
-import objective.taskboard.utils.DateTimeUtils;
-
 public class StatusTransition {
 
     protected final String status;
     protected final Optional<StatusTransition> next;
     protected final boolean isProgressingStatus;
-    private List<Worklog> worklogs = new LinkedList<>();
+    private List<ZonedWorklog> worklogs = new LinkedList<>();
     protected Optional<ZonedDateTime> enterDate = Optional.empty();
     protected Optional<ZonedDateTime> exitDate = Optional.empty();
 
@@ -50,27 +46,27 @@ public class StatusTransition {
         return next.map(n -> n.findWithTransition(status)).orElse(Optional.empty());
     }
 
-    public void putWorklog(Worklog worklog) {
-        this.worklogs.add(worklog);
+    public void putWorklog(ZonedWorklog w) {
+        this.worklogs.add(w);
     }
 
     boolean isProgressingStatus() {
         return isProgressingStatus;
     }
 
-    boolean hasAnyNextThatReceivesWorklog(Worklog worklog) {
-        if (hasNextProgressingStatusThatReceivesWorklog(worklog))
+    boolean hasAnyNextThatReceivesWorklog(ZonedWorklog w) {
+        if (hasNextProgressingStatusThatReceivesWorklog(w))
             return true;
 
         Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
 
-        boolean nextIsOnDate = nextWithDate.map(n -> n.isOnDate(worklog)).orElse(false);
-        boolean nextReceiveWorklog = nextWithDate.map(n -> n.isProgressingStatus || n.hasNextOnDateThatCouldReceiveWorklog(worklog, true)).orElse(false);
+        boolean nextIsOnDate = nextWithDate.map(n -> n.isOnDate(w)).orElse(false);
+        boolean nextReceiveWorklog = nextWithDate.map(n -> n.isProgressingStatus || n.hasNextOnDateThatCouldReceiveWorklog(w, true)).orElse(false);
 
         return nextIsOnDate && nextReceiveWorklog;
     }
 
-    boolean hasNextProgressingStatusThatReceivesWorklog(Worklog worklog) {
+    boolean hasNextProgressingStatusThatReceivesWorklog(ZonedWorklog worklog) {
         if(hasFutureProgressingStatusBeforeNonProgressingReceiver(worklog))
             return true;
 
@@ -82,21 +78,22 @@ public class StatusTransition {
         return !nextIsProgressing && nextHasNextProgressing && worklogIsAfterNext;
     }
 
-    boolean hasFutureProgressingStatusBeforeNonProgressingReceiver(Worklog worklog) {
+    boolean hasFutureProgressingStatusBeforeNonProgressingReceiver(ZonedWorklog worklog) {
         Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing());
         return nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);
     }
 
     public Long getEffort() {
-        return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0);
+        return worklogs.stream()
+                .map(ZonedWorklog::getTimeSpentSeconds)
+                .mapToLong(Long::valueOf).reduce(Long::sum).orElse(0);
     }
 
     public Long getEffortUntilDate(ZonedDateTime dateLimit) {
-        ZoneId zone = dateLimit.getZone();
-        LocalDate localDateLimit = dateLimit.toLocalDate();
         return worklogs.stream()
-                .filter(w -> !DateTimeUtils.toLocalDate(w.started, zone).isAfter(localDateLimit))
-                .mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0);
+                .filter(w -> !w.getStarted().isAfter(dateLimit))
+                .map(ZonedWorklog::getTimeSpentSeconds)
+                .mapToLong(Long::valueOf).reduce(Long::sum).orElse(0);
     }
 
     public long collectEffortUntilDate(ZonedDateTime dateLimit) {
@@ -107,29 +104,27 @@ public class StatusTransition {
         return next.flatMap(n -> n.withDate());
     }
 
-    protected Optional<ZonedDateTime> minimumDateFromWorklogs(ZoneId timezone) {
-        Optional<ZonedDateTime> minWorklogDate = this.worklogs.stream()
-                .map(w -> DateTimeUtils.get(w.started, timezone))
+    protected Optional<ZonedDateTime> minimumDateFromWorklogs() {
+        return this.worklogs.stream()
+                .map(ZonedWorklog::getStarted)
                 .map(d -> d.truncatedTo(ChronoUnit.DAYS))
                 .min(Comparators.naturalOrder());
-        return minWorklogDate;
     }
 
-    protected Optional<ZonedDateTime> maximumDateFromWorklogs(ZoneId timezone) {
-        Optional<ZonedDateTime> maxWorklogDate = this.worklogs.stream()
-                .map(w -> DateTimeUtils.get(w.started, timezone))
+    protected Optional<ZonedDateTime> maximumDateFromWorklogs() {
+        return this.worklogs.stream()
+                .map(ZonedWorklog::getStarted)
                 .map(d -> d.truncatedTo(ChronoUnit.DAYS))
                 .max(Comparators.naturalOrder());
-        return maxWorklogDate;
     }
 
-    protected Optional<ZonedDateTime> minimumDateFromNextWorklogs(ZoneId timezone) {
+    protected Optional<ZonedDateTime> minimumDateFromNextWorklogs() {
         if (!next.isPresent()) {
             return Optional.empty();
         }
         StatusTransition nextStatus = next.get();
-        Optional<ZonedDateTime> myMinDate = minimumDateFromWorklogs(timezone);
-        Optional<ZonedDateTime> minDateFollowingStatuses = nextStatus.minimumDateFromNextWorklogs(timezone);
+        Optional<ZonedDateTime> myMinDate = minimumDateFromWorklogs();
+        Optional<ZonedDateTime> minDateFollowingStatuses = nextStatus.minimumDateFromNextWorklogs();
         return min(myMinDate, minDateFollowingStatuses);
     }
 
@@ -141,7 +136,7 @@ public class StatusTransition {
         return this.isProgressingStatus() ? Optional.of(this) : flatNext(n -> n.whichIsProgressing());
     }
 
-    protected boolean hasNextOnDateThatCouldReceiveWorklog(Worklog worklog, boolean couldReceive) {
+    protected boolean hasNextOnDateThatCouldReceiveWorklog(ZonedWorklog worklog, boolean couldReceive) {
         Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
         return nextWithDate.map(n -> (n.isProgressingStatus == couldReceive) && n.isOnDate(worklog)).orElse(false);
     }
@@ -154,20 +149,20 @@ public class StatusTransition {
         return next.flatMap(mapper);
     }
 
-    List<Worklog> getWorklogs(){
+    List<ZonedWorklog> getWorklogs(){
         return this.worklogs;
     }
 
-    public List<Worklog> collectWorklog() {
-        List<Worklog> allWorklogs = next.map(n -> n.collectWorklog()).orElseGet(LinkedList::new);
+    public List<ZonedWorklog> collectWorklog() {
+        List<ZonedWorklog> allWorklogs = next.map(StatusTransition::collectWorklog).orElseGet(LinkedList::new);
         allWorklogs.addAll(this.worklogs);
         return allWorklogs;
     }
 
-    public Optional<LocalDate> firstDateOnProgressing(ZoneId timezone){
+    public Optional<LocalDate> firstDateOnProgressing(){
         if(isProgressingWithWorklogs())
-            return minimumDateFromWorklogs(timezone).map(ZonedDateTime::toLocalDate);
-        return next.flatMap(n -> n.firstDateOnProgressing(timezone));
+            return minimumDateFromWorklogs().map(ZonedDateTime::toLocalDate);
+        return next.flatMap(StatusTransition::firstDateOnProgressing);
     }
 
     public Optional<LocalDate> getDateAfterLeavingLastProgressingStatus() {
@@ -195,15 +190,15 @@ public class StatusTransition {
         return next.map(n -> n.hasNextProgressing()).orElse(false);
     }
 
-    public Optional<ZonedDateTime> getEnterDate(ZoneId timezone) {
+    public Optional<ZonedDateTime> getEnterDate() {
         if (enterDate.isPresent()) {
             return enterDate;
         }
-        enterDate = minimumDateFromWorklogs(timezone);
+        enterDate = minimumDateFromWorklogs();
         return enterDate;
     }
 
-    public Optional<ZonedDateTime> getExitDate(ZoneId timezone) {
+    public Optional<ZonedDateTime> getExitDate() {
         if (exitDate.isPresent()) {
             return exitDate;
         }
@@ -211,11 +206,11 @@ public class StatusTransition {
             return Optional.empty();
         }
         StatusTransition nextStatus = next.get();
-        Optional<ZonedDateTime> nextStatusEnterDate = nextStatus.getEnterDate(timezone);
+        Optional<ZonedDateTime> nextStatusEnterDate = nextStatus.getEnterDate();
         if (!nextStatusEnterDate.isPresent()) {
-            return nextStatus.getExitDate(timezone);
+            return nextStatus.getExitDate();
         }
-        exitDate = max(maximumDateFromWorklogs(timezone), nextStatusEnterDate);
+        exitDate = max(maximumDateFromWorklogs(), nextStatusEnterDate);
         return exitDate;
     }
 
