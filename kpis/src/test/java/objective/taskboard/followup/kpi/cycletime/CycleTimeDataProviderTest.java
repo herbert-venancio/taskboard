@@ -12,7 +12,7 @@ import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 
@@ -50,7 +50,7 @@ public class CycleTimeDataProviderTest {
             .eoI()
             .withKpiProperties()
                 .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
-            .eoKpi()
+            .eoKP()
         .when()
             .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
         .then()
@@ -85,7 +85,7 @@ public class CycleTimeDataProviderTest {
         .environment()
             .withKpiProperties()
                 .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
-            .eoKpi()
+            .eoKP()
         .when()
             .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
         .then()
@@ -111,7 +111,7 @@ public class CycleTimeDataProviderTest {
             .eoI()
             .withKpiProperties()
                 .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
-            .eoKpi()
+            .eoKP()
         .when()
             .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
         .then()
@@ -150,7 +150,7 @@ public class CycleTimeDataProviderTest {
             .eoI()
             .withKpiProperties()
                 .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
-            .eoKpi()
+            .eoKP()
         .when()
             .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
         .then()
@@ -189,7 +189,7 @@ public class CycleTimeDataProviderTest {
             .eoI()
             .withKpiProperties()
                 .withSubtaskCycleTimeProperties()
-            .eoKpi()
+            .eoKP()
         .when()
             .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
         .then()
@@ -228,7 +228,7 @@ public class CycleTimeDataProviderTest {
             .eoI()
             .withKpiProperties()
                 .withSubtaskCycleTimeProperties("Foo")
-            .eoKpi()
+            .eoKP()
         .when()
             .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
         .then()
@@ -260,7 +260,7 @@ public class CycleTimeDataProviderTest {
         return new GenerateCycleData(projectKey,level);
     }
 
-    private class GenerateCycleData implements DSLSimpleBehavior<CycleTimeKpiDataAsserter>{
+    private class GenerateCycleData implements DSLSimpleBehaviorWithAsserter<CycleTimeKpiDataAsserter>{
 
         private String projectKey;
         private KpiLevel level;

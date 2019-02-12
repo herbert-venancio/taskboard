@@ -1,6 +1,4 @@
-package objective.taskboard.followup.kpi.cycletime;
-
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
+package objective.taskboard.followup.kpi.leadTime;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -10,41 +8,27 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
-import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiController;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiDataProvider;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 import objective.taskboard.utils.DateTimeUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CycleTimeControllerTest {
-
-    @Mock
-    ProjectService projectService;
-
-    @Mock
-    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
-
-    @Mock
-    private CycleTimeDataProvider cycleTimeDataProvider;
-
-    @InjectMocks
-    private CycleTimeController subject;
+public class LeadTimeControllerTest {
 
     @Test
-    public void requestCycleTimeChartData_happyPath() {
+    public void requestLeadTimeChartData_happyPath() {
         dsl()
             .environment()
                 .services()
@@ -52,10 +36,6 @@ public class CycleTimeControllerTest {
                         .withKey("TEST")
                         .eoP()
                     .eoPs()
-                    .issueColor()
-                        .withProgressingStatusesColor("#ABABAB")
-                        .withNonProgressingStatusesColor("#FEFEFE")
-                    .eoIC()
                 .eoS()
                 .givenSubtask("I-1")
                     .type("Backend Development")
@@ -78,7 +58,8 @@ public class CycleTimeControllerTest {
                         .status("Doing").date("2020-01-04")
                         .status("To Review").date("2020-01-05")
                         .status("Reviewing").date("2020-01-06")
-                        .status("Done").date("2020-01-07")
+                        .status("Done").noDate()
+                        .status("Cancelled").date("2020-01-07")
                     .eoT()
                 .eoI()
                 .todayIs("2020-01-08")
@@ -96,70 +77,24 @@ public class CycleTimeControllerTest {
                     + "{"
                         + "\"issueKey\": \"I-1\","
                         + "\"issueType\": \"Backend Development\","
-                        + "\"cycleTime\": 5,"
-                        + "\"enterDate\": " + parseDateAsMillis("2020-01-02") + ","
-                        + "\"exitDate\": " + parseDateAsMillis("2020-01-06") + ","
-                        + "\"subCycles\": ["
-                            + "{"
-                                + "\"status\": \"To Do\","
-                                + "\"color\": \"#FEFEFE\","
-                                + "\"duration\": 1"
-                            + "},"
-                            + "{"
-                                + "\"status\": \"Doing\","
-                                + "\"color\": \"#ABABAB\","
-                                + "\"duration\": 1"
-                            + "},"
-                            + "{"
-                                + "\"status\": \"To Review\","
-                                + "\"color\": \"#FEFEFE\","
-                                + "\"duration\": 1"
-                            + "},"
-                            + "{"
-                                + "\"status\": \"Reviewing\","
-                                + "\"color\": \"#ABABAB\","
-                                + "\"duration\": 1"
-                            + "}"
-                        + "]"
+                        + "\"leadTime\": 6,"
+                        + "\"enterDate\": " + parseZonedDateAsMillis("2020-01-01", "America/Sao_Paulo") + ","
+                        + "\"exitDate\": " + parseZonedDateAsMillis("2020-01-06", "America/Sao_Paulo") + ","
+                        + "\"lastStatus\": \"Done\""
                     + "},"
                     + "{"
                         + "\"issueKey\": \"I-2\","
                         + "\"issueType\": \"Alpha Bug\","
-                        + "\"cycleTime\": 5,"
-                        + "\"enterDate\": " + parseDateAsMillis("2020-01-03") + ","
-                        + "\"exitDate\": "+ parseDateAsMillis("2020-01-07") + ","
-                        + "\"subCycles\": ["
-                            + "{"
-                                + "\"status\": \"To Do\","
-                                + "\"color\": \"#FEFEFE\","
-                                + "\"duration\": 1"
-                            + "},"
-                            + "{"
-                                + "\"status\": \"Doing\","
-                                + "\"color\": \"#ABABAB\","
-                                + "\"duration\": 1"
-                            + "},"
-                            + "{"
-                                + "\"status\": \"To Review\","
-                                + "\"color\": \"#FEFEFE\","
-                                + "\"duration\": 1"
-                            + "},"
-                            + "{"
-                                + "\"status\": \"Reviewing\","
-                                + "\"color\": \"#ABABAB\","
-                                + "\"duration\": 1"
-                            + "}"
-                        + "]"
+                        + "\"leadTime\": 6,"
+                        + "\"enterDate\": " + parseZonedDateAsMillis("2020-01-02", "America/Sao_Paulo") + ","
+                        + "\"exitDate\": "+ parseZonedDateAsMillis("2020-01-07", "America/Sao_Paulo") + ","
+                        + "\"lastStatus\": \"Cancelled\""
                     + "}"
                 + "]");
     }
 
-    private long parseDateAsMillis(String date) {
-        return parseDateTime(date, "00:00:00", "America/Sao_Paulo").toEpochSecond() * 1000;
-    }
-
     @Test
-    public void requestCycleTimeChartData_whenNotHavePermission_thenStatusNotFound() {
+    public void requestLeadTimeChartData_whenNotHavePermission_thenStatusNotFound() {
         dsl()
         .environment()
             .services()
@@ -206,7 +141,7 @@ public class CycleTimeControllerTest {
     }
 
     @Test
-    public void requestCycleTimeChartData_whenProjectDoesNotExists_thenStatusNotFound() {
+    public void requestLeadTimeChartData_whenProjectDoesNotExists_thenStatusNotFound() {
         dsl()
         .environment()
             .services()
@@ -253,7 +188,7 @@ public class CycleTimeControllerTest {
     }
 
     @Test
-    public void requestCycleTimeChartData_whenInvalidLevelValue_thenStatusBadRequest() {
+    public void requestLeadTimeChartData_whenInvalidLevelValue_thenStatusBadRequest() {
         dsl()
         .environment()
             .services()
@@ -304,20 +239,24 @@ public class CycleTimeControllerTest {
         DSLKpi dsl = new DSLKpi();
         dsl.environment()
             .statuses()
-                .withNotProgressingStatuses("Open","To Do","To Review","Done")
+                .withNotProgressingStatuses("Open","To Do","To Review","Done","Cancelled")
                 .withProgressingStatuses("Doing","Reviewing")
             .eoS()
             .types()
                 .addSubtasks("Backend Development","Alpha Bug")
             .eoT()
             .withKpiProperties()
-                .withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+                .withSubtaskLeadTimeProperties("Open","To Do","Doing","To Review","Reviewing")
             .eoKP();
         return dsl;
     }
 
     private RequestDataBehaviorBuilder createRequestDataBehavior() {
         return new RequestDataBehaviorBuilder();
+    }
+
+    private long parseZonedDateAsMillis(String date, String timezone) {
+        return DateTimeUtils.parseDateTime(date, "00:00:00", timezone).toEpochSecond() * 1000;
     }
 
     public class RequestDataBehaviorBuilder {
@@ -387,31 +326,35 @@ public class CycleTimeControllerTest {
         @Override
         public void behave(KpiEnvironment environment) {
             ProjectDashboardOperationalPermission projectDashboardOperationalPermission = mockPermission();
-            CycleTimeDataProvider dataProvider = mockProvider(environment);
+            LeadTimeKpiDataProvider dataProvider = mockProvider(environment);
             ProjectService projectService = environment.services().projects().getService();
-            CycleTimeController subject = new CycleTimeController(projectDashboardOperationalPermission, projectService, dataProvider);
+            LeadTimeKpiController subject = new LeadTimeKpiController(projectDashboardOperationalPermission, projectService, dataProvider);
             asserter = AssertResponse.of(subject.get(projectKey, zoneId, level));
         }
 
-        private CycleTimeDataProvider mockProvider(KpiEnvironment environment) {
-            CycleTimeDataProvider cycleTimeDataProvider = Mockito.mock(CycleTimeDataProvider.class);
+        @Override
+        public AssertResponse then() {
+            return asserter;
+        }
+
+        private LeadTimeKpiDataProvider mockProvider(KpiEnvironment environment) {
+            LeadTimeKpiDataProvider leadTimeDataProvider = Mockito.mock(LeadTimeKpiDataProvider.class);
             if (preventProviderMock) {
-                return cycleTimeDataProvider;
+                return leadTimeDataProvider;
             }
             ZoneId timezone = DateTimeUtils.determineTimeZoneId(zoneId);
             KpiLevel kpiLevel = KpiLevel.valueOf(level.toUpperCase());
             Map<KpiLevel, List<IssueKpi>> issues = environment.services().issueKpi().getIssuesByLevel();
-            List<CycleTimeKpi> cycleTimeKpis = issues.get(kpiLevel).stream()
-                .map(i -> transformIntoCycleTimeKpi(i, environment, timezone))
+            List<LeadTimeKpi> leadTimeKpis = issues.get(kpiLevel).stream()
+                .map(i -> transformIntoLeadTimeKpi(i, environment, timezone))
                 .collect(Collectors.toList());
-            Mockito.when(cycleTimeDataProvider.getDataSet(projectKey, kpiLevel, timezone)).thenReturn(cycleTimeKpis);
-            return cycleTimeDataProvider;
+            Mockito.when(leadTimeDataProvider.getDataSet(projectKey, kpiLevel, timezone)).thenReturn(leadTimeKpis);
+            return leadTimeDataProvider;
         }
 
-        private CycleTimeKpi transformIntoCycleTimeKpi(IssueKpi issue, KpiEnvironment environment, ZoneId timezone) {
-            Map<KpiLevel, Set<String>> cycleStatusMap = environment.withKpiProperties().getCycleStatusMap();
-            IssueColorService colorService = environment.services().issueColor().getService();
-            CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusMap, timezone, colorService);
+        private LeadTimeKpi transformIntoLeadTimeKpi(IssueKpi issue, KpiEnvironment environment, ZoneId timezone) {
+            Map<KpiLevel, Set<String>> leadStatusMap = environment.withKpiProperties().getLeadStatusMap();
+            LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusMap, timezone);
             return factory.create(issue);
         }
 
@@ -419,11 +362,6 @@ public class CycleTimeControllerTest {
             ProjectDashboardOperationalPermission projectDashboardOperationalPermission = Mockito.mock(ProjectDashboardOperationalPermission.class);
             Mockito.when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(hasPermission);
             return projectDashboardOperationalPermission;
-        }
-
-        @Override
-        public AssertResponse then() {
-            return asserter;
         }
     }
 }

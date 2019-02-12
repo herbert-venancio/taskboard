@@ -666,10 +666,13 @@ class BudgetChartBuilder extends ChartBuilderBase {
     }
 }
 
-class CycleTimeChartBuilder extends ChartBuilderBase {
+class ScatterChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
-        const HOUR_IN_MILLIS = 60 * 60 * 1000;
+        this.HOUR_IN_MILLIS = 60 * 60 * 1000;
+        const DEFAULT_JITTER_X = 4 * this.HOUR_IN_MILLIS;
+        const DEFAULT_JITTER_Y = 0.4;
+        const DEFAULT_TURBO_THRESHOLD = 10000;
         Highcharts.merge(true, this.options, {
             xAxis: {
                 labels: {
@@ -689,12 +692,12 @@ class CycleTimeChartBuilder extends ChartBuilderBase {
             plotOptions: {
                 series: {
                     stacking: null,
-                    turboThreshold: 10000
+                    turboThreshold: DEFAULT_TURBO_THRESHOLD
                 },
                 scatter: {
                     jitter: {
-                        x: 4 * HOUR_IN_MILLIS,
-                        y: 0.4
+                        x: DEFAULT_JITTER_X,
+                        y: DEFAULT_JITTER_Y
                     }
                 }
             }
@@ -702,31 +705,67 @@ class CycleTimeChartBuilder extends ChartBuilderBase {
         Highcharts.merge(true, this.options, {
             tooltip: {
                 borderWidth: 0,
-                pointFormatter: function () {
-                    const cycleHtml = [];
-                    this.extraData.subCycles.forEach((subcycle) => {
-                        if (subcycle.duration > 0) {
-                            cycleHtml.push('<div class="highcharts-tooltip-item">');
-                            cycleHtml.push(`<div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status" style="background-color: ${subcycle.color}">${subcycle.status}</div>`);
-                            cycleHtml.push(`<div class="highcharts-tooltip-item__value">${subcycle.duration} days</div>`);
-                            cycleHtml.push('</div>');
-                        }
-                    });
-                    cycleHtml.push('<div class="highcharts-tooltip-item">');
-                    cycleHtml.push('<div class="highcharts-tooltip-item__label">Conclusion Date:</div>');
-                    cycleHtml.push(`<div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>`);
-                    cycleHtml.push('</div>');
-                    return cycleHtml.join('\n');
-                },
-                footerFormat: `<div class="highcharts-tooltip-item">
-                    <div class="highcharts-tooltip-item__label">Total Cycle Time:</div>
-                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">{point.y} days</div>
-                </dev>`,
                 reversed: false,
                 useHTML: true,
                 xDateFormat: '%b %e, %Y'
             }
         });
+    }
+    withJitterXinHour (jitterXinHours) {
+        Highcharts.merge(true, this.options.plotOptions.scatter.jitter, {
+            x: jitterXinHours * this.HOUR_IN_MILLIS
+        });
+    }
+    withJitterYinDays (jitterYinDays) {
+        Highcharts.merge(true, this.options.plotOptions.scatter.jitter, {
+            y: jitterYinDays
+        });
+    }
+}
+
+class CycleTimeChartBuilder extends ScatterChartBuilder {
+    constructor (divID) {
+        super(divID);
+        Highcharts.merge(true, this.options.tooltip, {
+            pointFormatter: function () {
+                const cycleHtml = [];
+                this.extraData.subCycles.forEach((subcycle) => {
+                    if (subcycle.duration > 0) {
+                        cycleHtml.push(`<div class="highcharts-tooltip-item">
+                            <div class="highcharts-tooltip-item__label highcharts-tooltip-subcycle-status" style="background-color: ${subcycle.color}">${subcycle.status}</div>
+                            <div class="highcharts-tooltip-item__value">${subcycle.duration} days</div>
+                        </div>`);
+                    }
+                });
+                cycleHtml.push(`<div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Conclusion Date:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>
+                </div>`);
+                return cycleHtml.join('\n');
+            }
+        });
+        super.withTooltipFooterLabel('Total Cycle Time:');
+        super.withTooltipFooterValue('{point.y} days');
+    }
+}
+
+class LeadTimeChartBuilder extends ScatterChartBuilder {
+    constructor (divID) {
+        super(divID);
+        Highcharts.merge(true, this.options.tooltip, {
+            pointFormatter: function () {
+                return `<div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Enter Date:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.enterDate.toDateString()}</div>
+                </div>
+                <div class="highcharts-tooltip-item">
+                    <div class="highcharts-tooltip-item__label">Conclusion Date:</div>
+                    <div class="highcharts-tooltip-item__value highcharts-tooltip--text-bold">${this.extraData.exitDate.toDateString()}</div>
+                </div>`;
+            }
+        });
+        super.withTooltipFooterLabel('Total Lead Time:');
+        super.withTooltipFooterValue('{point.y} days');
     }
 }
 

@@ -142,13 +142,11 @@ public class IssueKpi {
     }
 
     public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
-        if (!hasEnteredCycle(cycleStatuses, timezone)) {
-            return false;
-        }
-        return doAllCycleStatusesHaveExitDate(cycleStatuses, timezone);
+        StatusTransitionChain cycleStatusesChain = getStatusChain(timezone).getStatusSubChain(cycleStatuses);
+        return cycleStatusesChain.hasAnyEnterDate() && cycleStatusesChain.doAllHaveExitDate();
     }
 
-    public List<StatusTransition> getStatusChainAsList() {
+    public StatusTransitionChain getStatusChain(ZoneId timezone) {
         List<StatusTransition> statusChain = new LinkedList<>();
         Optional<StatusTransition> current = firstStatus;
         do {
@@ -158,7 +156,7 @@ public class IssueKpi {
                 current = status.next;
             }
         } while (current.isPresent());
-        return statusChain;
+        return new StatusTransitionChain(statusChain, timezone);
     }
 
     private List<Worklog> collectWorklogs() {
@@ -179,19 +177,4 @@ public class IssueKpi {
         Optional<ZonedDateTime> minimum = all.map(s -> s.getDate()).min(Comparator.naturalOrder());
         return minimum.flatMap(zd -> Optional.of(zd.toLocalDate()));
     }
-
-    private boolean doAllCycleStatusesHaveExitDate(Set<String> cycleStatuses, ZoneId timezone) {
-        List<StatusTransition> statusChain = getStatusChainAsList();
-        return statusChain.stream()
-            .filter(s -> cycleStatuses.contains(s.status))
-            .filter(s -> !s.getExitDate(timezone).isPresent())
-            .count() == 0;
-    }
-
-    private boolean hasEnteredCycle(Set<String> cycleStatuses, ZoneId timezone) {
-        return getStatusChainAsList().stream()
-                .filter(s -> cycleStatuses.contains(s.status))
-                .anyMatch(s -> s.getEnterDate(timezone).isPresent());
-    }
-
 }

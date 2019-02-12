@@ -18,7 +18,7 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.IssuesAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
@@ -279,7 +279,7 @@ public class IssueKpiTransformerTest {
         return new AllIssuesTransformer();
     }
 
-    private class AllIssuesTransformer implements DSLSimpleBehavior<IssuesAsserter> {
+    private class AllIssuesTransformer implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
         private IssuesAsserter issuesAsserter;
         private boolean mappingHierarchally = false;
         private boolean setupWorklog = false;

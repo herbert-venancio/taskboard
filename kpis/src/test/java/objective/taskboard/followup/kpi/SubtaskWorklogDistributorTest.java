@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
 public class SubtaskWorklogDistributorTest {
@@ -245,9 +245,9 @@ public class SubtaskWorklogDistributorTest {
         return dsl;
     }
 
-    private DSLSimpleBehavior<SubtaskWorklogDistributorAsserter> prepareStatusTransition() {
+    private DSLSimpleBehaviorWithAsserter<SubtaskWorklogDistributorAsserter> prepareStatusTransition() {
 
-        return new DSLSimpleBehavior<SubtaskWorklogDistributorAsserter>() {
+        return new DSLSimpleBehaviorWithAsserter<SubtaskWorklogDistributorAsserter>() {
 
             private SubtaskWorklogDistributorAsserter asserter;
             @Override

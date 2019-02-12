@@ -15,7 +15,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -156,7 +156,7 @@ public class TouchTimeKPIDataProviderTest {
         return new TouchTimeDataProviderBehavior(projectKey, issueLevel, timezone);
     }
 
-    private class TouchTimeDataProviderBehavior implements DSLSimpleBehavior<TouchTimeDataSetAsserter> {
+    private class TouchTimeDataProviderBehavior implements DSLSimpleBehaviorWithAsserter<TouchTimeDataSetAsserter> {
 
         private String projectKey;
         private KpiLevel issueLevel;

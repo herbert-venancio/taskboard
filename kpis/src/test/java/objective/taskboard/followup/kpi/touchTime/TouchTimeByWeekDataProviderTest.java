@@ -19,7 +19,7 @@ import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.jira.ProjectService;
@@ -622,7 +622,7 @@ public class TouchTimeByWeekDataProviderTest {
         return dsl;
     }
 
-    private class TouchTimeByWeekDataProviderBehavior implements DSLSimpleBehavior<TouchTimeDataSetAsserter> {
+    private class TouchTimeByWeekDataProviderBehavior implements DSLSimpleBehaviorWithAsserter<TouchTimeDataSetAsserter> {
 
         private String projectKey;
         private KpiLevel issueLevel;

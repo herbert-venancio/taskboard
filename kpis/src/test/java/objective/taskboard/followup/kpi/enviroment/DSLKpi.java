@@ -14,6 +14,8 @@ import objective.taskboard.followup.kpi.StatusTransitionAsserter;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiAsserter;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpiFactory;
+import objective.taskboard.followup.kpi.leadTime.LeadTimeKpiAsserter;
+import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 
 public class DSLKpi {
 
@@ -78,6 +80,11 @@ public class DSLKpi {
             return new CycleTimeKpiAsserter<DSLKpi.AsserterFactory>(cKpi, this);
         }
 
+        public LeadTimeKpiAsserter<AsserterFactory> leadTimeKpi(String pKey) {
+            LeadTimeKpi lKpi = environment.getLeadTimeKpi(pKey);
+            return new LeadTimeKpiAsserter<>(lKpi, this);
+        }
+
     }
 
     public static class BehaviorFactory {
@@ -93,13 +100,13 @@ public class DSLKpi {
             return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.environment.givenIssue(key)));
         }
 
-        public <T> ExceptionBehavior<T> expectExceptionFromBehavior(DSLSimpleBehavior<T> behavior){
-            ExceptionBehavior<T> exceptionBehavior = new ExceptionBehavior<>(behavior);
+        public ExceptionBehavior expectExceptionFromBehavior(DSLSimpleBehavior behavior){
+            ExceptionBehavior exceptionBehavior = new ExceptionBehavior(behavior);
             exceptionBehavior.behave(kpiContext.environment);
             return exceptionBehavior;
         }
 
-        public <T> DSLSimpleBehavior<T> appliesBehavior(DSLSimpleBehavior<T> behavior) {
+        public <T> DSLSimpleBehaviorWithAsserter<T> appliesBehavior(DSLSimpleBehaviorWithAsserter<T> behavior) {
             behavior.behave(kpiContext.environment);
             return behavior;
         }

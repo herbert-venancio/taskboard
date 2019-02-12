@@ -22,13 +22,13 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.properties.JiraProperties;
 
-public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpleBehavior<ItemsAsserter> {
+public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpleBehaviorWithAsserter<ItemsAsserter> {
         
         private ItemsAsserter asserter;
         

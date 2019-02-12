@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
@@ -119,7 +119,7 @@ public class WipKPIServiceTest {
         return dsl;
     }
 
-    private class GenerateWipDataSets implements DSLSimpleBehavior<WipAllSetsAsserter> {
+    private class GenerateWipDataSets implements DSLSimpleBehaviorWithAsserter<WipAllSetsAsserter> {
         private WipAllSetsAsserter asserter;
 
         @Override

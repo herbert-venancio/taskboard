@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
@@ -119,7 +119,7 @@ public class ThroughputKPIServiceTest {
         return new GenerateThroughputDataSets();
     }
 
-    private class GenerateThroughputDataSets implements DSLSimpleBehavior<ThroughputAllSetsAsserter> {
+    private class GenerateThroughputDataSets implements DSLSimpleBehaviorWithAsserter<ThroughputAllSetsAsserter> {
         private ThroughputAllSetsAsserter asserter;
 
         @Override

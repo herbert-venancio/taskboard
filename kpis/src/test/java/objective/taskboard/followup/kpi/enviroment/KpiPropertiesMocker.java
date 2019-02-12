@@ -18,32 +18,31 @@ import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierar
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 import objective.taskboard.followup.kpi.properties.TouchTimeSubtaskConfiguration;
 
 public class KpiPropertiesMocker {
 
     private KPIProperties kpiProperties;
-    private KpiEnvironment fatherEnvironment;
+    private KpiEnvironment parentEnvironment;
     private Map<String, HierarchyBuilder> featureHierarchyBuilder = new LinkedHashMap<>();
     private Map<String, HierarchyBuilder> demandHierarchyBuilder = new LinkedHashMap<>();
     private TouchTimeSubtaskConfigsBuilder touchTimeSubtaskConfigsBuilder = new TouchTimeSubtaskConfigsBuilder();
     private boolean shouldCollectProgressingStatuses = true;
     private Map<KpiLevel,Set<String>> cycleTimeConfigurations;
+    private Map<KpiLevel, Set<String>> leadTimeConfigurations;
 
     public KpiPropertiesMocker(KpiEnvironment environment) {
-        this.fatherEnvironment = environment;
-        initializeMap();
-    }
-
-    private void initializeMap() {
-        cycleTimeConfigurations = new EnumMap<>(KpiLevel.class);
-        for (KpiLevel level : KpiLevel.values()) {
-            cycleTimeConfigurations.put(level, new HashSet<>());
-        }
+        this.parentEnvironment = environment;
+        initializeMaps();
     }
 
     public Map<KpiLevel, Set<String>> getCycleStatusMap() {
         return cycleTimeConfigurations;
+    }
+
+    public Map<KpiLevel, Set<String>> getLeadStatusMap() {
+        return leadTimeConfigurations;
     }
 
     public HierarchyBuilder atFeatureHierarchy(String fatherStatus) {
@@ -67,11 +66,48 @@ public class KpiPropertiesMocker {
         return this;
     }
 
-    public KPIProperties getKpiProperties() {
-        if(kpiProperties == null)
+    public KpiPropertiesMocker withSubtaskCycleTimeProperties(String...statuses) {
+        cycleTimeConfigurations.get(KpiLevel.SUBTASKS).addAll(asList(statuses));
+        return this;
+    }
+
+    public KpiPropertiesMocker withSubtaskLeadTimeProperties(String ...statuses) {
+        configureLeadStatusesForLevel(KpiLevel.SUBTASKS, statuses);
+        return this;
+    }
+
+    public KpiPropertiesMocker withFeatureLeadTimeProperties(String ...statuses) {
+        configureLeadStatusesForLevel(KpiLevel.FEATURES, statuses);
+        return this;
+    }
+
+    public KpiPropertiesMocker withDemandLeadTimeProperties(String ...statuses) {
+        configureLeadStatusesForLevel(KpiLevel.DEMAND, statuses);
+        return this;
+    }
+
+    public KpiEnvironment eoKP() {
+        return parentEnvironment;
+    }
+
+    KPIProperties getKpiProperties() {
+        if (kpiProperties == null)
             kpiProperties = prepareProperties();
 
         return kpiProperties;
+    }
+
+    private void initializeMaps() {
+        cycleTimeConfigurations = new EnumMap<>(KpiLevel.class);
+        leadTimeConfigurations = new EnumMap<>(KpiLevel.class);
+        for (KpiLevel level : KpiLevel.values()) {
+            cycleTimeConfigurations.put(level, new HashSet<>());
+            leadTimeConfigurations.put(level, new HashSet<>());
+        }
+    }
+
+    private void configureLeadStatusesForLevel(KpiLevel level, String[] statuses) {
+        leadTimeConfigurations.get(level).addAll(asList(statuses));
     }
 
     private KPIProperties prepareProperties() {
@@ -81,20 +117,16 @@ public class KpiPropertiesMocker {
         kpiProperties.setTouchTimeSubtaskConfigs(touchTimeSubtaskConfigsBuilder.build());
         kpiProperties.setProgressingStatuses(getProgressingStatuses());
         kpiProperties.setCycleTime(getCycleTimeProperties());
+        kpiProperties.setLeadTime(getLeadTimeProperties());
         return kpiProperties;
-    }
-
-    public KpiEnvironment eoKP() {
-        return fatherEnvironment;
     }
 
     private List<String> getProgressingStatuses() {
         if (!shouldCollectProgressingStatuses) {
             return Collections.emptyList();
         }
-        return fatherEnvironment.statuses().getProgressingStatuses();
+        return parentEnvironment.statuses().getProgressingStatuses();
     }
-
 
     private KpiCycleTimeProperties getCycleTimeProperties() {
         KpiCycleTimeProperties cycleProperties = new KpiCycleTimeProperties();
@@ -108,13 +140,16 @@ public class KpiPropertiesMocker {
         return new LinkedList<>(cycleTimeConfigurations.get(level));
     }
 
-    public KpiPropertiesMocker withSubtaskCycleTimeProperties(String...statuses) {
-        cycleTimeConfigurations.get(KpiLevel.SUBTASKS).addAll(asList(statuses));
-        return this;
+    private KpiLeadTimeProperties getLeadTimeProperties() {
+        KpiLeadTimeProperties leadProperties = new KpiLeadTimeProperties();
+        leadProperties.setDemands(getLeadConfigurationsFor(KpiLevel.DEMAND));
+        leadProperties.setFeatures(getLeadConfigurationsFor(KpiLevel.FEATURES));
+        leadProperties.setSubtasks(getLeadConfigurationsFor(KpiLevel.SUBTASKS));
+        return leadProperties;
     }
 
-    public KpiEnvironment eoKpi() {
-        return fatherEnvironment;
+    private List<String> getLeadConfigurationsFor(KpiLevel level){
+        return new LinkedList<>(leadTimeConfigurations.get(level));
     }
 
     private IssueTypeChildrenStatusHierarchy getHierarchy(Map<String, HierarchyBuilder> hierarchyBuilder) {
@@ -145,7 +180,7 @@ public class KpiPropertiesMocker {
         }
 
         private List<Long> getChildrenTypeId() {
-            return KpiPropertiesMocker.this.fatherEnvironment.collectTypeIds(childrenTypes);
+            return KpiPropertiesMocker.this.parentEnvironment.collectTypeIds(childrenTypes);
         }
 
         public HierarchyBuilder withChildrenType(String type) {
@@ -205,7 +240,7 @@ public class KpiPropertiesMocker {
             }
 
             public ChartStackConfig types(String ...types) {
-                this.typeIds = KpiPropertiesMocker.this.fatherEnvironment.collectTypeIds(Arrays.asList(types));
+                this.typeIds = KpiPropertiesMocker.this.parentEnvironment.collectTypeIds(Arrays.asList(types));
                 return this;
             }
 
