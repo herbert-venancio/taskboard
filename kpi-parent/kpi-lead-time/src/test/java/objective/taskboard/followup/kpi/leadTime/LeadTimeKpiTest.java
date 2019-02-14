@@ -344,8 +344,7 @@ public class LeadTimeKpiTest {
                 DSLKpi kpiContext = environment.then();
                 IssueKpi kpi = kpiContext.getIssueKpi(pKey);
                 LeadTimeKpiFactory factory = new LeadTimeKpiFactory(
-                        environment.getKPIProperties(KpiLeadTimeProperties.class).getLeadTime().toMap(),
-                        environment.getTimezone());
+                        environment.getKPIProperties(KpiLeadTimeProperties.class).getLeadTime().toMap());
                 factory.create(kpi);
             }
         };

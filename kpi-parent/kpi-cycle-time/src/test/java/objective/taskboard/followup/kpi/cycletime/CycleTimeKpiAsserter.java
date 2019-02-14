@@ -33,7 +33,6 @@ public class CycleTimeKpiAsserter<T> {
             IssueKpi kpi = environment.eoE().getIssueKpi(pkey);
             CycleTimeKpiFactory cycleTimeKpiFactory = new CycleTimeKpiFactory(
                     environment.getKPIProperties(KpiCycleTimeProperties.class).getCycleTime().toMap(),
-                    environment.getTimezone(),
                     environment.services().issueColor().getService());
             CycleTimeKpi cKpi = cycleTimeKpiFactory.create(kpi);
             return new CycleTimeKpiAsserter<>(cKpi, factory);

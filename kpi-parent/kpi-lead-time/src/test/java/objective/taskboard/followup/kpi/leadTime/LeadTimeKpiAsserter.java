@@ -26,8 +26,7 @@ public class LeadTimeKpiAsserter<T> {
         return (environment, factory) -> {
             IssueKpi kpi = environment.eoE().getIssueKpi(pkey);
             LeadTimeKpiFactory leadTimeKpiFactory = new LeadTimeKpiFactory(
-                    environment.getKPIProperties(KpiLeadTimeProperties.class).getLeadTime().toMap(),
-                    environment.getTimezone());
+                    environment.getKPIProperties(KpiLeadTimeProperties.class).getLeadTime().toMap());
             LeadTimeKpi cKpi = leadTimeKpiFactory.create(kpi);
             return new LeadTimeKpiAsserter<>(cKpi, factory);
         };

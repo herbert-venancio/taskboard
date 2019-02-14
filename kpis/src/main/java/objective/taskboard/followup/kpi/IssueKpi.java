@@ -136,8 +136,8 @@ public class IssueKpi {
         return Optional.of(RangeUtils.between(firstDate, lastDate));
     }
 
-    public boolean hasCompletedCycle(Set<String> cycleStatuses, ZoneId timezone) {
-        StatusTransitionChain cycleStatusesChain = getStatusChain(timezone).getStatusSubChain(cycleStatuses);
+    public boolean hasCompletedCycle(Set<String> cycleStatuses) {
+        StatusTransitionChain cycleStatusesChain = getStatusChain().getStatusSubChain(cycleStatuses);
         return cycleStatusesChain.hasAnyEnterDate() && cycleStatusesChain.doAllHaveExitDate();
     }
 
