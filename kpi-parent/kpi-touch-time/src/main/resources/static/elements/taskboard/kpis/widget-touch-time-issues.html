@@ -21,7 +21,7 @@
                 <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
             </modal-wrap-content>
             <modal-wrap-footer>
-                <tb-button button=[[_btFilterClose]]></tb-button>
+                <tb-button button="[[_btFilterClose]]"></tb-button>
             </modal-wrap-footer>
         </modal-wrap>
 
@@ -30,7 +30,7 @@
                 <h3 class="tb-label">Level</h3>
                 <div>
                     <label id="labelLevel"></label>
-                    <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}" aria-labelledby="labelLevel">
+                    <paper-radio-group class="radio-group" selected="{{issueLevel}}" aria-labelledby="labelLevel">
                         <paper-radio-button name="Demand">Demand</paper-radio-button>
                         <paper-radio-button name="Features">Feature</paper-radio-button>
                         <paper-radio-button name="Subtasks">Subtask</paper-radio-button>
@@ -52,26 +52,18 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
-                    },
-                    selectedDate: {
-                        type: String,
-                        notify: true,
-                        value: ''
+                        observer: '_onProjectSelected'
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
                         type: String,
-                        notify: true,
                         value: ''
                     },
                     chartWrapper: {
                         type: Object,
-                        notify: true,
                         value: null
                     },
                     tags: {
@@ -81,14 +73,16 @@
                         type: Array,
                         value: null
                     },
-                    settingIssueLevel: {
+                    issueLevel: {
                         type: String,
-                        notify: true,
                         value: 'Subtasks'
                     },
                     localStorageLevelItemName: {
                         type: String,
                         computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
+                    },
+                    isVisible: {
+                        type: Boolean
                     },
                     _btFilterClose: {
                         type: Object,
@@ -99,26 +93,64 @@
                         value: null
                     },
                     _plotData: {
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
+                    },
+                    _typeFilter: {
                         type: Object,
-                        value: null
+                        computed: '_createIssueTypeFilter(_plotData)'
                     }
                 },
 
                 observers: [
-                    '_onProjectSelected(selectedProjectKey, selectedDate)'
+                    '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
                     }
-                    this._reloadChart();
+                    this._fetchData(newSelectedProjectKey);
                 },
 
+                _fetchData: function (selectedProjectKey) {
+                    this.reset();
+                    const savedLevel = this._getSavedLevel();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${selectedProjectKey}/followup/touchtime/byIssues?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        data = data.points;
+                        if (data.length === 0) {
+                            this.errorMessage = 'Touch Time By Issues chart has no data';
+                            return;
+                        }
+
+                        this._prepareData(data);
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
+                },
+                
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtasks';
                 },
 
+                _prepareData: function (data) {
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
+
+                    this._plotData = {
+                        allData: data,
+                        filteredData: data,
+                        issueTypes: issueTypes
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+                
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
                     return `dashboard.touchTimeIssues-chart.${selectedProjectKey}.level`;
                 },
@@ -128,14 +160,15 @@
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingIssueLevel) {
+                        if (savedLevel === this.issueLevel) {
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.issueLevel);
                         this.$$('.settings-modal').close();
-                        this._reloadChart();
+                        this._fetchData(this.selectedProjectKey);
                     }).build();
+                    this.issueLevel = this._getSavedLevel();
                 },
 
                 reset: function () {
@@ -148,130 +181,108 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
                     if (this.chartWrapper) {
+                        dcDateRangeChartsService.deregisterHighchartsNotifyOnlyChart(this.chartWrapper);
                         this.chartWrapper.destroy();
                         this.chartWrapper = null;
                     }
                 },
 
-                _createIssueListFilter: function () {
+                _createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
-                    new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
-                        this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                    const filterPlotData = (selectedTypes, isToggledAll) => {
+                        this._plotData.filteredData = this._plotData.allData.filter(item => selectedTypes.includes(item.issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this.recreateChart();
-                    });
-                },
-
-                _reloadChart: function() {
-                    this.reset();
-                    const savedLevel = this._getSavedLevel();
-                    const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/touchtime/byIssues?level=${savedLevel}&timezone=${timezone}`;
-                    this.xhr = $.getJSON(url);
-                    this.xhr.done((data) => {
-                        data = data.points;
-                        if (data.length === 0) {
-                            this.errorMessage = 'Touch Time chart has no data';
-                            return;
-                        }
-
-                        this._prepareData(data);
-                        this._createIssueListFilter();
-                        this._createChart();
-                        this.isReady = true;
-                    });
-                    this.xhr.fail((error) => {
-                        this.errorMessage = error.responseText;
-                    });
-                },
-
-                _prepareData: function (data) {
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
-                    const issueKeys = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueKey');
-
-                    const ndx = crossfilter(data);
-                    const statusesDimension = ndx.dimension('issueStatus');
-                    const typeDimension = ndx.dimension('issueType');
-                    const startProgressingDateDimension = ndx.dimension('startProgressingDate');
-                    const endProgressingDateDimension = ndx.dimension('endProgressingDate');
-                    const statusesGroup = statusesDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'issueKey', 'effortInHours');
-
-                    this._plotData = Object.freeze({
-                        issueTypes: issueTypes,
-                        issueKeys: issueKeys,
-                        statusesGroup: statusesGroup,
-                        typeDimension: typeDimension,
-                        startProgressingDateDimension: startProgressingDateDimension,
-                        endProgressingDateDimension: endProgressingDateDimension
-                    });
-                },
-
-                _createChart: function () {
-                    const filterByTimeline = (timelineRange) => {
-                        const [tlStart, tlEnd] = timelineRange;
-                        this._plotData.startProgressingDateDimension.filter((start) => start <= tlEnd);
-                        this._plotData.endProgressingDateDimension.filter((end) => end >= tlStart);
-                        const selectedIssueKeys = new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey));
-                        return selectedIssueKeys;
+                        this._isPlotDataUpdated = true;
                     };
-                    const selectedIssueKeys = filterByTimeline(dcDateRangeChartsService.getTimelineRange());
-                    const effortByStatusByIssueKey = [...this._plotData.statusesGroup.all()];
-                    const selectedIssueKeysOrdered = this._orderIssueKeysByTotalEffort(selectedIssueKeys, effortByStatusByIssueKey);
-                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, selectedIssueKeysOrdered);
+                    return new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, filterPlotData);
+                },
 
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const data = this._getDataToPlot();
                     this.chartWrapper = new TouchTimeByIssuesChartBuilder('touchTimeIssues')
                         .withChartType('bar')
                         .withTooltipHeaderTitleBold()
                         .withTooltipNumberOfDecimals(2)
-                        .withCategories(selectedIssueKeysOrdered)
-                        .withSeriesData(series)
-                        .withTimelineFilterCallback(this.recreateChart.bind(this))
+                        .withCategories(data.selectedIssueKeysOrdered)
+                        .withSeriesData(data.series)
+                        .withTimelineFilterCallback(this._updateSeries.bind(this))
                         .build();
                     dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chartWrapper);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
-                _orderIssueKeysByTotalEffort: function (selectedIssueKeys, effortByStatusByIssueKey) {
-                    const totalEffortByIssueKey = effortByStatusByIssueKey
-                        .map(( { value: effortByIssueKey } ) => effortByIssueKey)
-                        .reduce((previous, current) => {
-                            Object.keys(current).forEach(issueKey => previous[issueKey] = (previous[issueKey] || 0) + current[issueKey]);
-                            return previous;
-                        }, {});
-
-                    return Object.entries(totalEffortByIssueKey)
-                        .sort((entry1, entry2) => this._sortTotalEffort(entry1[1], entry2[1], { ascending: false }))
-                        .map(entry => entry[0])
-                        .filter(issueKey => selectedIssueKeys.has(issueKey));
-                },
-
-                _sortTotalEffort: function (totalEffort1, totalEffort2, {ascending = true} = {}) {
-                    if (ascending) {
-                        return totalEffort1 - totalEffort2;
+                
+                _updateSeries: function () {
+                    const plotData = this._getDataToPlot();
+                    const series = plotData.series;
+                    const redraw = false;
+                    while (this.chartWrapper.highchartChart.series.length > 0) {
+                        this.chartWrapper.highchartChart.series[0].remove(redraw);
                     }
-                    return totalEffort2 - totalEffort1;
+                    series.forEach(s => this.chartWrapper.highchartChart.addSeries(s, redraw));
+                    this.chartWrapper.highchartChart.redraw();
+                },
+                
+                _getDataToPlot: function () {
+                    const issuesFilteredByTimeline = this._filterByTimeline();
+                    this._orderIssuesByTotalEffort(issuesFilteredByTimeline);
+                    const selectedIssueKeysOrdered = [...new Set(issuesFilteredByTimeline.map(i => i.issueKey))];
+                    const series = this._transformToHighchartsSeries(issuesFilteredByTimeline, selectedIssueKeysOrdered);
+                    return {
+                        series: series,
+                        selectedIssueKeysOrdered: selectedIssueKeysOrdered
+                    };
                 },
 
-                _transformToHighchartsSeries: function (effortByStatusByIssueKey, issueKeysOrderLUT) {
-                    return effortByStatusByIssueKey.map(
-                        ({key: status, value: effortByIssueKey}) => {
-                            return {
-                                name: status, 
-                                data: issueKeysOrderLUT.map((issueKey) => effortByIssueKey[issueKey])
+                _filterByTimeline: function () {
+                    const [tlStart, tlEnd] = dcDateRangeChartsService.getTimelineRange();
+                    return this._plotData.filteredData.filter(issue => 
+                        issue.startProgressingDate <= tlEnd && issue.endProgressingDate >= tlStart);
+                },
+
+                _orderIssuesByTotalEffort: function (issues) {
+                    const reduceTotalEffort = (previous, current) => {
+                        if (previous[current.issueKey] === undefined) {
+                            previous[current.issueKey] = 0;
+                        }
+                        previous[current.issueKey] += current.effortInHours;
+                        return previous;
+                    };
+                    const compareTotalEffort = (totalEffort1, totalEffort2, {ascending = true} = {}) => {
+                        if (ascending) {
+                            return totalEffort1 - totalEffort2;
+                        }
+                        return totalEffort2 - totalEffort1;
+                    };
+                    const totalEffortByIssueKey = issues.reduce(reduceTotalEffort, {});
+                    issues.sort(({issueKey: issueKey1}, {issueKey: issueKey2}) => 
+                        compareTotalEffort(totalEffortByIssueKey[issueKey1], totalEffortByIssueKey[issueKey2], { ascending: false }));
+                },
+
+                _transformToHighchartsSeries: function (issues) {
+                    const reduceFunction = (previous, current) => {
+                        if (previous[current.issueStatus] === undefined) {
+                            previous[current.issueStatus] = {
+                                name: current.issueStatus,
+                                data: []
                             };
                         }
-                    );
-                },
-
-                recreateChart: function () {
-                    if (this.chartWrapper != null) {
-                        this.chartWrapper.destroy();
-                    }
-                    this._createChart();
+                        previous[current.issueStatus].data.push(current.effortInHours);
+                        return previous;
+                    };
+                    const series = Object.values(issues.reduce(reduceFunction, {})).sort((a, b) => a.name.localeCompare(b.name));
+                    return series;
                 }
-
             });
         })();
     </script>
