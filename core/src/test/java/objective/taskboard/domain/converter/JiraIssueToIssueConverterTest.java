@@ -24,7 +24,6 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static objective.taskboard.domain.converter.FieldValueExtractor.UNSUPPORTED_EXTRACTION_VALUE;
-import static objective.taskboard.followup.FollowUpHelper.COST_CENTER_FIELD_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -88,6 +87,8 @@ import objective.taskboard.utils.IOUtilities;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JiraIssueToIssueConverterTest {
+
+    public static final String COST_CENTER_FIELD_ID = "customfield_10390";
 
     private static final String PARENT_ISSUE_KEY = "ISSUE-1";
     private static final String ISSUE_KEY = "ISSUE-2";

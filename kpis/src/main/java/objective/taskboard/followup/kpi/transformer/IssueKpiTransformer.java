@@ -122,10 +122,9 @@ public class IssueKpiTransformer {
 
     private void map(){
         for (IssueKpiDataItemAdapter itemProvider : items.values()) {
-
-            Optional<StatusTransition> finalStatusTransition = Optional.empty();
-            Optional<StatusTransition> next = finalStatusTransition;
-
+            
+            Optional<StatusTransition> next = Optional.empty();
+            
             for (Entry<String,ZonedDateTime> transition : itemProvider.getTransitions().entrySet()) {
                 String status = transition.getKey();
                 ZonedDateTime date = transition.getValue();

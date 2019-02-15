@@ -21,9 +21,9 @@
 package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
-import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
-import static objective.taskboard.followup.FollowUpHelper.getDefaultThroughputDataSet;
-import static objective.taskboard.followup.FollowUpHelper.getDefaultWipDataSet;
+import static objective.taskboard.followup.FollowUpReportHelper.getDefaultFollowupData;
+import static objective.taskboard.followup.FollowUpReportHelper.getDefaultThroughputDataSet;
+import static objective.taskboard.followup.FollowUpReportHelper.getDefaultWipDataSet;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

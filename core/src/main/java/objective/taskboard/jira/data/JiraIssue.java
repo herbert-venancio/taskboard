@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import org.springframework.boot.configurationprocessor.json.JSONObject;
-
 import objective.taskboard.jira.properties.JiraProperties;
 import retrofit.client.Response;
 import retrofit.http.Body;

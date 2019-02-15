@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 @ConfigurationProperties("kpi")
 @PropertySource("classpath:kpi.properties")
+@PropertySource(value="file:./kpi.properties", ignoreResourceNotFound=true)
 @Validated
 public class KPIProperties {
 
@@ -28,35 +29,6 @@ public class KPIProperties {
     @NotEmpty
     @Valid
     private List<String> progressingStatuses;
-
-    @Valid
-    private CumulativeFlowDiagramProperties cumulativeFlowDiagram = new CumulativeFlowDiagramProperties();
-
-    @NotEmpty
-    @Valid
-    private List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs;
-
-    @Valid
-    private KpiCycleTimeProperties cycleTime;
-
-    @Valid
-    private KpiLeadTimeProperties leadTime = new KpiLeadTimeProperties();
-
-    public KpiLeadTimeProperties getLeadTime() {
-        return leadTime;
-    }
-
-    public void setLeadTime(KpiLeadTimeProperties leadTime) {
-        this.leadTime = leadTime;
-    }
-
-    public KpiCycleTimeProperties getCycleTime() {
-        return cycleTime;
-    }
-
-    public void setCycleTime(KpiCycleTimeProperties cycleTime) {
-        this.cycleTime = cycleTime;
-    }
 
     public IssueTypeChildrenStatusHierarchy getFeaturesHierarchy() {
         return featuresHierarchy;
@@ -80,22 +52,6 @@ public class KPIProperties {
 
     public void setDemandHierarchy(IssueTypeChildrenStatusHierarchy demandHierarchy) {
         this.demandHierarchy = demandHierarchy;
-    }
-
-    public CumulativeFlowDiagramProperties getCumulativeFlowDiagram() {
-        return cumulativeFlowDiagram;
-    }
-
-    public void setCumulativeFlowDiagram(CumulativeFlowDiagramProperties cumulativeFlowDiagram) {
-        this.cumulativeFlowDiagram = cumulativeFlowDiagram;
-    }
-
-    public List<TouchTimeSubtaskConfiguration> getTouchTimeSubtaskConfigs() {
-        return touchTimeSubtaskConfigs;
-    }
-
-    public void setTouchTimeSubtaskConfigs(List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs) {
-        this.touchTimeSubtaskConfigs = touchTimeSubtaskConfigs;
     }
 
 }

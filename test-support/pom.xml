@@ -59,6 +59,11 @@
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
-		</dependency>		
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.sonar-plugins.java</groupId>
+			<artifactId>sonar-jacoco-listeners</artifactId>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 </project>

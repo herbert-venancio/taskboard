@@ -12,7 +12,7 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
-import objective.taskboard.followup.kpi.touchTime.TouchTimeFilter;
+import objective.taskboard.followup.kpi.touchTime.WithinRangeFilter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.followup.kpi.transformer.IssueKpiTransformer;
@@ -61,7 +61,7 @@ public class IssueKpiService {
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()
                                         .settingWorklogWithTimezone(timezone)
-                                        .filter(new TouchTimeFilter(timezone, range))
+                                        .filter(new WithinRangeFilter(timezone, range))
                                         .transform();
 
         return issuesKpi.stream().filter(i -> i.getLevel() == kpiLevel).collect(Collectors.toList());

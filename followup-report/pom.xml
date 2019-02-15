@@ -24,15 +24,20 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<version>${kpi.plugins.version}</version>
+			<artifactId>kpi-throughput</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<version>${kpi.plugins.version}</version>
+			<artifactId>kpi-wip</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 			<artifactId>test-support</artifactId>
 			<scope>test</scope>
 		</dependency>		
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.docx4j</groupId>
 			<artifactId>docx4j</artifactId>
@@ -43,11 +48,6 @@
 					<artifactId>guava</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.sonar-plugins.java</groupId>
-			<artifactId>sonar-jacoco-listeners</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

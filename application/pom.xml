@@ -4,7 +4,6 @@
 		<groupId>br.com.objective</groupId>
 		<artifactId>taskboard-parent</artifactId>
 		<version>0.0.82-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>application</artifactId>
 	<packaging>war</packaging>
@@ -49,15 +48,58 @@
 			<version>${project.version}</version>
 			<artifactId>sizing-importer</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-budget-chart</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-cfd</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-cycle-time</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-planned-x-ballpark</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-progress-chart</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-scope-by-type</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-throughput</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-touch-time</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-wip</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 			<artifactId>test-support</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -68,11 +110,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.sonar-plugins.java</groupId>
-			<artifactId>sonar-jacoco-listeners</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

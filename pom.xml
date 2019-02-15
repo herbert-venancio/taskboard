@@ -17,6 +17,7 @@
 		<module>core</module>
 		<module>application</module>
 		<module>kpis</module>
+		<module>kpi-parent</module>
 		<module>followup-core</module>
 		<module>followup-report</module>
 		<module>dashboard</module>
@@ -48,6 +49,7 @@
 		<project.build.date>${maven.build.timestamp}</project.build.date>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 		<springboot.version>1.5.13.RELEASE</springboot.version>
+		<kpi.plugins.version>${project.version}</kpi.plugins.version>
 	</properties>
 	<prerequisites>
 		<maven>3.1.0</maven>
@@ -399,7 +401,6 @@
 				<groupId>org.codehaus.sonar-plugins.java</groupId>
 				<artifactId>sonar-jacoco-listeners</artifactId>
 				<version>3.2</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>

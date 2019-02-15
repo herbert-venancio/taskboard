@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
 
 import com.google.common.collect.Streams;
 
-import objective.taskboard.followup.FollowUpHelper;
+import objective.taskboard.followup.FollowUpReportHelper;
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SimpleSheet;
@@ -69,7 +69,7 @@ public class SpreadsheetEditorTest {
             assertEquals("Last shared string", 203, sharedStrings.get("BALLPARK").longValue());
 
             Sheet sheet = subject.getSheet("From Jira");
-            for (FromJiraDataRow followUpData : FollowUpHelper.getDefaultFromJiraDataRowList()) 
+            for (FromJiraDataRow followUpData : FollowUpReportHelper.getDefaultFromJiraDataRowList())
                 addRow(sheet, followUpData);
             sheet.save();
 
@@ -97,7 +97,7 @@ public class SpreadsheetEditorTest {
             header.addColumn("Cycle Hours per Role With Risk");
             header.addColumn("demand_type");
 
-            addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
+            addRow(sheet, FollowUpReportHelper.getDefaultFromJiraDataRow());
             sheet.save();
 
             String jiraDataSheet = subject.getSheet("From Jira").stringValue();
@@ -161,7 +161,7 @@ public class SpreadsheetEditorTest {
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
 
             Sheet sheet = subject.getSheet("From Jira");
-            for (FromJiraDataRow followUpData : FollowUpHelper.getDefaultFromJiraDataRowList()) 
+            for (FromJiraDataRow followUpData : FollowUpReportHelper.getDefaultFromJiraDataRowList())
                 addRow(sheet, followUpData);
 
             sheet.save();
@@ -242,7 +242,7 @@ public class SpreadsheetEditorTest {
             Sheet sheet = subject.createSheet("A New Sheet");
 
             for (int i = 0; i < 5000; i++) {
-                addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
+                addRow(sheet, FollowUpReportHelper.getDefaultFromJiraDataRow());
             }
             sheet.save();
         }
