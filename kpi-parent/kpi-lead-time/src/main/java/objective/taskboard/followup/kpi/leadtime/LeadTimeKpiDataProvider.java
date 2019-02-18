@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 import objective.taskboard.followup.kpi.properties.LeadTimeProperties;
 

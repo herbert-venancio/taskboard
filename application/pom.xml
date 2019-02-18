@@ -66,6 +66,11 @@
 		</dependency>
 		<dependency>
 			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-lead-time</artifactId>
+			<version>${kpi.plugins.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
 			<artifactId>kpi-planned-x-ballpark</artifactId>
 			<version>${kpi.plugins.version}</version>
 		</dependency>

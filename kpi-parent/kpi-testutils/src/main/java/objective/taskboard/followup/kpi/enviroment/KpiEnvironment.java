@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi.BehaviorFactory;
