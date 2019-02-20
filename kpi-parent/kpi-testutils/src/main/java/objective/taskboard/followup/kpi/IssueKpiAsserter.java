@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.Range;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
@@ -41,9 +40,9 @@ public class IssueKpiAsserter<T> {
     public IssueKpiAsserter<IssueKpiAsserter<T>> withChild(String childKey) {
         Optional<IssueKpi> child = findChildByKey(childKey);
         if(!child.isPresent())
-            Assert.fail(String.format("Child %s not found", childKey));
+            throw new AssertionError(String.format("Child %s not found", childKey));
 
-        return new IssueKpiAsserter<IssueKpiAsserter<T>>(child.get(),this.environment,this);
+        return new IssueKpiAsserter<>(child.get(),this.environment,this);
     }
 
     public IssueKpiAsserter<T> hasChild(String childKey) {
@@ -142,7 +141,8 @@ public class IssueKpiAsserter<T> {
 
         public IssueKpiAsserter<T> endsOn(String end) {
             Optional<Range<LocalDate>> opRange = getRange();
-            assertTrue(opRange.isPresent());
+            if(!opRange.isPresent())
+                throw new AssertionError("opRange is not present");
             Range<LocalDate> range = opRange.get();
 
             LocalDate endDate = LocalDate.parse(end);

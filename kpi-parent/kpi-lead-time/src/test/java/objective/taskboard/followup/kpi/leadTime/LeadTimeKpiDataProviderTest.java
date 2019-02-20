@@ -1,7 +1,6 @@
 package objective.taskboard.followup.kpi.leadTime;
 
 import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesMocker.withSubtaskLeadTimeProperties;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -17,7 +16,6 @@ import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiDataProvider;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 
 public class LeadTimeKpiDataProviderTest {

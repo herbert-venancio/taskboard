@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class KpiExtensionService {
 
-    private final List<BasicKpiFrontendExtension> items;
+    private final List<KpiFrontendExtension> items;
 
     @Autowired
-    public KpiExtensionService(Optional<List<BasicKpiFrontendExtension>> items) {
+    public KpiExtensionService(Optional<List<KpiFrontendExtension>> items) {
         this.items = Collections.unmodifiableList(items.orElse(Collections.emptyList()));
     }
 
-    public List<BasicKpiFrontendExtension> getItems() {
+    public List<KpiFrontendExtension> getItems() {
         return items;
     }
 }
