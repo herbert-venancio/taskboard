@@ -3,11 +3,11 @@ issue-detail paper-autocomplete-suggestions paper-item.active {
     background-color: #B5E8FF !important;
 }
 
- :host * {
-     font-family: 'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
- }
+issue-detail :host * {
+    font-family: 'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
+}
 
-.subtask--status {
+issue-detail .subtask--status {
     border-radius: 5px;
     color: white;
     height: 24px;
@@ -16,90 +16,42 @@ issue-detail paper-autocomplete-suggestions paper-item.active {
     padding-right: 8px;
 }
 
-.subtask--status span {
+issue-detail .subtask--status span {
     display: inline-block;
     margin: auto;
 }
 
-paper-material.subtask-panel:first-child {
+issue-detail paper-material.subtask-panel:first-child {
     border-top: 1px solid #EFEFEF;
     margin-top: 0;
 }
 
-.content-box {
-    padding-left: 24px;
-    padding-right: 24px;
-    padding-top: 24px;
-    margin-bottom: 24px;
-}   
-.subtask--status {
-    border-radius: 5px;
-    color: white;
-    height: 24px;
-    font-size: 12px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-.subtask--status span {
-    display: inline-block;
-    margin: auto;
-}
-
-paper-material.subtask-panel:first-child {
-    border-top: 1px solid #EFEFEF;
-    margin-top: 0;
-}
-
-.content-box {
+issue-detail .content-box {
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 24px;
     margin-bottom: 24px;
 }
 
- .people--separator {
+ issue-detail .people--separator {
      height: 0px;
      margin-top: 32px;
      border: 1px none #8e8e8e;
      border-top-style: solid;
  }
 
-  /* width */
- ::-webkit-scrollbar {
-     width: 10px;
- }
-
- /* Track */
- ::-webkit-scrollbar-track {
-     background: #f1f1f1;
-     border-radius: 10px;
- }
-
- /* Handle */
- ::-webkit-scrollbar-thumb {
-     background: #888;
-     border-radius: 10px;
- }
-
- /* Handle on hover */
- ::-webkit-scrollbar-thumb:hover {
-     background: #555;
-     border-radius: 10px;
- }
-
- .project-title {
+ issue-detail .project-title {
      color: #8E8E8E;
  }
 
- .transitions-row {
+ issue-detail .transitions-row {
      display: flex;
      align-items: center;
      font-size: 12px;
      margin-bottom: 24px;
  }
 
- .card-header-custom {
+ issue-detail .card-header-custom {
      width: 100%;
      font-size: 24px;
      display: flex;
@@ -108,20 +60,20 @@ paper-material.subtask-panel:first-child {
      border-radius: 4px 4px 0px 0px;
  }
 
- .card-header-info {
+ issue-detail .card-header-info {
      flex: 1;
  }
 
- .card-header-breadcrumb {
+ issue-detail .card-header-breadcrumb {
      font-size: 10px;
      line-height: 14px;
  }
 
- .arrow {
+ issue-detail .arrow {
      margin: 0 5px;
  }
 
- .card-header-title {
+ issue-detail .card-header-title {
      min-width: initial;
      margin: 0px;
      padding: 0px;
@@ -129,7 +81,7 @@ paper-material.subtask-panel:first-child {
      display: flex;
  }
 
- .card-header-title .card-name-wrapper {
+ issue-detail .card-header-title .card-name-wrapper {
      font-size: 16px;
      line-height: 21px;
      width:calc(100% - 40px);
@@ -139,7 +91,7 @@ paper-material.subtask-panel:first-child {
      color: #F5F5F5;
  }
 
- .card-summary-wrapper {
+ issue-detail .card-summary-wrapper {
      cursor:text;
      display:flex;
      padding-left:5px;
@@ -150,16 +102,16 @@ paper-material.subtask-panel:first-child {
      border-radius:5px;
  }
 
- .card-summary-wrapper.edit-summary-wrapper {
+ issue-detail .card-summary-wrapper.edit-summary-wrapper {
      flex-grow:1;
      justify-content:space-between;
  }
 
- .card-summary-wrapper .card--icons-wrapper paper-button {
+ issue-detail .card-summary-wrapper .card--icons-wrapper paper-button {
      display:none;
  }
 
- .card--icons-wrapper paper-button {
+ issue-detail .card--icons-wrapper paper-button {
      text-align:center;
      margin:0;
      padding:0;
@@ -169,33 +121,33 @@ paper-material.subtask-panel:first-child {
      border-bottom-left-radius:0;
  }
 
- .card-summary-wrapper.edit-summary-wrapper .card--icons-wrapper paper-button {
+ issue-detail .card-summary-wrapper.edit-summary-wrapper .card--icons-wrapper paper-button {
      min-width:18px;
      color:#8E8E8E;
      padding:0;
  }
 
- .card--icons-wrapper iron-icon {
+ issue-detail .card--icons-wrapper iron-icon {
      width:16px;
      height:16px;
  }
 
- .card--icons-wrapper paper-button.card-name__edit-button {
+ issue-detail .card--icons-wrapper paper-button.card-name__edit-button {
      margin-left:5px;
      background-color:#8E8E8E;
  }
 
- .card-summary-wrapper:hover, 
- .card-summary-wrapper.edit-summary-wrapper {
+ issue-detail .card-summary-wrapper:hover,
+ issue-detail .card-summary-wrapper.edit-summary-wrapper {
      border-color:#999;
  }
 
- .card-summary-wrapper.view-summary-wrapper:hover .card--icons-wrapper .card-name__edit-button,
- .card-summary-wrapper.edit-summary-wrapper .card--icons-wrapper paper-button {
+ issue-detail .card-summary-wrapper.view-summary-wrapper:hover .card--icons-wrapper .card-name__edit-button,
+ issue-detail .card-summary-wrapper.edit-summary-wrapper .card--icons-wrapper paper-button {
      display:inline-flex;
  }
 
- .card-summary-wrapper.edit-summary-wrapper .card-summary-field {
+ issue-detail .card-summary-wrapper.edit-summary-wrapper .card-summary-field {
      font-family:'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
      font-size:16px;
      line-height:21px;
@@ -206,33 +158,33 @@ paper-material.subtask-panel:first-child {
      outline: none;
  }
 
- .sub-content {
+ issue-detail .sub-content {
      font-size: 14px;
  }
 
- paper-button {
+ issue-detail paper-button {
      margin-bottom: 12px;
      text-transform: none;
  }
 
- .card-header-buttons {
+ issue-detail .card-header-buttons {
      padding: 0;
      margin-top: auto;
      margin-bottom: auto;
  }
 
- .icon-text {
+ issue-detail .icon-text {
      display: flex;
      align-items: center;
  }
 
- .icon-text .icon {
+ issue-detail .icon-text .icon {
      margin-right: 5px;
      filter: initial;
      bottom: initial;
  }
 
- paper-button.transition-button {
+ issue-detail paper-button.transition-button {
      border-right: 1px solid #E5E5E5;
      border-top: 1px solid #E5E5E5;
      border-bottom: 1px solid #E5E5E5;
@@ -244,42 +196,42 @@ paper-material.subtask-panel:first-child {
      height: 32px;
  }
 
- paper-button.current-status {
+ issue-detail paper-button.current-status {
      background-color: #E27323;
      color: white;
      cursor: default;
  }
 
- paper-button.transition-button:first-of-type {
+ issue-detail paper-button.transition-button:first-of-type {
      border-top-left-radius: 5px !important;
      border-bottom-left-radius: 5px !important;
      border-left: 1px solid #E5E5E5;
  }
 
- paper-button.transition-button:last-of-type {
+ issue-detail paper-button.transition-button:last-of-type {
      border-top-right-radius: 5px !important;
      border-bottom-right-radius: 5px !important;
  }
 
- .block-button-container {
+ issue-detail .block-button-container {
      display: flex;
      margin-left: 16px;
      margin-right: 8px;
  }
 
- .block-button {
+ issue-detail .block-button {
      cursor: pointer;
  }
 
- paper-button[toggles] {
+ issue-detail paper-button[toggles] {
      transition: all 0.3s;
  }
 
- paper-button[toggles][active] {
+ issue-detail paper-button[toggles][active] {
      background-color: rgba(0, 0, 0, 0.25);
  }
 
- #parent-card-name {
+ issue-detail #parent-card-name {
      font-weight: 600;
      margin: 0px;
      padding: 0px;
@@ -287,71 +239,46 @@ paper-material.subtask-panel:first-child {
      color: #5DAFFF;
  }
 
- paper-material.subtask-panel {
+ issue-detail paper-material.subtask-panel {
      display: flex;
      border-bottom: 1px solid #EFEFEF;
      padding: 8px;
  }
- paper-material.subtask-panel > div {
+ issue-detail paper-material.subtask-panel > div {
      display: flex;
      margin-top: auto;
      margin-bottom: auto;
  }
- .subtasks--panel {
+ issue-detail .subtasks--panel {
      width: 100%;
  }
- .subtask--issue-type {
+ issue-detail .subtask--issue-type {
      width: 48px;
  }
- .subtask--issue-type img {
+ issue-detail .subtask--issue-type img {
      margin: auto;
  }
- .subtask--issue-key {
+ issue-detail .subtask--issue-key {
      color: #5DAFFF;
      margin-right: 10px;
  }
 
- paper-button.subtask-link {
+ issue-detail paper-button.subtask-link {
      color: #5DAFFF;
      margin: 0 5px 0 0;
      padding: 0;
      display: inline;
  }
 
- .subtask--summary {
+ issue-detail .subtask--summary {
      flex: 10;
  }
 
- .subtask--status {
-     border-radius: 5px;
-     color: white;
-     height: 24px;
-     font-size: 12px;
-     padding-left: 8px;
-     padding-right: 8px;
- }
- .subtask--status span {
-     display: inline-block;
-     margin: auto;
- }
-
- paper-material.subtask-panel:first-child {
-     border-top: 1px solid #EFEFEF;
-     margin-top: 0;
- }
-
- .content-box {
-     padding-left: 24px;
-     padding-right: 24px;
-     padding-top: 24px;
-     margin-bottom: 24px;
- }
-
- #timetracking_content {
+ issue-detail #timetracking_content {
      height: 40px;
  }
 
- #modal {
+ issue-detail #modal {
      background: white;
      width: 1280px;
      margin: 0;
@@ -361,20 +288,20 @@ paper-material.subtask-panel:first-child {
      overflow-y: initial;
  }
 
- .button-close {
+ issue-detail .button-close {
      min-width: auto;
      display: inline;
      padding: 0;
      margin: 0;
  }
 
- .button-close iron-icon {
+ issue-detail .button-close iron-icon {
      width: 14px;
      height: 14px;
      color: #8E8E8E;
  }
 
- .close-tshirt-bubble {
+ issue-detail .close-tshirt-bubble {
      min-width: auto;
      display: inline;
      padding: 0;
@@ -382,21 +309,21 @@ paper-material.subtask-panel:first-child {
      color: #8E8E8E;
  }
 
- .close-tshirt-bubble iron-icon {
+ issue-detail .close-tshirt-bubble iron-icon {
      width: 10px;
      height: 10px;
  }
 
- .icon img {
+ issue-detail .icon img {
      display: block;
  }
 
- .icon-small {
+ issue-detail .icon-small {
      width: 32px;
      height: 32px;
  }
 
- .description-box {
+ issue-detail .description-box {
      width: 100%;
      border: 1px solid #e5e5e5;
      margin-top: 16px;
@@ -404,7 +331,7 @@ paper-material.subtask-panel:first-child {
      position:relative;
  }
 
- .wrapper-edit {
+ issue-detail .wrapper-edit {
      position:absolute;
      right:0;
      top:0;
@@ -417,12 +344,12 @@ paper-material.subtask-panel:first-child {
      text-align:center;
      display:none;
  }
- 
- .description-box:hover .wrapper-edit {
+
+ issue-detail .description-box:hover .wrapper-edit {
      display:block;
  }
- 
- .description-box__field {
+
+ issue-detail .description-box__field {
      text-align:left;
      resize:none;
      border-top:0;
@@ -434,45 +361,44 @@ paper-material.subtask-panel:first-child {
      height:20vh;
  }
 
- .description-box__footer {
+ issue-detail .description-box__footer {
      padding:16px 24px;
      justify-content:flex-end;
      display:flex;
  }
- 
- 
- .wrapper-edit iron-icon {
+
+ issue-detail .wrapper-edit iron-icon {
      cursor:pointer;
      color:#8e8e8e;
      width:12px;
      height:12px;
  }
-             
- .description-box__footer paper-button.tb-button__default {
+
+ issue-detail .description-box__footer paper-button.tb-button__default {
      margin-right:15px;
  }
 
- .details-row.description-row {
+ issue-detail .details-row.description-row {
      width: 100%;
      margin:0;
      cursor:text;
  }
 
- .description-row--collapsed {
+ issue-detail .description-row--collapsed {
      overflow-y: hidden;
      max-height: 20vh;
      text-overflow: ellipsis;
  }
- .description-row-no-description {
+ issue-detail .description-row-no-description {
      font-style: italic;
      color: #8e8e8e !important;
  }
- .description-row marked-element {
+ issue-detail .description-row marked-element {
      padding:0 24px 0 8px;
      width: 100%;
  }
 
- .descriptionShowMore {
+ issue-detail .descriptionShowMore {
      color: #5DAFFF;
      font-size: 12px;
      margin-top: 10px;
@@ -480,21 +406,21 @@ paper-material.subtask-panel:first-child {
      margin-bottom: 8px;
      cursor: pointer;
  }
- .descriptionShowMore iron-icon {
+ issue-detail .descriptionShowMore iron-icon {
      width: 8px;
      height: 8px;
      margin-bottom: 3px;
      display: inline-block;
  }
- .upsideDown {
+ issue-detail .upsideDown {
      transform: rotate(180deg);
  }
 
- paper-spinner[aria-hidden=true] {
+ issue-detail paper-spinner[aria-hidden=true] {
      display: none;
  }
 
- .glasspane {
+ issue-detail .glasspane {
      position: absolute;
      left: 0px;
      width: 100%;
@@ -507,7 +433,7 @@ paper-material.subtask-panel:first-child {
      cursor: pointer;
  }
 
- .glasspane span {
+ issue-detail .glasspane span {
      font-size: 24px;
      position: absolute;
      top: 50%;
@@ -518,11 +444,11 @@ paper-material.subtask-panel:first-child {
      line-height: 30px;
  }
 
- .visible-glasspane {
+ issue-detail .visible-glasspane {
      visibility: visible !important;
  }
 
- .message-box {
+ issue-detail .message-box {
      position: absolute;
      bottom: 25px;
      right: 25px;
@@ -531,15 +457,15 @@ paper-material.subtask-panel:first-child {
      border-radius: 5px;
      padding: 8px;
  }
- .message-box--error {
+ issue-detail .message-box--error {
      background: #E72915;
  }
 
- .message-box--updating {
+ issue-detail .message-box--updating {
      background: #E2AE33;
  }
 
- .message-box__icon {
+ issue-detail .message-box__icon {
      flex: 0 0 auto;
      width: 14px;
      height: 14px;
@@ -548,20 +474,20 @@ paper-material.subtask-panel:first-child {
      margin-bottom: auto;
  }
 
- .message-box__icon[icon="error"] {
+ issue-detail .message-box__icon[icon="error"] {
      color: white !important;
      width: 20px;
      height: 20px;
  }
 
- .message-box__message {
+ issue-detail .message-box__message {
      flex: 1;
      margin: 0;
      color: white;
      font-weight: normal;
  }
 
- .message-box__close {
+ issue-detail .message-box__close {
      flex: 0 0 auto;
      width: 20px;
      height: 20px;
@@ -571,7 +497,7 @@ paper-material.subtask-panel:first-child {
      color: white;
  }
 
- .tag {
+ issue-detail .tag {
      background-color: #666666;
      font-size: 12px;
      border-radius: 5px;
@@ -585,32 +511,32 @@ paper-material.subtask-panel:first-child {
      margin-bottom: 2px;
  }
 
- .invalid-assignee {
+ issue-detail .invalid-assignee {
      background-color: #E2AE33;
  }
- .invalid-assignee .assignee-button {
+ issue-detail .invalid-assignee .assignee-button {
      color: white !important;
  }
- 
- .assignee span {
+
+ issue-detail .assignee span {
      display: inline-block;
      margin-right: 2px;
  }
- .add-people-icon {
+ issue-detail .add-people-icon {
      width: 9px;
      height: 9px;
      margin: auto 2px;
  }
- .restore-icon {
+ issue-detail .restore-icon {
      width: 9px;
      height: 9px;
      margin: auto 3px;
  }
- #assignToMe {
+ issue-detail #assignToMe {
      margin-right: 8px;
  }
 
- .people-action-link {
+ issue-detail .people-action-link {
      cursor: pointer;
      color: #5DAFFF;
      font-size: 12px;
@@ -619,64 +545,64 @@ paper-material.subtask-panel:first-child {
      margin-bottom: 5px;
  }
 
- #restoreTeamButton {
+ issue-detail #restoreTeamButton {
      margin-left: 10px;
  }
 
- .people-actions {
+ issue-detail .people-actions {
      display: flex;
      white-space: nowrap;
  }
 
- .people-action-link span {
+ issue-detail .people-action-link span {
      margin: auto;
  }
 
- .icon-tiny {
+ issue-detail .icon-tiny {
      width: 12px;
      height: 12px;
  }
 
- .remove-button {
+ issue-detail .remove-button {
      width: 10px;
      height: 10px;
  }
 
- .assignee-button {
+ issue-detail .assignee-button {
      cursor: pointer;
      color: #8E8E8E;
      margin: auto 2px auto 5px;
  }
 
- .default-team, .team-by-issue-type {
+ issue-detail .default-team, issue-detail .team-by-issue-type {
      background-color: #8e8e8e !important;
      cursor: pointer;
  }
 
- .default-team iron-icon, .team-by-issue-type iron-icon {
+ issue-detail .default-team iron-icon, issue-detail .team-by-issue-type iron-icon {
      color: #e5e5e5 !important;
  }
 
- .parent-team {
+ issue-detail .parent-team {
      background-color: #8e8e8e !important;
      cursor: pointer;
  }
- 
- .tshirt {
+
+ issue-detail .tshirt {
      background-color: #8e8e8e !important;
  }
 
- .parent-team iron-icon, 
- .tshirt iron-icon {
+ issue-detail .parent-team iron-icon,
+ issue-detail .tshirt iron-icon {
      color: #e5e5e5 !important;
  }
 
- #tshirt-selector {
+ issue-detail #tshirt-selector {
      cursor:pointer;
  }
 
- .people-picker,
- .ballpark-picker {
+ issue-detail .people-picker,
+ issue-detail .ballpark-picker {
      display: none;
      background-color: #666666;
      font-size: 12px;
@@ -689,59 +615,59 @@ paper-material.subtask-panel:first-child {
      height: 24px;
  }
 
- .blocked {
+ issue-detail .blocked {
      background-color: #FCE196;
      border-radius: 4px;
      padding: 16px;
      display: flex;
  }
- .blocked iron-icon {
+ issue-detail .blocked iron-icon {
      margin-top: auto;
      margin-bottom: auto;
  }
- .blocked span {
+ issue-detail .blocked span {
      margin-top: auto;
      margin-bottom: auto;
      margin-left: 10px;
      display: inline-block;
  }
 
- .cancelled {
+ issue-detail .cancelled {
      background-color: #FCE196;
      border-radius: 4px;
      padding: 16px;
      display: flex;
  }
- .cancelled iron-icon {
+ issue-detail .cancelled iron-icon {
      margin-top: auto;
      margin-bottom: auto;
  }
- .cancelled span {
+ issue-detail .cancelled span {
      margin-top: auto;
      margin-bottom: auto;
      margin-left: 10px;
      display: inline-block;
  }
 
- .panel-parent {
+ issue-detail .panel-parent {
      display: flex;
      height: 60vh;
  }
 
- .leftPanel {
+ issue-detail .leftPanel {
      width: 64%;
      display: block;
      overflow-y: scroll;
      padding-right: 1em;
  }
 
- .rightPanel {
+ issue-detail .rightPanel {
      padding-left: 10px;
      width: 36%;
      display: inline-block;
  }
 
- .subtitle {
+ issue-detail .subtitle {
      font-size: 16px;
      display: flex;
      margin-top: 32px;
@@ -749,49 +675,49 @@ paper-material.subtask-panel:first-child {
      line-height: 22px;
  }
 
- .subtitle:first-of-type {
+ issue-detail .subtitle:first-of-type {
      margin-top: 0px;
  }
 
- .subtitle--slot1 {
+ issue-detail .subtitle--slot1 {
      flex: 1;
      font-weight: bold;
  }
 
- .subtasks--title {
+ issue-detail .subtasks--title {
      margin-bottom: 12px;
  }
 
- .tshirtSizesView {
+ issue-detail .tshirtSizesView {
      font-size: 12px;
      color: #5DAFFF;
      display: flex;
  }
 
- .tshirtSizesView * {
+ issue-detail .tshirtSizesView * {
      cursor: pointer;
  }
 
- .tshirtSizesView label {
+ issue-detail .tshirtSizesView label {
      margin-top: auto;
      margin-bottom: auto;
      margin-left: 5px;
  }
 
- .subsubtitle {
+ issue-detail .subsubtitle {
      margin-bottom: 8px;
      font-size: 14px;
      font-weight: bold;
  }
 
- .details-row {
+ issue-detail .details-row {
      width: 100%;
      display: flex;
      flex-wrap: wrap;
      margin: 16px 0px;
  }
 
- .tshirt-bubble {
+ issue-detail .tshirt-bubble {
      display: none;
      border-radius: 5px;
      border: 1px solid #E3E3E3;
@@ -805,8 +731,8 @@ paper-material.subtask-panel:first-child {
      -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.15);
      box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.15);
  }
- 
- .tshirt-bubble-arrow {
+
+ issue-detail .tshirt-bubble-arrow {
      background-color: white;
      box-shadow: -1px 1px 1px 0 rgba( 0, 0, 0, .25);
      content: "\00a0";
@@ -823,7 +749,7 @@ paper-material.subtask-panel:first-child {
      width: 10px;
  }
 
- .tshirt-line {
+ issue-detail .tshirt-line {
      border-bottom: 1px solid #E3E3E3;
      font-size: 12px;
      color: #555555;
@@ -831,22 +757,22 @@ paper-material.subtask-panel:first-child {
      padding-top: 8px;
      padding-bottom: 8px;
  }
- .tshirt-label {
+ issue-detail .tshirt-label {
      flex: 1;
  }
- .tshirt-label--header {
+ issue-detail .tshirt-label--header {
      font-size: 14px;
      font-weight: bold;
      padding-top: 0px;
  }
- .details-column {
+ issue-detail .details-column {
      flex: 1
  }
- .text {
+ issue-detail .text {
      font-size: 14px;
  }
- #class-of-service-value,
- #tshirt-value {
+ issue-detail #class-of-service-value,
+ issue-detail #tshirt-value {
      float:left;
      border-radius: 5px;
      padding: 0px 6px;
@@ -857,33 +783,33 @@ paper-material.subtask-panel:first-child {
      margin:0;
  }
 
- .class-of-service-value__wrapper {
+ issue-detail .class-of-service-value__wrapper {
      display:flex;
  }
- 
- .class-of-service-value__wrapper .assignee-button {
+
+ issue-detail .class-of-service-value__wrapper .assignee-button {
      display:none;
  }
 
- .class-of-service-value__wrapper:hover .assignee-button {
+ issue-detail .class-of-service-value__wrapper:hover .assignee-button {
      display:block;
  }
 
- .class-of-service-value__wrapper,
- #tshirt-value,
- #class-of-service-selector {
+ issue-detail .class-of-service-value__wrapper,
+ issue-detail #tshirt-value,
+ issue-detail #class-of-service-selector {
      cursor:pointer;
  }
 
- .hidden-section {
+ issue-detail .hidden-section {
      display: none;
  }
- .button-open-jira {
+ issue-detail .button-open-jira {
      min-width: auto;
      padding: 0px 5px 0px 0px;
      margin: 0px 0px 0px 0px;
  }
- .button-open-jira iron-icon {
+ issue-detail .button-open-jira iron-icon {
      width: 16px;
      height: 16px;
      color: #8E8E8E;
