@@ -1,39 +1,16 @@
-<!--
-  [LICENSE]
-  Taskboard
-  ---
-  Copyright (C) 2015 - 2016 Objective Solutions
-  ---
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  [/LICENSE]
-  -->
 <dom-module id="widget-budget-chart">
 
     <template>
 
        <style>
-            .widget__body {
-                display: flex;
-            }
             #budget-chart {
-                display: flex;
                 height: 100%;
                 width: 100%;
             }
         </style>
 
-        <widget-wrap title="Budget Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" highcharts-chart="{{chart}}">
+        <widget-wrap title="Budget Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}"
+                highcharts-chart="{{chart}}" options="{{options}}">
             <div id="budget-chart" class="tb-chart"></div>
         </widget-wrap>
 
@@ -47,54 +24,57 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true,
-                        value: '',
                         observer: '_onProjectSelected'
-                    },
-                    selectedDate: {
-                        type: String,
-                        notify: true,
-                        value: '',
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
                         type: String,
-                        notify: true,
                         value: '',
                     },
                     chart: {
                         type: Object,
-                        notify: true,
-                        value: function() { return {}; }
+                        value: null
                     },
                     options: {
                         type: Array,
-                        value: function() { return []; }
+                        value: () => []
                     },
-                    _btUpdate: {
-                        type: Object,
-                        value: function () { return {} }
+                    isVisible: {
+                        type: Boolean
+                    },
+                    _plotData: {
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
                     }
                 },
 
-                _onProjectSelected: function() {
-                    this.reloadChart();
+                observers: [
+                    '_createChart(_isPlotDataUpdated, isVisible)'
+                ],
+
+                _onProjectSelected: function(newSelectedProjectKey, previousSelectedProjectKey) {
+                    if (newSelectedProjectKey === previousSelectedProjectKey) {
+                        return;
+                    }
+                    this._fetchData(newSelectedProjectKey);
                 },
 
-                reloadChart: function(){
+                _fetchData: function(selectedProjectKey){
 
                     this.reset();
-                    var url = `/api/projects/${this.selectedProjectKey}/followup/budget?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
+                    var url = `/api/projects/${selectedProjectKey}/followup/budget?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
 
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
-                        this.plotData = this.prepareData(data);
-                        this.createChart();
-                        this.isReady = true;
+                        if (!data) {
+                            this.errorMessage = 'Budget has no data';
+                        }
+                        this._prepareData(data);
                     });
                     
                     this.xhr.fail((error) => {
@@ -102,9 +82,9 @@
                     });
                 },
 
-                prepareData: function(data){
+                _prepareData: function (data){
 
-                    function formatPlotData(type, array, color, dashStyle = "Solid") {
+                    function formatPlotData(type, array, color, dashStyle = 'Solid') {
                         var serie = {};
                         serie.name = type;
                         serie.data = [];
@@ -122,27 +102,34 @@
 
                     var graphData = [];
 
-                    graphData.push(formatPlotData("Budget", data.budget, "#53B873"));
-                    graphData.push(formatPlotData("Scope Done", data.scopeDone, "#FA6A01"));
-                    graphData.push(formatPlotData("Scope Total", data.scopeTotal, '#5DAFFF'));
-                    graphData.push(formatPlotData("Scope Done Projection", data.scopeDoneProjection, "#FFCF0F", "ShortDash"));
-                    graphData.push(formatPlotData("Scope Total Projection", data.scopeTotalProjection, "#C464DB", "ShortDash"));
+                    graphData.push(formatPlotData('Budget', data.budget, '#53B873'));
+                    graphData.push(formatPlotData('Scope Done', data.scopeDone, '#FA6A01'));
+                    graphData.push(formatPlotData('Scope Total', data.scopeTotal, '#5DAFFF'));
+                    graphData.push(formatPlotData('Scope Done Projection', data.scopeDoneProjection, '#FFCF0F', 'ShortDash'));
+                    graphData.push(formatPlotData('Scope Total Projection', data.scopeTotalProjection, '#C464DB', 'ShortDash'));
                     this.projectionDate = data.projectionDate;
 
                     this.startDate = getDateFromIso(data.startingDate);
                     this.endDate = getDateFromIso(data.endingDate);
 
-                    return graphData;
+                    this._plotData = graphData;
+                    this._isPlotDataUpdated = true;
                 },
 
-                createChart: function(){
-                    const builder = new BudgetChartBuilder('budget-chart', this.startDate, this.EndDate, this.projectionDate)
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const builder = new BudgetChartBuilder('budget-chart', this.startDate, this.endDate, this.projectionDate)
                         .withChartType('spline')
-                        .withSeriesData(this.plotData)
-                        .withPlotLineAt(this.plotData[3].data[0][0]);
+                        .withSeriesData(this._plotData)
+                        .withPlotLineAt(this._plotData[3].data[0][0]);
                     this.chart = builder.build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
                 ready: function () {
@@ -151,33 +138,28 @@
 
                 _createChartOptions: function() {
                     this.options = new WidgetOptionsBuilder(this)
-                        .withCustomOption(
-                            new WidgetOptionBuilder()
-                                .withIcon('taskboard-icons:dashboard-filter')
-                                .withTitle('Chart filters')
-                                .withOnTap(() => this.$.modal.open())
-                                .withHidden(true)
-                                .build()
-                        )
                         .withFullscreen()
                         .build();
                 },
+
                 reset: function () {
                     this.isReady = false;
                     this.errorMessage = '';
-                    this.set('options.0.cssClasses', '');
-                    this.set('options.0.hidden', true);
+                    
                     if (this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
                     if (this.chart) {
                         dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
-                },
-
+                }
             });
         })();
     </script>
