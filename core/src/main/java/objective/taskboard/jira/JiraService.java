@@ -204,7 +204,7 @@ public class JiraService {
     }
     
     public void saveDescription(String issueKey, String value) {
-        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder()
                 .description(value)
                 .build());
 
@@ -223,7 +223,7 @@ public class JiraService {
     }
     
     public void saveSummary(String issueKey, String summary) {
-        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder()
                 .summary(summary)
                 .build());
 

@@ -160,7 +160,7 @@ public class IssueController {
     }
     
     @RequestMapping(path ="saveDescription/{issue}", method = RequestMethod.POST)
-    public CardDto saveDescription(@PathVariable("issue") String issueKey, @RequestBody String description) {
+    public CardDto saveDescription(@PathVariable("issue") String issueKey, @RequestBody(required=false) String description) {
         return toCardDto(issueBufferService.saveDescription(issueKey, description));
     }
 
@@ -170,7 +170,7 @@ public class IssueController {
     }
 
     @RequestMapping(path = "saveSummary/{issue}", method = RequestMethod.POST)
-    public CardDto saveSummary(@PathVariable("issue") String issueKey, @RequestBody String summary) {
+    public CardDto saveSummary(@PathVariable("issue") String issueKey, @RequestBody(required=false) String summary) {
         return toCardDto(issueBufferService.saveSummary(issueKey, summary));
     }
 

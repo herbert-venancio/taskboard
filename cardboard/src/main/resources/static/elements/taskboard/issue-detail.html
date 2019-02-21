@@ -299,6 +299,7 @@
                  margin-top: 16px;
                  border-radius:4px;
                  position:relative;
+                 min-height:50px;
              }
 
              .description-box:hover .wrapper-edit {
@@ -999,7 +1000,7 @@
                                 </template>
 
                                 <template is="dom-if" if="{{descriptionIsEditable}}">
-                                    <textarea class="description-box__field" name="description" id="description" value={{item.description::input}}></textarea>
+                                    <textarea class="description-box__field" name="description" id="description" value={{editableDescription::input}}></textarea>
                                     <div class="description-box__footer">
                                         <paper-button class="tb-button tb-button__default" on-tap="_closeDescriptionEditMode">Cancel</paper-button>
                                         <paper-button class="tb-button tb-button--type_button description--save-button" on-tap="_saveIssueDescription">Save</paper-button>
@@ -1168,6 +1169,11 @@
                     item: {
                         type: Object,
                         notify: true
+                    },
+
+                    editableDescription: {
+                        type: String,
+                        value: ""
                     },
 
                     projectMetadata: {
@@ -1586,12 +1592,13 @@
                 },
                 
                 _closeDescriptionEditMode: function() {
+                     this.editableDescription = this.item.description;
                      this.descriptionIsEditable = false;
                 },
                 
                 _saveIssueDescription: function() {
                     var self = this;
-
+                    this.item.description = this.editableDescription;
                     this._issueAction("saveDescription", "save description " + this.item.issueKey, this.item.description)
                     .fail(function(){
                             self.descriptionIsEditable = true;
@@ -1867,6 +1874,7 @@
                 setCard: function(item) {
                     var self = this;
                     
+                    this.editableDescription = item.description;
                     this.hasSubtasks = (typeof item.subtasks !== undefined && item.subtasks.length > 0);
                     this.canHaveSubtasks = item.feature || item.demand;
                     this.canShowSize = item.subTask && item.cardTshirtSize;

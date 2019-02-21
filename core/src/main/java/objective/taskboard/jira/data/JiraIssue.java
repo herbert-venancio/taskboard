@@ -95,7 +95,7 @@ public class JiraIssue {
         }
 
         public T summary(String value) {
-            return field("summary", value);
+            return field("summary", value == null ? "" : value);
         }
 
         public T reporter(FieldBuilder fieldBuilder) {
@@ -107,7 +107,7 @@ public class JiraIssue {
         }
 
         public T description(String value) {
-            return field("description", value);
+            return field("description", value == null ? "" : value);
         }
 
         public T originalEstimate(String value) {
