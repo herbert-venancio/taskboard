@@ -63,13 +63,12 @@
                         type: Array,
                         value: () => []
                     },
-                    _plotStartLines: {
-                        type: Object,
-                        value: []
-                    },
                     tempProjectionTimespan: {
                         type: Number,
                         value: null
+                    },
+                    isVisible: {
+                        type: Boolean
                     },
                     _btUpdate: {
                         type: Object,
@@ -78,14 +77,17 @@
                     _plotData: {
                         type: Object
                     },
-                    _stylesApplied: {
-                        type: Boolean,
-                        value: false
+                    _isPlotDataUpdated: {
+                        type: Boolean
+                    },
+                    _plotStartLines: {
+                        type: Object,
+                        value: []
                     }
                 },
 
                 observers: [
-                    '_createChart(_plotData, _stylesApplied)'
+                    '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
 
                 ready: function() {
@@ -95,7 +97,7 @@
                         .id('update')
                         .onClick(() => {
                             this.$.modal.close();
-                            this._fetchData();
+                            this._fetchData(this.selectedProjectKey);
                         })
                         .build();
                 },
@@ -119,17 +121,17 @@
                         return;
                     }
                     this._resetProjectionTimespan();
-                    this._fetchData();
+                    this._fetchData(newSelectedProjectKey);
                 },
 
                 _resetProjectionTimespan: function() {
                     this.tempProjectionTimespan = null;
                 },
 
-                _fetchData: function () {
+                _fetchData: function (selectedProjectKey) {
                     this.reset();
                     const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    let url = `/api/projects/${this.selectedProjectKey}/followup/progress?timezone=${timezone}`;
+                    let url = `/api/projects/${selectedProjectKey}/followup/progress?timezone=${timezone}`;
 
                     if (this.tempProjectionTimespan)
                         url = `${url}&projection=${this.tempProjectionTimespan}`;
@@ -150,8 +152,7 @@
                 _prepareData: function(data) {
                     this._parseData(data);
                     this.tempProjectionTimespan = data.projectionTimespan;
-                    this.startDate = data.startingDate.getTime();
-                    this._setYearsStartLineToPlot(data);
+                    const yearsPlotLines = this._getYearsStartLineToPlot(data);
                     
                     const reduceFunction = (previous, current) => {
                         previous.get('done').data.push([current.date.getTime(), current.sumEffortDone]);
@@ -184,7 +185,12 @@
                         }]
                     ]);
                     const projection = data.actualProjection.reduce(reduceFunction, initial);
-                    this._plotData = [...actual.values(), ...projection.values()];
+                    this._plotData = {
+                        startDate: data.startingDate.getTime(),
+                        yearsPlotLines: yearsPlotLines,
+                        series: [...actual.values(), ...projection.values()]
+                    };
+                    this._isPlotDataUpdated = true;
                 },
 
                 _parseData: function (data) {
@@ -200,7 +206,7 @@
                     data.actualProjection.shift();
                 },
 
-                _setYearsStartLineToPlot: function(data) {
+                _getYearsStartLineToPlot: function(data) {
 
                     const toPlotLineFormat = (year) => {
                         const januaryFirstDate = new Date(year, 0, 1);
@@ -223,7 +229,7 @@
                     const yearsActual = data.actual.map(d => d.date.getFullYear());
                     const yearsProjection = data.actualProjection.map(d => d.date.getFullYear());
                     const allYears = [...new Set([...yearsActual, ...yearsProjection])];
-                    this._plotStartLines = allYears.map(y => toPlotLineFormat(y));
+                    return allYears.map(y => toPlotLineFormat(y));
                 },
 
                 attributeChanged: function (attributeName) {
@@ -242,7 +248,7 @@
                     }
                     this._resetChart();
                 },
-                
+
                 _resetChart: function () {
                     if (this.chart) {
                         dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
@@ -251,18 +257,20 @@
                     }
                 },
 
-                _createChart: function () {
-                    if (!this._stylesApplied) {
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
                         return;
                     }
-                    const builder = new ScopeProgressChartBuilder('scope-progress', this.startDate, this._plotStartLines)
+                    this._resetChart();
+                    const builder = new ScopeProgressChartBuilder('scope-progress', this._plotData.startDate, this._plotData.yearsPlotLines)
                         .withChartType('column')
-                        .withSeriesData(this._plotData);
+                        .withSeriesData(this._plotData.series);
 
                     this.chart = builder.build();
 
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
                     this.isReady = true;
                 }
             });

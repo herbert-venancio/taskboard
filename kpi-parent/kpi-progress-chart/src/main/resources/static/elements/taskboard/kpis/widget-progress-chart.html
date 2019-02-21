@@ -1,62 +1,19 @@
-<!--
-  [LICENSE]
-  Taskboard
-  ---
-  Copyright (C) 2015 - 2016 Objective Solutions
-  ---
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  [/LICENSE]
-  -->
 <dom-module id="widget-progress-chart">
 
     <template>
 
         <style>
-            .widget__body {
-                display: flex;
-            }
             #progress-chart {
-                display: flex;
                 height: 100%;
                 width: 100%;
             }
         </style>
 
-        <iron-signals on-iron-signal-cfd-created="linkCfdBrush"></iron-signals>
-
-        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" highcharts-chart="{{chart}}">
+        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" 
+                error-message="{{errorMessage}}" highcharts-chart="{{chart}}">
             <div id="progress-chart" class="tb-chart"></div>
         </widget-wrap>
 
-        <modal-wrap id="modal"
-                    title="Progress Chart Filters"
-                    >
-
-            <modal-wrap-content>
-                <div class="modal-content">
-                    <form class="progress-chart-modal" style="width: 250px">
-                        <paper-input id="projectProjectionTimespan"
-                            label="Projection Timespan (in days)"
-                            value="{{tempProjectionTimespan}}"
-                            type="number"
-                            min="0"
-                            auto-validate></paper-input>
-                    </form>
-                </div>
-            </modal-wrap-content>
-
-        </modal-wrap>
         
     </template>
 
@@ -68,104 +25,90 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true,
-                        value: '',
                         observer: '_onProjectSelected'
-                    },
-                    selectedDate: {
-                        type: String,
-                        notify: true,
-                        value: '',
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
-                        type: String,
-                        notify: true,
-                        value: '',
+                        type: String
                     },
                     chart: {
-                        type: Object,
-                        notify: true,
-                        value: function() { return {}; }
+                        type: Object
                     },
-                    options: {
-                        type: Array,
-                        value: function() { return []; }
+                    isVisible: {
+                        type: Boolean
                     },
-                    tempProjectionTimespan: {
-                        type: Number,
-                        value: null
+                    _plotData: {
+                        type: Object
                     },
-                    _btUpdate: {
-                        type: Object,
-                        value: function () { return {} }
+                    _isPlotDataUpdated: {
+                        type: Boolean
                     }
                 },
 
-                _onProjectSelected: function() {
-                    
-                    this.reloadChart();
-                },
-                
-                reloadChart: function(){
+                observers: [
+                    '_createChart(_isPlotDataUpdated, isVisible)'
+                ],
 
+                _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
+                    if (newSelectedProjectKey === previousSelectedProjectKey) {
+                        return;
+                    }
+                    this._fetchData(newSelectedProjectKey);
+                },
+
+                _fetchData: function (selectedProjectKey) {
                     this.reset();
-                    var url = `/api/projects/${this.selectedProjectKey}/followup/progress?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
-                    
-                    if (this.tempProjectionTimespan)
-                        url = url + "&projection=" + self.tempProjectionTimespan;
-                    
+                    var url = `/api/projects/${selectedProjectKey}/followup/progress?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
-                        
-                        this.plotData = this.prepareData(data);
-                        this.createChart();
-                        this.isReady = true;
-                        
+                        this._prepareData(data);
                     });
                     
                     this.xhr.fail((error) => {
                         this.errorMessage = error.responseText;
-                    });     
+                    });
                 },
-                
-                prepareData: function(data){
 
-                    function formatPlotData(type, array, color) {
-                        var serie = {};
-                        serie.name = type;
-                        serie.data = [];
-                        serie.color = color;
-                        array.forEach( function(d){
+                _prepareData: function(data){
+                    const formatPlotData = (type, array, color) => {
+                        const serie = {
+                            name: type,
+                            data: [],
+                            color: color
+                        };
+                        array.forEach(d => {
                             serie.data.push({
                                 x  : getDateFromIso(d.date),
                                 y  : d.progress * 100
                             });
                         });
-                
                         return serie;
-                    }
+                    };
             
                     var graphData = [];
                     
-                    graphData.push(formatPlotData("Actual", data.actual, dcUtils.colors.DONE));
-                    graphData.push(formatPlotData("Projection", data.actualProjection, dcUtils.colors.DONE_PROJECTION));
-                    graphData.push(formatPlotData("Expected", data.expected, dcUtils.colors.EXPECTED));
+                    graphData.push(formatPlotData('Actual', data.actual, dcUtils.colors.DONE));
+                    graphData.push(formatPlotData('Projection', data.actualProjection, dcUtils.colors.DONE_PROJECTION));
+                    graphData.push(formatPlotData('Expected', data.expected, dcUtils.colors.EXPECTED));
 
                     this.startDate = getDateFromIso(data.startingDate);
                     this.endDate = getDateFromIso(data.endingDate);
                     
-                    return graphData;
+                    this._plotData = graphData;
+                    this._isPlotDataUpdated = true;
                 },
 
-                createChart: function(){
-                    const builder = new ProgressChartBuilder('progress-chart', this.startDate, this.EndDate)
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const builder = new ProgressChartBuilder('progress-chart', this.startDate, this.endDate)
                         .withChartType('spline')
-                        .withSeriesData(this.plotData);
+                        .withSeriesData(this._plotData);
                     this.chart = builder.build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
@@ -183,33 +126,32 @@
                                 .withIcon('taskboard-icons:dashboard-filter')
                                 .withTitle('Chart filters')
                                 .withOnTap(() => this.$.modal.open())
-                                .withHidden(true)
+                                .withHidden(false)
                                 .build()
                         )
                         .withFullscreen()
                         .build();
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
                 reset: function () {
                     this.isReady = false;
                     this.errorMessage = '';
-                    this.set('options.0.cssClasses', '');
-                    this.set('options.0.hidden', true);
                     if (this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
                     if (this.chart) {
                         dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
-                },
-
-                _resetProjectionTimespan: function() {
-                    this.set('tempProjectionTimespan', null);
-                },
- 
+                }
             });
         })();
     </script>
