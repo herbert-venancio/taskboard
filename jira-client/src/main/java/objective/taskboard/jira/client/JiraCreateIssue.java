@@ -16,7 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableSet;
 
 import objective.taskboard.jira.data.JiraUser;
@@ -99,9 +104,7 @@ public class JiraCreateIssue {
         public FieldSchema schema;
         private List<Object> allowedValues;
         public List<Object> getAllowedValues() {
-            if(allowedValues == null)
-                return null;
-            if(allowedValues.isEmpty())
+            if(allowedValues == null || allowedValues.isEmpty())
                 return Collections.emptyList();
 
             FieldSchemaType type;
@@ -124,6 +127,7 @@ public class JiraCreateIssue {
         }
     }
 
+    @JsonSerialize(using = FieldSchemaTypeSerializer.class)
     public static class FieldSchemaType {
 
         static final Map<String, FieldSchemaType> constants = new LinkedHashMap<>();
@@ -198,5 +202,17 @@ public class JiraCreateIssue {
         }
 
         public String value;
+    }
+
+    public static class FieldSchemaTypeSerializer extends JsonSerializer<FieldSchemaType>
+    {
+        @Override
+        public void serialize(FieldSchemaType value, JsonGenerator jgen,
+                              SerializerProvider provider)
+                throws IOException, JsonProcessingException
+        {
+            jgen.writeString(value.text);
+        }
+
     }
 }

@@ -1,13 +1,15 @@
 package objective.taskboard.controller;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,21 +20,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.TaskboardTimeTracking;
+import objective.taskboard.issue.CardStatusOrderCalculator;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.JiraService.PermissaoNegadaException;
+import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.client.JiraTimeTrackingDto;
+import objective.taskboard.jira.data.FieldsRequiredInTransition;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.utils.DateTimeUtils;
 
 @RestController
 @RequestMapping("/ws/issue-detail")
 public class IssueDetailController {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(IssueDetailController.class);
 
     @Autowired
     private IssueBufferService issueBufferService;
-    
+
+    @Autowired
+    private JiraService jiraService;
+
+    @Autowired
+    private CardStatusOrderCalculator statusOrderCalculator;
+
     @GetMapping("/{issueKey}")
     public ResponseEntity<Object> findByKey(@PathVariable final String issueKey, @RequestParam("timezone") final String timezone,
                                             @RequestParam(required = false, defaultValue ="true") boolean onlyVisible) {
@@ -46,18 +54,30 @@ public class IssueDetailController {
         final ZoneId zoneId = DateTimeUtils.determineTimeZoneId(timezone);
         
         Double cycleTime = issue.getCycleTime(zoneId).orElse(null);
-        List<Transition> transitions = null;
-        
-        try {
-            transitions = issueBufferService.transitions(issueKey);
-        } catch (PermissaoNegadaException e) {
-            LOG.debug("Could not fetch transitions", e);
-        }
-        
+
+        List<TransitionDto> transitionDtos = getTransitions(issue);
+
         JiraTimeTrackingDto jiraTimeTraking = getJiraTimeTraking(issue);
         
-        IssueDetailDto detailDto = new IssueDetailDto(cycleTime, transitions, jiraTimeTraking);
+        IssueDetailDto detailDto = new IssueDetailDto(cycleTime, transitionDtos, jiraTimeTraking);
         return ResponseEntity.ok(detailDto);
+    }
+
+    private List<TransitionDto> getTransitions(Issue issue) {
+        List<Transition> transitions = jiraService.getTransitions(issue.getIssueKey());
+
+        List<Long> transitionIds = transitions.stream()
+                .map(t -> t.id)
+                .collect(toList());
+
+        Map<Long, FieldsRequiredInTransition> fieldsRequiredInTransitions = transitionIds.isEmpty()
+                ? Collections.emptyMap()
+                : jiraService.getFieldsRequiredInTransitions(issue.getIssueKey(), transitionIds).stream()
+                    .collect(toMap(t -> t.id, t -> t));
+
+        return transitions.stream()
+                .map(t -> TransitionDto.from(t, statusOrderCalculator.computeStatusOrder(issue.getType(), t.to.id), fieldsRequiredInTransitions))
+                .collect(toList());
     }
 
     private JiraTimeTrackingDto getJiraTimeTraking(final Issue issue) {
@@ -81,11 +101,11 @@ public class IssueDetailController {
 
     public static class IssueDetailDto {
 
-        public Double cycleTime;
-        public List<Transition> transitions;
-        public JiraTimeTrackingDto jiraTimeTracking;
+        public final Double cycleTime;
+        public final List<TransitionDto> transitions;
+        public final JiraTimeTrackingDto jiraTimeTracking;
 
-        public IssueDetailDto(Double cycleTime, List<Transition> transitions, JiraTimeTrackingDto jiraTimeTracking) {
+        public IssueDetailDto(Double cycleTime, List<TransitionDto> transitions, JiraTimeTrackingDto jiraTimeTracking) {
             super();
             this.cycleTime = cycleTime;
             this.transitions = transitions;

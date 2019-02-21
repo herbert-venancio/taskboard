@@ -2058,7 +2058,7 @@
                 transitionList: function() {
                     var r = [];
                     r.push({name: taskboard.getStatusName(this.item.status), order: this.item.statusOrder})
-                    for(var t in this.transitions ) {
+                    for(var t in this.transitions) {
                         r.push(this.transitions[t])
                     }
                     return r.sort(function(a,b) {

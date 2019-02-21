@@ -152,8 +152,7 @@ public class JiraService {
 
     public List<FieldsRequiredInTransition> getFieldsRequiredInTransitions(String issueKey, List<Long> transitionIds) {
         log.debug("⬣⬣⬣⬣⬣  getFieldsRequiredInTransitions");
-        Iterable<FieldsRequiredInTransition> response = jiraEndpointAsUser.request(FieldsRequiredInTransition.Service.class).post(issueKey, transitionIds);
-        return ImmutableList.copyOf(response);
+        return jiraEndpointAsUser.request(FieldsRequiredInTransition.Service.class).post(issueKey, transitionIds);
     }
 
     public List<Transition> getTransitions(String issueKey) {
