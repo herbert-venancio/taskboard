@@ -13,7 +13,7 @@ public class KpiTouchTimePropertiesMocker implements KpiEnvironment.KpiPropertie
     private boolean shouldCollectProgressingStatuses = true;
     private List<ChartStackConfig> stacks = new LinkedList<>();
 
-    public static KpiTouchTimePropertiesMocker withTouchTimeSubtaskConfig() {
+    public static KpiTouchTimePropertiesMocker withTouchTimeConfig() {
         return new KpiTouchTimePropertiesMocker();
     }
 
@@ -49,13 +49,13 @@ public class KpiTouchTimePropertiesMocker implements KpiEnvironment.KpiPropertie
         return properties;
     }
 
-    private void addStack(ChartStackConfig stackBuilder) {
-        stacks.add(stackBuilder);
-    }
-
     public KpiTouchTimePropertiesMocker withNoProgressingStatusesConfigured() {
         this.shouldCollectProgressingStatuses = false;
         return this;
+    }
+
+    private void addStack(ChartStackConfig stackBuilder) {
+        stacks.add(stackBuilder);
     }
 
     public class ChartStackConfig {

@@ -39,6 +39,11 @@ public class TouchTimeKpiWeekRange implements Comparable<TouchTimeKpiWeekRange> 
         return timezone;
     }
 
+    public boolean progressOverlaps(IssueKpi issueKpi) {
+        return issueKpi.getDateRangeBasedOnProgressingStatuses(this.getTimezone())
+                .map(this::overlaps).orElse(false);
+    }
+
     @Override
     public String toString() {
         return "Week" + range;
@@ -47,9 +52,5 @@ public class TouchTimeKpiWeekRange implements Comparable<TouchTimeKpiWeekRange> 
     @Override
     public int compareTo(TouchTimeKpiWeekRange other) {
         return this.getFirstDay().compareTo(other.getFirstDay());
-    }
-
-    public boolean progressOverlaps(IssueKpi issueKpi) {
-        return issueKpi.getDateRangeBasedOnProgressingStatuses(this.getTimezone()).map(range -> this.overlaps(range)).orElse(false);
     }
 }

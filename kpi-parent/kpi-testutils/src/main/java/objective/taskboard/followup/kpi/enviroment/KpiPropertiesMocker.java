@@ -59,25 +59,6 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
         mockBuilderMap.put(builder.propertiesClass(), builder);
     }
 
-    private static class EmptyKpiPropertiesBuilder<T> implements KpiEnvironment.KpiPropertiesMockBuilder<T> {
-
-        private final Class<T> propertiesClass;
-
-        public EmptyKpiPropertiesBuilder(Class<T> propertiesClass) {
-            this.propertiesClass = propertiesClass;
-        }
-
-        @Override
-        public Class<T> propertiesClass() {
-            return propertiesClass;
-        }
-
-        @Override
-        public T build(KpiEnvironment environment) {
-            return BeanUtils.instantiate(propertiesClass);
-        }
-    }
-
     @Override
     public Class<KPIProperties> propertiesClass() {
         return KPIProperties.class;
@@ -96,6 +77,10 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
         return environment;
     }
 
+    public KpiEnvironment eoKpi() {
+        return environment;
+    }
+
     private List<String> getProgressingStatuses() {
         if (!shouldCollectProgressingStatuses) {
             return Collections.emptyList();
@@ -103,17 +88,32 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
         return environment.statuses().getProgressingStatuses();
     }
 
-    public KpiEnvironment eoKpi() {
-        return environment;
-    }
-
     private IssueTypeChildrenStatusHierarchy getHierarchy(Map<String, HierarchyBuilder> hierarchyBuilder) {
         IssueTypeChildrenStatusHierarchy hierarchy = new IssueTypeChildrenStatusHierarchy();
         List<Hierarchy> hierachies = hierarchyBuilder.values().stream()
-                .map(builder -> builder.buildHierachy())
+                .map(HierarchyBuilder::buildHierachy)
                 .collect(Collectors.toList());
         hierarchy.setHierarchies(hierachies);
         return hierarchy;
+    }
+
+    private static class EmptyKpiPropertiesBuilder<T> implements KpiEnvironment.KpiPropertiesMockBuilder<T> {
+
+        private final Class<T> propertiesClass;
+
+        public EmptyKpiPropertiesBuilder(Class<T> propertiesClass) {
+            this.propertiesClass = propertiesClass;
+        }
+
+        @Override
+        public Class<T> propertiesClass() {
+            return propertiesClass;
+        }
+
+        @Override
+        public T build(KpiEnvironment environment) {
+            return BeanUtils.instantiate(propertiesClass);
+        }
     }
 
     public class HierarchyBuilder {
@@ -134,10 +134,6 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
             return hierarchy;
         }
 
-        private List<Long> getChildrenTypeId() {
-            return KpiPropertiesMocker.this.environment.collectTypeIds(childrenTypes);
-        }
-
         public HierarchyBuilder withChildrenType(String type) {
             childrenTypes.add(type);
             return this;
@@ -150,6 +146,10 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
 
         public KpiPropertiesMocker eoH() {
             return KpiPropertiesMocker.this;
+        }
+
+        private List<Long> getChildrenTypeId() {
+            return KpiPropertiesMocker.this.environment.collectTypeIds(childrenTypes);
         }
     }
 

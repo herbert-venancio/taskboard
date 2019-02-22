@@ -28,14 +28,14 @@ public abstract class RequestChartDataBehavior<T> implements DSLSimpleBehaviorWi
 
     @Override
     public void behave(KpiEnvironment environment) {
-        ProjectDashboardOperationalPermission permission = mockPermission();
+        ProjectDashboardOperationalPermission permission = getMockedPermission();
         ProjectService projectService = environment.services().projects().getService();
         doBehave(environment, permission, projectService);
     }
 
     public abstract void doBehave(KpiEnvironment environment, ProjectDashboardOperationalPermission permission, ProjectService projectService);
 
-    protected ProjectDashboardOperationalPermission mockPermission() {
+    protected ProjectDashboardOperationalPermission getMockedPermission() {
         ProjectDashboardOperationalPermission projectDashboardOperationalPermission = Mockito.mock(ProjectDashboardOperationalPermission.class);
         Mockito.when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(hasPermission);
         return projectDashboardOperationalPermission;

@@ -3,48 +3,42 @@ package objective.taskboard.followup.kpi.touchtime;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.Range;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
-import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.properties.KPIProperties;
-import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.DateTimeUtils;
 
-@Service
-class TouchTimeByIssueKpiDataProvider implements TouchTimeKpiDataProvider<TouchTimeByIssueKpiDataSet>{
+public class TouchTimeByIssueKpiStrategy implements TouchTimeKpiStrategy<TouchTimeByIssueKpiDataPoint> {
 
-    private IssueKpiService issueKpiService;
+    private ZoneId timezone;
+    private List<IssueKpi> issues;
+    private List<String> progressingStatuses;
 
-    private JiraProperties jiraProperties;
-
-    private KPIProperties kpiProperties;
-
-    @Autowired
-    public TouchTimeByIssueKpiDataProvider(IssueKpiService issueKpiService, JiraProperties jiraProperties, KPIProperties kpiProperties) {
-        this.issueKpiService = issueKpiService;
-        this.jiraProperties = jiraProperties;
-        this.kpiProperties = kpiProperties;
+    public TouchTimeByIssueKpiStrategy(
+            ZoneId timezone, List<IssueKpi> issues, List<String> progressingStatuses) {
+        this.timezone = timezone;
+        this.issues = issues;
+        this.progressingStatuses = progressingStatuses;
     }
 
     @Override
-    public TouchTimeByIssueKpiDataSet getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
-        final List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
-        final List<String> allProgressingStatuses = kpiProperties.getProgressingStatuses();
-        final List<String> statuses = kpiLevel.filterProgressingStatuses(allProgressingStatuses, jiraProperties);
-        final List<TouchTimeByIssueKpiDataPoint> points = transformToDataPoints(issues, statuses, timezone);
-        return new TouchTimeByIssueKpiDataSet(points);
+    public List<TouchTimeByIssueKpiDataPoint> getDataSet() {
+        if (this.issues.isEmpty())
+            return Collections.emptyList();
+        return getDataPoints();
+    }
+
+    private List<TouchTimeByIssueKpiDataPoint> getDataPoints() {
+        return transformToDataPoints(issues, progressingStatuses, timezone);
     }
 
     private List<TouchTimeByIssueKpiDataPoint> transformToDataPoints(List<IssueKpi> issues, List<String> statuses, ZoneId timezone) {
         final List<TouchTimeByIssueKpiDataPoint> points = new LinkedList<>();
-        issues.forEach(issue -> {
+        issues.forEach(issue ->
             statuses.forEach(status -> {
                 final Long effortInSeconds = issue.getEffort(status);
                 final double effortInHours = DateTimeUtils.secondsToHours(effortInSeconds);
@@ -59,8 +53,9 @@ class TouchTimeByIssueKpiDataProvider implements TouchTimeKpiDataProvider<TouchT
                         startProgressingDate.toInstant(),
                         endProgressingDate.toInstant());
                 points.add(dataPoint);
-            });
-        });
+            })
+        );
         return points;
     }
+
 }
