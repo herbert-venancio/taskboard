@@ -295,20 +295,20 @@
     }
   },
   {
-    "id": "customfield_11243",
-    "name": "Último Motivo Impedimento",
+    "id": "customfield_11452",
+    "name": "Last Block Reason",
     "custom": true,
     "orderable": true,
     "navigable": true,
     "searchable": true,
     "clauseNames": [
-      "cf[11243]",
-      "Último Motivo Impedimento"
+      "cf[11452]",
+      "Last Block Reason"
     ],
     "schema": {
       "type": "string",
       "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
-      "customId": 11243
+      "customId": 11452
     }
   },
   {

@@ -72,6 +72,7 @@ public class CardDto {
     public long priorityOrder;
     public List<Subtask> subtasks;
     public Version release;
+    public List<Version> fixVersions;
     public int stateHash;
     public int statusOrder;
 
@@ -119,7 +120,8 @@ public class CardDto {
         cardDto.cardTshirtSizeFieldId = issue.getCardTshirtSizeFieldId();
         cardDto.typeIconUri = issue.getTypeIconUri();
         cardDto.release = issue.getRelease();
-        
+        cardDto.fixVersions = issue.getFixVersions();
+
         cardDto.parent = issue.getParent();
         cardDto.parentSummary = issue.getParentSummary();
         cardDto.parentType = issue.getParentType();
@@ -179,6 +181,7 @@ public class CardDto {
                 , dto.additionalEstimatedHoursField
                 , dto.parentSummary
                 , dto.release
+                , dto.fixVersions
                 , dto.typeIconUri
                 , dto.releaseId
                 , dto.mismatchingUsers

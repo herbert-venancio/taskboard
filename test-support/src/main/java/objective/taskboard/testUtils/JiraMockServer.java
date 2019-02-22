@@ -656,7 +656,8 @@ public class JiraMockServer {
                     JSONArray transitionsArray = issueData.getJSONArray("transitions");
                     for (int j = 0; j < transitionsArray.length(); j++) {
                         JSONObject aTransition = transitionsArray.getJSONObject(j);
-                        aTransition.put("fields", new JSONObject());
+                        if (!aTransition.has("fields"))
+                            aTransition.put("fields", new JSONObject());
                     }
 
                     JSONArray arrayOfIssues = new JSONArray();

@@ -37,7 +37,6 @@ import objective.taskboard.data.User;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.domain.converter.ParentProvider;
-import objective.taskboard.issue.CardStatusOrderCalculator;
 import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
@@ -48,7 +47,6 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.ProjectUpdateEvent;
 import objective.taskboard.jira.RetrofitErrorParser;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
@@ -86,9 +84,6 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
 
     @Autowired
     private TeamCachedRepository teamRepo;
-
-    @Autowired
-    private CardStatusOrderCalculator statusOrderCalculator;
 
     @Autowired
     private ProjectAdministrationPermission projectAdministrationPermission;
@@ -311,14 +306,6 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
             return Optional.ofNullable(issue);
         }
         return Optional.empty();
-    }
-
-    public synchronized List<Transition> transitions(String issueKey) {
-        Issue issue = getIssueByKey(issueKey);
-        List<Transition> transitions = jiraBean.getTransitions(issueKey);
-        
-        transitions.forEach(t -> t.order = (long) statusOrderCalculator.computeStatusOrder(issue.getType(), t.to.id) );
-        return transitions;
     }
 
     public synchronized Issue addMeAsAssignee(String issueKey) {

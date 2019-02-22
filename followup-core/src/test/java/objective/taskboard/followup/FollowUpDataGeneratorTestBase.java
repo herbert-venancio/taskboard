@@ -487,7 +487,8 @@ public abstract class FollowUpDataGeneratorTestBase {
                     buildTransitions(),
                     worklogs,
                     emptyList(),
-                    emptyMap()
+                    emptyMap(),
+                    emptyList()
                     );
 
             Issue issue = new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, cycleTime, null, projectService, null, issuePriorityService);

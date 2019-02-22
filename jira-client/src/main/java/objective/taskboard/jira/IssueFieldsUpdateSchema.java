@@ -25,6 +25,7 @@ public class IssueFieldsUpdateSchema {
             fieldByName.put("comment", new Field("comment", Operation.ADD, "body"));
             fieldByName.put("assignee", new Field("assignee", Operation.SET, "name"));
             fieldByName.put("resolution", new Field("resolution", Operation.SET, "name"));
+            fieldByName.put("fixVersions", new Field("fixVersions", Operation.SET));
         }
 
         private final String name;
@@ -44,12 +45,22 @@ public class IssueFieldsUpdateSchema {
             this.fieldNameToSet = fieldNameToSet;
         }
 
-        public Map<String, Object> jiraValues(Object value) {
-            final Map<String, Object> valueWithType = new HashMap<>();
-            valueWithType.put(fieldNameToSet, value);
+        Field(String name, Operation operation) {
+            this.name = name;
+            this.operation = operation;
+            this.fieldNameToSet = "";
+        }
 
+        public Map<String, Object> jiraValues(Object value) {
             final Map<String, Object> valueWithOperation = new HashMap<>();
-            valueWithOperation.put(operation.getValue(), valueWithType);
+            if (fieldNameToSet.isEmpty()) {
+                valueWithOperation.put(operation.getValue(), value);
+            } else {
+                final Map<String, Object> valueWithType = new HashMap<>();
+                valueWithType.put(fieldNameToSet, value);
+
+                valueWithOperation.put(operation.getValue(), valueWithType);
+            }
 
             final List<Map<String, Object>> valueArray = new ArrayList<>();
             valueArray.add(valueWithOperation);

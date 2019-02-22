@@ -193,4 +193,50 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
         issue.assertCardColor("rgb(254, 229, 188)");
     }
 
+    @Test
+    public void givenTransitionWithRequiredField_whenPerformTransition_thenRequiredFieldShouldBeFilledWhenSupported() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
+
+        IssueDetails issueDetails = mainPage.issue("TASKB-545").click()
+                .issueDetails()
+                .transitionClick("Back to 'To Review'");
+
+        issueDetails.alertModal()
+            .assertMessage("Can't perform this transition because it requires fields not supported in taskboard. Please, perform the transition on Jira.")
+            .clickOnOk();
+
+        issueDetails.transitionClick("Deferred")
+            .alertModal()
+            .assertMessage("Can't perform this transition because 'Fix Version/s' field is required, but the project doesn't have any versions.")
+            .clickOnOk();
+
+        issueDetails.transitionClick("Done")
+            .fieldsRequiredModal()
+            .confirm()
+            .assertRequiredMessageIsVisible("fixVersions")
+            .addVersion("fixVersions", "1.0")
+            .addVersion("fixVersions", "2.0")
+            .confirm()
+            .assertIsClosed();
+
+        issueDetails.assertIsClosed();
+
+        LaneFragment operational = mainPage.lane("Operational");
+        operational.boardStep("Reviewing").issueCountBadge(0);
+        operational.boardStep("Reviewing").assertIssueList();
+        operational.boardStep("Done").issueCountBadge(9);
+        operational.boardStep("Done").assertIssueList(
+                "TASKB-638",
+                "TASKB-678",
+                "TASKB-679",
+                "TASKB-545",
+                "TASKB-656",
+                "TASKB-657",
+                "TASKB-658",
+                "TASKB-660",
+                "TASKB-662"
+                );
+    }
+
 }

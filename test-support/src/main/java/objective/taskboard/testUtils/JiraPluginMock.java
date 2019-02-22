@@ -26,6 +26,8 @@ public class JiraPluginMock {
         });
 
         server.get("/rest/projectbuilder/1.0/roles", (req, res) -> loadMockData("roles.json"));
+
+        server.post("/rest/projectbuilder/1.0/issue/:issueKey/fields-required-in-transitions", (req, res) -> loadMockData("fields-required-in-transitions.json"));
     }
 
     private static String loadMockData(String data) {

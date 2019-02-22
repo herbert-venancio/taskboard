@@ -4,6 +4,7 @@ tmp
 out-tsc
 target
 /data
+application/data
 /bin/
 
 # dependencies
