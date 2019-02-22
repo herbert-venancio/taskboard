@@ -12,24 +12,24 @@
                  border: 1px none #8e8e8e;
                  border-top-style: solid;
              }
-            
+
               /* width */
              ::-webkit-scrollbar {
                  width: 10px;
              }
-            
+
              /* Track */
              ::-webkit-scrollbar-track {
                  background: #f1f1f1;
                  border-radius: 10px;
              }
-            
+
              /* Handle */
              ::-webkit-scrollbar-thumb {
                  background: #888;
                  border-radius: 10px;
              }
-            
+
              /* Handle on hover */
              ::-webkit-scrollbar-thumb:hover {
                  background: #555;
@@ -144,7 +144,7 @@
                  background-color:#8E8E8E;
              }
 
-             .card-summary-wrapper:hover, 
+             .card-summary-wrapper:hover,
              .card-summary-wrapper.edit-summary-wrapper {
                  border-color:#999;
              }
@@ -551,7 +551,7 @@
                  background-color: #8e8e8e !important;
              }
 
-             .parent-team iron-icon, 
+             .parent-team iron-icon,
              .tshirt iron-icon {
                  color: #e5e5e5 !important;
              }
@@ -747,7 +747,7 @@
                  color: #8E8E8E;
                  top: -1px;
              }
-            
+
         </style>
         <style is="custom-property">
             paper-toggle-button {
@@ -1007,15 +1007,12 @@
                                     </div>
                                 </template>
                             </div>
-
-                            <template is="dom-if" if="{{canHaveSubtasks}}">
-                                <issue-detail-tabs
-                                    item={{item}}
-                                    isOpen=[[isOpen]]
-                                    metadata={{issueMetadata}}
-                                    on-selected-card="changeCard"
-                                ></issue-detail-tabs>
-                            </template>
+                            <issue-detail-tabs
+                                item={{item}}
+                                isOpen=[[isOpen]]
+                                metadata={{issueMetadata}}
+                                on-selected-card="changeCard"
+                            ></issue-detail-tabs>
                         </div>
                         <div class="rightPanel">
                             <div class="subtitle">People</div>
@@ -1279,7 +1276,7 @@
                         type: Object,
                         notify: true
                     },
-                    
+
                     _modalStatus: {
                         type: String
                     },
@@ -1894,8 +1891,7 @@
 
                 setCard: function(item) {
                     var self = this;
-                    
-                    this.editableDescription = item.description;
+this.editableDescription = item.description;
                     this.hasSubtasks = (typeof item.subtasks !== undefined && item.subtasks.length > 0);
                     this.canHaveSubtasks = item.feature || item.demand;
                     this.canShowSize = item.subTask && item.cardTshirtSize;
@@ -1947,7 +1943,7 @@
 
                 setFieldOptions: function(metadata) {
                     var self = this;
-                    
+
                     this.issueMetadata = metadata;
                     this.getFieldOptions(this.item, this.item.classOfServiceFieldId, function(data, el) {
                         self.classOfServiceOptions = data;
@@ -1964,7 +1960,6 @@
                          }
                      });
                 },
-
                 getFieldOptions: function(item , fieldId, callback) {
                     taskboard.getFieldOptions(this.issueMetadata, fieldId, callback);
                 },

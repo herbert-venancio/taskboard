@@ -138,18 +138,18 @@ function Taskboard() {
         var fieldFromIssue = selectedIssue.fields.filter(function(field) {
             return (field.id == fieldId);
         });
-        
+
         var fieldOptions = fieldFromIssue['0'] ? fieldFromIssue['0'].allowedValues : [];
 
         if (fieldOptions.length > 0 && !fieldFromIssue['0'].required) {
             fieldOptions.unshift({
-               value: "None" 
+               value: "None"
             });
         }
 
         callback.apply(null, [fieldOptions]);
         return fieldOptions;
-        
+
     };
 
     this.setLaneConfiguration = function(laneConfiguration) {

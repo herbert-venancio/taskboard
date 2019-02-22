@@ -496,7 +496,7 @@ public class Issue extends IssueScratch implements Serializable {
         return this.description;
     }
 
-    public String getComments() {
+    public List<Comment> getComments() {
         return this.comments;
     }
 
@@ -584,7 +584,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.description = description;
     }
 
-    public void setComments(final String comments) {
+    public void setComments(final List<Comment> comments) {
         this.comments = comments;
     }
 

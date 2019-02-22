@@ -90,10 +90,6 @@ public class JiraIssueDto {
         return fields.priority;
     }
 
-    public List<JiraCommentDto> getComments() {
-        return Collections.emptyList();
-    }
-
     public List<JiraLinkDto> getIssueLinks() {
         return fields.issuelinks;
     }
@@ -128,6 +124,12 @@ public class JiraIssueDto {
         if (fields.worklog == null)
             return new JiraWorklogResultSetDto();
         return fields.worklog;
+    }
+
+    public JiraCommentResultSetDto getComments() {
+        if (fields.comment == null)
+            return new JiraCommentResultSetDto();
+        return fields.comment;
     }
 
     public void setWorklogs(JiraWorklogResultSetDto worklogsForIssue) {

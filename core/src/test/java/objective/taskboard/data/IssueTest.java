@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -61,7 +62,7 @@ public class IssueTest {
                 6000l,
                 new Date(),
                 "description",
-                "comments",
+                Collections.emptyList(),
                 Arrays.asList("labels"),
                 Arrays.asList("components"),
                 false,
@@ -299,7 +300,7 @@ public class IssueTest {
         assertTrue(Issue.compareIssueKey("PROJ-3-10", "PROJ-3-2") > 0);
     }
 
-    private List<String> toStringSet(Set<Issue.CardTeam> s) {
+    private List<String> toStringSet(Set<CardTeam> s) {
         return s.stream().map(c->c.name).sorted().collect(Collectors.toList());
     }
 }

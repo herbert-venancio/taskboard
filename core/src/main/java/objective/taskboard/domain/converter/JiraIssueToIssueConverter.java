@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.cycletime.CycleTime;
+import objective.taskboard.data.Comment;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
@@ -199,11 +200,8 @@ public class JiraIssueToIssueConverter {
         return issueTeamService;
     }
 
-    private String getComments(JiraIssueDto issue) {
-    	List<String> comments = extractComments(issue);
-        if (comments.isEmpty())
-            return "";
-        return comments.get(0);
+    private List<Comment> getComments(JiraIssueDto issue) {
+    	return extractComments(issue);
     }
 
     public IssueColorService getIssueColorService() {

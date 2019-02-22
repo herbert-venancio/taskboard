@@ -38,6 +38,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -67,6 +69,7 @@ import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCommentDto;
+import objective.taskboard.jira.client.JiraCommentResultSetDto;
 import objective.taskboard.jira.client.JiraFieldDataDto;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
@@ -76,14 +79,10 @@ import objective.taskboard.jira.client.JiraStatusDto;
 import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.jira.properties.JiraProperties.CustomField;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.ClassOfServiceDetails;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
-import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 import objective.taskboard.utils.IOUtilities;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class JiraIssueToIssueConverterTest {
@@ -132,21 +131,21 @@ public class JiraIssueToIssueConverterTest {
     @Mock
     private JiraProperties jiraProperties;
     @Mock
-    private CustomField customField;
+    private JiraProperties.CustomField customField;
     @Mock
-    private CustomFieldDetails coAssigneesDetails;
+    private JiraProperties.CustomField.CustomFieldDetails coAssigneesDetails;
     @Mock
-    private Blocked blocked;
+    private JiraProperties.CustomField.Blocked blocked;
     @Mock
-    private TShirtSize tShirtSize;
+    private JiraProperties.CustomField.TShirtSize tShirtSize;
     @Mock
-    private CustomFieldDetails lastBlockReason;
+    private JiraProperties.CustomField.CustomFieldDetails lastBlockReason;
     @Mock
-    private CustomFieldDetails additionalEstimatedHours;
+    private JiraProperties.CustomField.CustomFieldDetails additionalEstimatedHours;
     @Mock
-    private CustomFieldDetails release;
+    private JiraProperties.CustomField.CustomFieldDetails release;
     @Mock
-    private ClassOfServiceDetails classOfServiceDetails;
+    private JiraProperties.CustomField.ClassOfServiceDetails classOfServiceDetails;
     @Mock
     private objective.taskboard.jira.properties.JiraProperties.IssueLink issueLinkProperty;
     @Mock
@@ -169,9 +168,12 @@ public class JiraIssueToIssueConverterTest {
     private CardVisibilityEvalService cardVisibilityEvalService;
     @Mock
     private FieldMetadataService fieldMetadataService;
+    @Mock
+    private JiraCommentResultSetDto commentsDto;
+    private List<JiraCommentDto> comments = new ArrayList<>();
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         when(parentIssueLinkRepository.findAll()).thenReturn(asList());
 
         when(classOfServiceDetails.getId()).thenReturn(CLASS_OF_SERVICE_ID);
@@ -195,8 +197,8 @@ public class JiraIssueToIssueConverterTest {
         when(release.getId()).thenReturn(RELEASE_ID);
         when(customField.getRelease()).thenReturn(release);
 
-        when(customField.getAssignedTeams()).thenReturn(mock(CustomFieldDetails.class));
-        when(customField.getCoAssignees()).thenReturn(mock(CustomFieldDetails.class));
+        when(customField.getAssignedTeams()).thenReturn(mock(JiraProperties.CustomField.CustomFieldDetails.class));
+        when(customField.getCoAssignees()).thenReturn(mock(JiraProperties.CustomField.CustomFieldDetails.class));
         
         when(jiraProperties.getCustomfield()).thenReturn(customField);
         when(jiraProperties.getExtraFields()).thenReturn(new JiraProperties.ExtraFields());
@@ -252,7 +254,7 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Description", "Description", converted.getDescription());
         assertEquals("Teams", 1, converted.getTeams().size());
         assertEquals("Team name", "team", converted.getTeams().iterator().next().name);
-        assertEquals("Comments", "", converted.getComments());
+        assertEquals("Comments", 1, converted.getComments().size());
         assertFalse("Blocked", converted.isBlocked());
         assertEquals("Last block reason", "", converted.getLastBlockReason());
         assertEquals("Class of Service", null, converted.getLocalClassOfServiceCustomField());
@@ -267,7 +269,7 @@ public class JiraIssueToIssueConverterTest {
     }
 
     @Test
-    public void issueWithParentConvert() throws JSONException {
+    public void issueWithParentConvert() throws Exception {
         when(classOfServiceDetails.getDefaultValue()).thenReturn(CLASS_OF_SERVICE_STANDARD);
         mockIssue(parent, PARENT_ISSUE_KEY, 1L);
 
@@ -289,15 +291,13 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Release", "100", converted.getReleaseId());
     }
 
+
     @Test
-    public void issueWithComment() {
-        when(comment.toString()).thenReturn("comment");
-        when(issue.getComments()).thenReturn(asList(comment));
-
-        objective.taskboard.data.Issue converted = subject.convertSingleIssue(issue, buildProvider());
-
-        assertEquals("Comment", "comment", converted.getComments());
+    public void issueWithComment() throws Exception {
+        assertEquals( 1, comments.size());
+        assertEquals("Comment", "Comment", comments.get(0).body);
     }
+
 
     @Test
     public void updateIssueConverted() throws JSONException {
@@ -313,9 +313,10 @@ public class JiraIssueToIssueConverterTest {
         assertNotNull("Issue updated converted", issueUpdated);
         assertEquals("Class of service", issueUpdated.getClassOfServiceValue(), CLASS_OF_SERVICE_STANDARD);
     }
-    
+
+
     @Test
-    public void whenIssuesWithMultipleNestedLevelsAreReturned_makeSureValuesDependingOnParentsAreCorrectlyConverted() throws JSONException {
+    public void whenIssuesWithMultipleNestedLevelsAreReturned_makeSureValuesDependingOnParentsAreCorrectlyConverted() throws Exception {
         JiraIssueDto A = mock(JiraIssueDto.class);
         JiraIssueDto B = mock(JiraIssueDto.class);
         JiraIssueDto C = mock(JiraIssueDto.class);
@@ -327,7 +328,7 @@ public class JiraIssueToIssueConverterTest {
         mockIssue(C,"PARENT-2");
         
         
-        Map<String, objective.taskboard.data.Issue> issueByKey = new LinkedHashMap<>();
+        Map<String, Issue> issueByKey = new LinkedHashMap<>();
         ParentProvider provider = parentKey -> {
             objective.taskboard.data.Issue issue = issueByKey.get(parentKey);
             if (issue == null)
@@ -352,6 +353,7 @@ public class JiraIssueToIssueConverterTest {
         subject.convertSingleIssue(A, provider);
     }
 
+
     @Test
     public void givenExtraFieldsIsConfigured_whenConvert_thenExtractExtraFieldsHasValues() throws JSONException {
         // given
@@ -364,6 +366,7 @@ public class JiraIssueToIssueConverterTest {
         // then
         assertThat(converted.getExtraFields()).containsEntry(COST_CENTER_FIELD_ID, "Taskboard");
     }
+
 
     @Test
     public void givenExtraFieldsIsConfiguredAndValueIsEmpty_whenConvert_thenExtractedAsNull() throws JSONException {
@@ -378,6 +381,7 @@ public class JiraIssueToIssueConverterTest {
         assertThat(converted.getExtraFields()).isEmpty();
     }
 
+
     @Test
     public void givenExtraFieldsIsConfiguredAndIssueDoNotHaveField_whenConvert_thenExtractedAsNull() {
         // given
@@ -389,6 +393,7 @@ public class JiraIssueToIssueConverterTest {
         // then
         assertThat(converted.getExtraFields()).isEmpty();
     }
+
 
     @Test
     public void givenExtraFieldsNotSupported_whenConvert_thenExtractedAsUnsupportedValueString() throws JSONException {
@@ -418,7 +423,7 @@ public class JiraIssueToIssueConverterTest {
         }
     }
 
-    private void mockIssue(JiraIssueDto issue, String issueKey) {
+    private void mockIssue(JiraIssueDto issue, String issueKey) throws Exception {
         when(issue.getKey()).thenReturn(issueKey);
         when(issue.getProject()).thenReturn(project);
         when(issue.getIssueType()).thenReturn(issueType);
@@ -426,9 +431,27 @@ public class JiraIssueToIssueConverterTest {
         when(issue.getCreationDate()).thenReturn(new DateTime(0));
         when(issue.getPriority()).thenReturn(priority);
         when(issue.getWorklogs()).thenReturn(new JiraWorklogResultSetDto());
+        when(issue.getComments()).thenReturn(commentsDto);
+
+        URI uri;
+
+        try{
+            uri = new URI("http://example");
+        } catch (URISyntaxException ex){
+            uri = null; //NOSONAR
+        }
+
+        commentsDto.comments = comments;
+        commentsDto.comments.add(comment);
+        JiraUserDto user = mock(JiraUserDto.class);
+        when(user.getDisplayName()).thenReturn("user");
+        when(user.getAvatarUri(anyString())).thenReturn(uri);
+        comment.author = user;
+        comment.body = "Comment";
+        comment.created = new Date();
     }
 
-    private void mockIssue(JiraIssueDto issue, String issueKey, long issueTypeId) {
+    private void mockIssue(JiraIssueDto issue, String issueKey, long issueTypeId) throws Exception {
         mockIssue(issue, issueKey);
         JiraIssueTypeDto issueType = mock(JiraIssueTypeDto.class);
         when(issueType.getId()).thenReturn(issueTypeId);

@@ -85,6 +85,9 @@
                         Ballparks
                     </paper-tab>
                 </template>
+                <paper-tab id="tab-comments">
+                    Comments ({{item.comments.length}})
+                </paper-tab>
             </paper-tabs>
             <iron-pages selected="{{selected}}">
                 <template is="dom-if" if="{{_hasSubtasks(item)}}">
@@ -129,6 +132,12 @@
                         </div>
                     </div>
                 </template>
+                <div class="tabs-content">
+                    <issue-detail-comments
+                            item="{{item}}"
+                            isOpen="{{isOpen}}"
+                    ></issue-detail-comments>
+                </div>
             </iron-pages>
         </div>
     </template>
@@ -178,7 +187,7 @@
                 },
 
                 _hasSubtasks: function(item) {
-                    return typeof item.subtasks !== undefined;
+                    return typeof item.subtasks !== undefined && (item.feature || item.demand);
                 },
 
                 _updateMeta: function() {
