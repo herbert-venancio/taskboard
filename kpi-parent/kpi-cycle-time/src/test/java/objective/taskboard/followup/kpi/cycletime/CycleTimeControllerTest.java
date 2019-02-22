@@ -9,11 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
@@ -23,8 +20,9 @@ import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
+import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehaviorBuilder;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
@@ -32,18 +30,6 @@ import objective.taskboard.utils.DateTimeUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CycleTimeControllerTest {
-
-    @Mock
-    ProjectService projectService;
-
-    @Mock
-    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
-
-    @Mock
-    private CycleTimeDataProvider cycleTimeDataProvider;
-
-    @InjectMocks
-    private CycleTimeController subject;
 
     @Test
     public void requestCycleTimeChartData_happyPath() {
@@ -318,84 +304,35 @@ public class CycleTimeControllerTest {
         return dsl;
     }
 
-    private RequestDataBehaviorBuilder createRequestDataBehavior() {
-        return new RequestDataBehaviorBuilder();
+    private RequestCycleTimeDataBehaviorBuilder createRequestDataBehavior() {
+        return new RequestCycleTimeDataBehaviorBuilder();
     }
 
-    public class RequestDataBehaviorBuilder {
-        private String projectKey;
-        private String level;
-        private String zoneId;
-        private Boolean hasPermission;
-        private boolean preventProviderMock = false;
-        public RequestDataBehaviorBuilder forProject(String projectKey) {
-            this.projectKey = projectKey;
-            return this;
+    private class RequestCycleTimeDataBehaviorBuilder extends RequestChartDataBehaviorBuilder<RequestCycleTimeDataBehavior> {
+
+        @Override
+        public RequestCycleTimeDataBehavior doBuild() {
+            return new RequestCycleTimeDataBehavior(projectKey, level, zoneId, hasPermission, preventProviderMock);
         }
-        public RequestDataBehaviorBuilder preventDataProviderMock() {
-            this.preventProviderMock  = true;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withLevel(String level) {
-            this.level = level;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withTimezone(String timezone) {
-            this.zoneId = timezone;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withPermission() {
-            this.hasPermission = true;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withoutPermission() {
-            this.hasPermission = false;
-            return this;
-        }
-        public RequestDataBehavior build() {
-            validate();
-            return new RequestDataBehavior(projectKey, level, zoneId, hasPermission, preventProviderMock);
-        }
-        private void validate() {
-            if (projectKey == null) {
-                Assertions.fail("Project key not configured");
-            }
-            if (level == null) {
-                Assertions.fail("Level not configured");
-            }
-            if (zoneId == null) {
-                Assertions.fail("ZoneId not configured");
-            }
-            if (hasPermission == null) {
-                Assertions.fail("Permission not configured");
-            }
-        }
+
     }
-    public class RequestDataBehavior implements DSLSimpleBehaviorWithAsserter<AssertResponse> {
-        private final String projectKey;
-        private final String level;
-        private final String zoneId;
-        private final boolean hasPermission;
-        private boolean preventProviderMock;
-        private AssertResponse asserter;
-        public RequestDataBehavior(String projectKey, String level, String zoneId, boolean hasPermission, boolean preventProviderMock) {
-            this.projectKey = projectKey;
-            this.level = level;
-            this.zoneId = zoneId;
-            this.hasPermission = hasPermission;
-            this.preventProviderMock = preventProviderMock;
+
+    private class RequestCycleTimeDataBehavior extends RequestChartDataBehavior<CycleTimeDataProvider> {
+
+        public RequestCycleTimeDataBehavior(String projectKey, String level, String zoneId,
+                boolean hasPermission, boolean preventProviderMock) {
+            super(projectKey, level, zoneId, hasPermission, preventProviderMock);
         }
 
         @Override
-        public void behave(KpiEnvironment environment) {
-            ProjectDashboardOperationalPermission projectDashboardOperationalPermission = mockPermission();
+        public void doBehave(KpiEnvironment environment, ProjectDashboardOperationalPermission permission, ProjectService projectService) {
             CycleTimeDataProvider dataProvider = mockProvider(environment);
-            ProjectService projectService = environment.services().projects().getService();
-            CycleTimeController subject = new CycleTimeController(projectDashboardOperationalPermission, projectService, dataProvider);
+            CycleTimeController subject = new CycleTimeController(permission, projectService, dataProvider);
             asserter = AssertResponse.of(subject.get(projectKey, zoneId, level));
         }
 
-        private CycleTimeDataProvider mockProvider(KpiEnvironment environment) {
+        @Override
+        protected CycleTimeDataProvider mockProvider(KpiEnvironment environment) {
             CycleTimeDataProvider cycleTimeDataProvider = Mockito.mock(CycleTimeDataProvider.class);
             if (preventProviderMock) {
                 return cycleTimeDataProvider;
@@ -417,15 +354,5 @@ public class CycleTimeControllerTest {
             return factory.create(issue);
         }
 
-        private ProjectDashboardOperationalPermission mockPermission() {
-            ProjectDashboardOperationalPermission projectDashboardOperationalPermission = Mockito.mock(ProjectDashboardOperationalPermission.class);
-            Mockito.when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(hasPermission);
-            return projectDashboardOperationalPermission;
-        }
-
-        @Override
-        public AssertResponse then() {
-            return asserter;
-        }
     }
 }
