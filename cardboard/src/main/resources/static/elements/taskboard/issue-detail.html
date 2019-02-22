@@ -1764,21 +1764,19 @@
 
                     var self = this;
                     var fieldsTransitions = [];
-                    Object.keys(transition.fields).forEach(function(fieldId) {
-                        var field = this[fieldId];
-
+                    transition.fields.forEach(function(field) {
                         if (!field.required)
                             return;
 
                         if (self._isArrayOfVersion(field.schema)) {
                             fieldsTransitions.push({
-                                id: fieldId,
+                                id: field.id,
                                 name: field.name,
                                 type: TYPE_FIELD.VERSIONS,
                                 versions: field.allowedValues
                             });
                         }
-                    }, transition.fields);
+                    });
 
                     if (TRANSITION_REQUIRED_COMMENT.indexOf(transition.name) !== -1) {
                         fieldsTransitions.push({
