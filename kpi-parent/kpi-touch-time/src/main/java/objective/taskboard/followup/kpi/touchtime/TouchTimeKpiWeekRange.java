@@ -10,11 +10,11 @@ import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 
-public class TouchTimeWeekRange implements Comparable<TouchTimeWeekRange> {
+public class TouchTimeKpiWeekRange implements Comparable<TouchTimeKpiWeekRange> {
     private Range<LocalDate> range;
     private ZoneId timezone;
 
-    public TouchTimeWeekRange(Range<LocalDate> weekRange, ZoneId timezone) {
+    public TouchTimeKpiWeekRange(Range<LocalDate> weekRange, ZoneId timezone) {
         this.range = weekRange;
         this.timezone = timezone;
     }
@@ -45,7 +45,7 @@ public class TouchTimeWeekRange implements Comparable<TouchTimeWeekRange> {
     }
 
     @Override
-    public int compareTo(TouchTimeWeekRange other) {
+    public int compareTo(TouchTimeKpiWeekRange other) {
         return this.getFirstDay().compareTo(other.getFirstDay());
     }
 

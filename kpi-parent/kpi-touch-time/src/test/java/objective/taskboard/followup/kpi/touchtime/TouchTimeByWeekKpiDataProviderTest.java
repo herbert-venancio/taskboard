@@ -23,14 +23,14 @@ import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekDataProvider;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataPoint;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataProvider;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataSet;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TouchTimeByWeekDataProviderTest {
+public class TouchTimeByWeekKpiDataProviderTest {
 
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
@@ -641,7 +641,7 @@ public class TouchTimeByWeekDataProviderTest {
         private String projectKey;
         private KpiLevel issueLevel;
         private ZoneId timezone;
-        private TouchTimeChartByWeekDataSet dataset;
+        private TouchTimeByWeekKpiDataSet dataset;
 
         public TouchTimeByWeekDataProviderBehavior(String projectKey, KpiLevel issueLevel, ZoneId timezone) {
             this.projectKey = projectKey;
@@ -655,7 +655,7 @@ public class TouchTimeByWeekDataProviderTest {
             JiraProperties jiraProperties = environment.getJiraProperties();
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             ProjectService projectService = environment.services().projects().getService();
-            TouchTimeByWeekDataProvider subject = new TouchTimeByWeekDataProvider(issueKpiService, projectService, kpiProperties, jiraProperties);
+            TouchTimeByWeekKpiDataProvider subject = new TouchTimeByWeekKpiDataProvider(issueKpiService, projectService, kpiProperties, jiraProperties);
             this.dataset = subject.getDataSet(projectKey, issueLevel, timezone);
         }
 
@@ -667,9 +667,9 @@ public class TouchTimeByWeekDataProviderTest {
 
     private class TouchTimeDataSetAsserter {
 
-        private TouchTimeChartByWeekDataSet dataset;
+        private TouchTimeByWeekKpiDataSet dataset;
 
-        public TouchTimeDataSetAsserter(TouchTimeChartByWeekDataSet dataset) {
+        public TouchTimeDataSetAsserter(TouchTimeByWeekKpiDataSet dataset) {
             this.dataset = dataset;
         }
 
@@ -684,10 +684,10 @@ public class TouchTimeByWeekDataProviderTest {
 
         private class TouchTimePointsAsserter {
 
-            private TouchTimeChartByWeekDataPoint currentPoint;
-            private Iterator<TouchTimeChartByWeekDataPoint> iterator;
+            private TouchTimeByWeekKpiDataPoint currentPoint;
+            private Iterator<TouchTimeByWeekKpiDataPoint> iterator;
 
-            public TouchTimePointsAsserter(List<TouchTimeChartByWeekDataPoint> points) {
+            public TouchTimePointsAsserter(List<TouchTimeByWeekKpiDataPoint> points) {
                 iterator = points.iterator();
                 currentPoint = iterator.next();
             }

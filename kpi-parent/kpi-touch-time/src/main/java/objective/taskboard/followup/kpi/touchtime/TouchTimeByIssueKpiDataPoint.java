@@ -2,7 +2,7 @@ package objective.taskboard.followup.kpi.touchtime;
 
 import java.time.Instant;
 
-class TouchTimeDataPoint {
+class TouchTimeByIssueKpiDataPoint {
     public final String issueKey;
     public final String issueType;
     public final String issueStatus;
@@ -10,7 +10,7 @@ class TouchTimeDataPoint {
     public final Instant startProgressingDate;
     public final Instant endProgressingDate;
     
-    public TouchTimeDataPoint(String issueKey, String issueType, String issueStatus, double effortInHours, Instant startProgressingDate, Instant endProgressingDate) {
+    public TouchTimeByIssueKpiDataPoint(String issueKey, String issueType, String issueStatus, double effortInHours, Instant startProgressingDate, Instant endProgressingDate) {
         this.issueKey = issueKey;
         this.issueType = issueType;
         this.issueStatus = issueStatus;

@@ -4,7 +4,7 @@ import java.time.ZoneId;
 
 import objective.taskboard.followup.kpi.KpiLevel;
 
-public interface TouchTimeProvider <T>{
+public interface TouchTimeKpiDataProvider <T>{
 
 	T getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone);
 	

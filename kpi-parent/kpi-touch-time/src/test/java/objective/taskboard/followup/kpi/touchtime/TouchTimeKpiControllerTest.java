@@ -18,18 +18,18 @@ import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekDataProvider;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataPoint;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataSet;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeChartDataSet;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeDataPoint;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeKPIController;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeKPIDataProvider;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataProvider;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeKpiController;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataProvider;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TouchTimeKPIControllerTest {
+public class TouchTimeKpiControllerTest {
 
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
@@ -40,13 +40,13 @@ public class TouchTimeKPIControllerTest {
     private ProjectService projectService;
 
     @Mock
-    private TouchTimeKPIDataProvider touchTimeKpiDataProvider;
+    private TouchTimeByIssueKpiDataProvider touchTimeKpiDataProvider;
 
     @Mock
-    private TouchTimeByWeekDataProvider touchTimeByWeekDataProvider;
+    private TouchTimeByWeekKpiDataProvider touchTimeByWeekDataProvider;
 
     @InjectMocks
-    private TouchTimeKPIController subject;
+    private TouchTimeKpiController subject;
 
     @Test
     public void requestTouchTimeChartData_happyPath() {
@@ -56,18 +56,18 @@ public class TouchTimeKPIControllerTest {
 
         final Instant startProgressingDate = parseDateTime("2018-12-06").toInstant();
         final Instant endProgressingDate = parseDateTime("2018-12-07").toInstant();
-        final List<TouchTimeDataPoint> issuesList = Arrays.asList(
-                new TouchTimeDataPoint("I-1", "Backend Development", "Doing", 5.0, startProgressingDate, endProgressingDate),
-                new TouchTimeDataPoint("I-2", "Backend Development", "Doing", 8.0, startProgressingDate, endProgressingDate),
-                new TouchTimeDataPoint("I-3", "Backend Development", "Reviewing", 2.0, startProgressingDate, endProgressingDate));
+        final List<TouchTimeByIssueKpiDataPoint> issuesList = Arrays.asList(
+                new TouchTimeByIssueKpiDataPoint("I-1", "Backend Development", "Doing", 5.0, startProgressingDate, endProgressingDate),
+                new TouchTimeByIssueKpiDataPoint("I-2", "Backend Development", "Doing", 8.0, startProgressingDate, endProgressingDate),
+                new TouchTimeByIssueKpiDataPoint("I-3", "Backend Development", "Reviewing", 2.0, startProgressingDate, endProgressingDate));
         configureTestEnvironmentForProject(projectKey)
             .projectExists()
             .withOperationPermission()
-            .withSubtaskDataSet(new TouchTimeChartDataSet(issuesList));
+            .withSubtaskDataSet(new TouchTimeByIssueKpiDataSet(issuesList));
 
         AssertResponse.of(subject.getData("byIssues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
-            .bodyClass(TouchTimeChartDataSet.class)
+            .bodyClass(TouchTimeByIssueKpiDataSet.class)
             .bodyAsJson(
                     "{\"points\":"
                         + "["
@@ -105,21 +105,21 @@ public class TouchTimeKPIControllerTest {
         final String level = "Subtasks";
         final String zoneId = "America/Sao_Paulo";
 
-        final List<TouchTimeChartByWeekDataPoint> issueList = Arrays.asList(
-                new TouchTimeChartByWeekDataPoint(parseDateTime("2018-11-18").toInstant(), "Development", 5d),
-                new TouchTimeChartByWeekDataPoint(parseDateTime("2018-11-18").toInstant(), "Review", 10d),
-                new TouchTimeChartByWeekDataPoint(parseDateTime("2018-11-25").toInstant(), "Development", 15d),
-                new TouchTimeChartByWeekDataPoint(parseDateTime("2018-11-25").toInstant(), "Review", 20d)
+        final List<TouchTimeByWeekKpiDataPoint> issueList = Arrays.asList(
+                new TouchTimeByWeekKpiDataPoint(parseDateTime("2018-11-18").toInstant(), "Development", 5d),
+                new TouchTimeByWeekKpiDataPoint(parseDateTime("2018-11-18").toInstant(), "Review", 10d),
+                new TouchTimeByWeekKpiDataPoint(parseDateTime("2018-11-25").toInstant(), "Development", 15d),
+                new TouchTimeByWeekKpiDataPoint(parseDateTime("2018-11-25").toInstant(), "Review", 20d)
                 );
 
         configureTestEnvironmentForProject(projectKey)
             .projectExists()
             .withOperationPermission()
-            .withSubtaskByWeekDataSet(new TouchTimeChartByWeekDataSet(issueList));
+            .withSubtaskByWeekDataSet(new TouchTimeByWeekKpiDataSet(issueList));
 
         AssertResponse.of(subject.getData("byWeek",projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
-            .bodyClass(TouchTimeChartByWeekDataSet.class)
+            .bodyClass(TouchTimeByWeekKpiDataSet.class)
             .bodyAsJson(
                     "{\"points\":"
                         + "["
@@ -242,13 +242,13 @@ public class TouchTimeKPIControllerTest {
             return this;
         }
 
-        public TestEnvironmentDSL withSubtaskByWeekDataSet(TouchTimeChartByWeekDataSet dataset) {
+        public TestEnvironmentDSL withSubtaskByWeekDataSet(TouchTimeByWeekKpiDataSet dataset) {
             when(touchTimeByWeekDataProvider.getDataSet(projectKey, KpiLevel.SUBTASKS, ZONE_ID))
                 .thenReturn(dataset);
             return this;
         }
 
-        public TestEnvironmentDSL withSubtaskDataSet(TouchTimeChartDataSet dataset) {
+        public TestEnvironmentDSL withSubtaskDataSet(TouchTimeByIssueKpiDataSet dataset) {
             when(touchTimeKpiDataProvider.getDataSet(projectKey, KpiLevel.SUBTASKS, ZONE_ID))
                 .thenReturn(dataset);
             return this;

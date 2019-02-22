@@ -35,7 +35,7 @@ import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.RangeUtils;
 
 @Service
-public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeChartByWeekDataSet>{
+public class TouchTimeByWeekKpiDataProvider implements TouchTimeKpiDataProvider<TouchTimeByWeekKpiDataSet>{
 
     private IssueKpiService issueKpiService;
 
@@ -46,7 +46,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
     private JiraProperties jiraProperties;
 
     @Autowired
-    public TouchTimeByWeekDataProvider(
+    public TouchTimeByWeekKpiDataProvider(
             IssueKpiService issueKpiService,
             ProjectService projectService,
             KpiTouchTimeProperties properties,
@@ -59,12 +59,12 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
     }
 
     @Override
-    public TouchTimeChartByWeekDataSet getDataSet(String projectKey, KpiLevel level, ZoneId timezone) {
+    public TouchTimeByWeekKpiDataSet getDataSet(String projectKey, KpiLevel level, ZoneId timezone) {
 
         ProjectFilterConfiguration project = projectService.getTaskboardProjectOrCry(projectKey);
         List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone,level);
         if (issues.isEmpty()) {
-            return new TouchTimeChartByWeekDataSet(Collections.emptyList());
+            return new TouchTimeByWeekKpiDataSet(Collections.emptyList());
         }
         Range<LocalDate> projectRange = getRangeOrCry(project);
         DataCollector dataCollector = new DataCollectorFactory(projectRange, timezone, issues).getDataCollector(level);
@@ -103,7 +103,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
         private Range<LocalDate> projectRange;
         private ZoneId timezone;
         private List<IssueKpi> issues;
-        private Map<TouchTimeWeekRange, List<IssueKpi>> issuesByWeek;
+        private Map<TouchTimeKpiWeekRange, List<IssueKpi>> issuesByWeek;
 
         public DataCollector(Range<LocalDate> projectRange, ZoneId timezone, List<IssueKpi> issues) {
             this.projectRange = projectRange;
@@ -112,26 +112,26 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
             this.issuesByWeek = aggregateIssuesByWeek();
         }
 
-        private Map<TouchTimeWeekRange, List<IssueKpi>> aggregateIssuesByWeek() {
+        private Map<TouchTimeKpiWeekRange, List<IssueKpi>> aggregateIssuesByWeek() {
             return getWeeksStream().collect(Collectors.toMap(w -> w, w -> filterIssuesFromWeek(w)));
         }
 
-        private Stream<TouchTimeWeekRange> getWeeksStream() {
+        private Stream<TouchTimeKpiWeekRange> getWeeksStream() {
             Stream<Range<LocalDate>> weeksRanges = WeekRangeNormalizer.splitByWeek(projectRange, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY);
-            return weeksRanges.map(w -> new TouchTimeWeekRange(w, timezone));
+            return weeksRanges.map(w -> new TouchTimeKpiWeekRange(w, timezone));
         }
 
-        private List<IssueKpi> filterIssuesFromWeek(TouchTimeWeekRange week){
+        private List<IssueKpi> filterIssuesFromWeek(TouchTimeKpiWeekRange week){
             return issues.stream()
                     .filter(week::progressOverlaps)
                     .collect(Collectors.toList());
         }
 
-        public TouchTimeChartByWeekDataSet getDataSet() {
-            return new TouchTimeChartByWeekDataSet(getDataPoints());
+        public TouchTimeByWeekKpiDataSet getDataSet() {
+            return new TouchTimeByWeekKpiDataSet(getDataPoints());
         }
 
-        abstract List<TouchTimeChartByWeekDataPoint> getDataPoints();
+        abstract List<TouchTimeByWeekKpiDataPoint> getDataPoints();
 
     }
 
@@ -145,7 +145,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
         }
 
         @Override
-        List<TouchTimeChartByWeekDataPoint> getDataPoints() {
+        List<TouchTimeByWeekKpiDataPoint> getDataPoints() {
             return super.issuesByWeek.entrySet().stream()
                     .sorted(Comparator.comparing(Entry::getKey))
                     .map(this::transformToDataPoints)
@@ -153,18 +153,18 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
                     .collect(Collectors.toList());
         }
 
-        private List<TouchTimeChartByWeekDataPoint> transformToDataPoints(Entry<TouchTimeWeekRange, List<IssueKpi>> entry) {
-            TouchTimeWeekRange week = entry.getKey();
+        private List<TouchTimeByWeekKpiDataPoint> transformToDataPoints(Entry<TouchTimeKpiWeekRange, List<IssueKpi>> entry) {
+            TouchTimeKpiWeekRange week = entry.getKey();
             List<IssueKpi> issues = entry.getValue();
             return progressingStatuses.stream()
-                .map(status -> new TouchTimeChartByWeekDataPoint(
+                .map(status -> new TouchTimeByWeekKpiDataPoint(
                         week.getFirstDay().toInstant(),
                         status,
                         getWeekAvgEffortForStatusFromIssues(week, status, issues)))
                 .collect(Collectors.toList());
         }
 
-        private double getWeekAvgEffortForStatusFromIssues(TouchTimeWeekRange week, String status, List<IssueKpi> issues) {
+        private double getWeekAvgEffortForStatusFromIssues(TouchTimeKpiWeekRange week, String status, List<IssueKpi> issues) {
             return issues.stream()
                 .map(i -> i.getEffortFromStatusUntilDate(status, week.getLastDay()))
                 .mapToDouble(DateTimeUtils::secondsToHours)
@@ -179,14 +179,14 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
     }
 
     private class DataCollectorBySubtasksConfigs extends DataCollector {
-        private Table<TouchTimeWeekRange, String, List<Double>> effortsByStackNameByWeek = HashBasedTable.create();
+        private Table<TouchTimeKpiWeekRange, String, List<Double>> effortsByStackNameByWeek = HashBasedTable.create();
 
         public DataCollectorBySubtasksConfigs(Range<LocalDate> projectRange, ZoneId timezone, List<IssueKpi> issues) {
             super(projectRange, timezone, issues);
         }
 
         @Override
-        List<TouchTimeChartByWeekDataPoint> getDataPoints() {
+        List<TouchTimeByWeekKpiDataPoint> getDataPoints() {
             aggregateEffortAccordingToConfiguration();
             return transformToDataPoints();
         }
@@ -195,7 +195,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
             super.issuesByWeek.entrySet().forEach(entry -> aggregate(entry.getKey(), entry.getValue()));
         }
 
-        private void aggregate(TouchTimeWeekRange week, List<IssueKpi> issuesFromWeek) {
+        private void aggregate(TouchTimeKpiWeekRange week, List<IssueKpi> issuesFromWeek) {
             List<IssueKpi> issuesFromWeekCopy = new LinkedList<>(issuesFromWeek);
             
             for (TouchTimeSubtaskConfiguration conf : properties.getTouchTimeSubtaskConfigs()) {
@@ -217,32 +217,32 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
             return issue.getIssueType().map(t -> typesIds.contains(t.getId())).orElse(false);
         }
 
-        private List<Double> getEffortsFromIssues(TouchTimeWeekRange week, List<IssueKpi> issuesSelectedByType) {
+        private List<Double> getEffortsFromIssues(TouchTimeKpiWeekRange week, List<IssueKpi> issuesSelectedByType) {
             return issuesSelectedByType.stream()
                 .map(i -> i.getEffortUntilDate(week.getLastDay()))
                 .map(DateTimeUtils::secondsToHours)
                 .collect(Collectors.toList());
         }
 
-        private void collectEffortFromStatusesForStack(String stackName, List<String> statuses, TouchTimeWeekRange week, List<IssueKpi> issuesFromWeek) {
+        private void collectEffortFromStatusesForStack(String stackName, List<String> statuses, TouchTimeKpiWeekRange week, List<IssueKpi> issuesFromWeek) {
             issuesFromWeek.stream()
                 .map(i -> i.getEffortSumInSecondsFromStatusesUntilDate(statuses, week.getLastDay()))
                 .mapToDouble(DateTimeUtils::secondsToHours)
                 .forEach(effortSumInHours -> effortsByStackNameByWeek.get(week, stackName).add(effortSumInHours));
         }
 
-        private List<TouchTimeChartByWeekDataPoint> transformToDataPoints() {
+        private List<TouchTimeByWeekKpiDataPoint> transformToDataPoints() {
             return effortsByStackNameByWeek.cellSet().stream()
                     .sorted(Comparator.comparing(Cell::getRowKey))
-                    .map(c -> new TouchTimeChartByWeekDataPoint(
+                    .map(c -> new TouchTimeByWeekKpiDataPoint(
                             c.getRowKey().getFirstDay().toInstant(),
                             c.getColumnKey(),
                             calculateAverage(c)))
                     .collect(Collectors.toList());
         }
 
-        private double calculateAverage(Cell<TouchTimeWeekRange, String, List<Double>> effortsByStackNameByWeekCell) {
-            TouchTimeWeekRange week = effortsByStackNameByWeekCell.getRowKey();
+        private double calculateAverage(Cell<TouchTimeKpiWeekRange, String, List<Double>> effortsByStackNameByWeekCell) {
+            TouchTimeKpiWeekRange week = effortsByStackNameByWeekCell.getRowKey();
             List<Double> efforts = effortsByStackNameByWeekCell.getValue();
             double sum = efforts.stream().collect(Collectors.summingDouble(x -> x));
             if (sum <= 0d)

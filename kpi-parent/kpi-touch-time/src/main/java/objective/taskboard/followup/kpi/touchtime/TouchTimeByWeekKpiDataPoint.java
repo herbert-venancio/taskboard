@@ -4,13 +4,13 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public class TouchTimeChartByWeekDataPoint {
+public class TouchTimeByWeekKpiDataPoint {
 
     public final Instant date;
     public final String stackName;
     public final double effortInHours;
 
-    public TouchTimeChartByWeekDataPoint(Instant date, String stackName, double effortInHours) {
+    public TouchTimeByWeekKpiDataPoint(Instant date, String stackName, double effortInHours) {
         this.date = date;
         this.stackName = stackName;
         this.effortInHours = effortInHours;

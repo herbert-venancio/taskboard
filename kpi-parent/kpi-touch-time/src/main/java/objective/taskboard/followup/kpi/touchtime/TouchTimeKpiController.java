@@ -23,19 +23,19 @@ import objective.taskboard.jira.ProjectService;
 
 @RestController
 @RequestMapping(value = "/api/projects/{project}/followup/touchtime")
-class TouchTimeKPIController {
+class TouchTimeKpiController {
 	
     private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
     
     private ProjectService projectService;
    
-    private Map<String,TouchTimeProvider<?>> providerMap;
+    private Map<String,TouchTimeKpiDataProvider<?>> providerMap;
     
 
     @Autowired
-    public TouchTimeKPIController(ProjectDashboardOperationalPermission projectDashboardOperationalPermission,
-			ProjectService projectService, TouchTimeByWeekDataProvider touchTimeByWeekDataProvider,
-			TouchTimeKPIDataProvider touchTimeKpiDataProvider) {
+    public TouchTimeKpiController(ProjectDashboardOperationalPermission projectDashboardOperationalPermission,
+			ProjectService projectService, TouchTimeByWeekKpiDataProvider touchTimeByWeekDataProvider,
+			TouchTimeByIssueKpiDataProvider touchTimeKpiDataProvider) {
 		super();
 		this.projectDashboardOperationalPermission = projectDashboardOperationalPermission;
 		this.projectService = projectService;
@@ -71,7 +71,7 @@ class TouchTimeKPIController {
 				.orElse(new ResponseEntity<>(String.format("Method not found: %s", method),HttpStatus.NOT_FOUND));
 	}
 	
-	public ResponseEntity<Object> getOkResponse(TouchTimeProvider<?> provider, String projectKey, KpiLevel kpiLevel, ZoneId timezone){
+	public ResponseEntity<Object> getOkResponse(TouchTimeKpiDataProvider<?> provider, String projectKey, KpiLevel kpiLevel, ZoneId timezone){
 		return new ResponseEntity<>(provider.getDataSet(projectKey, kpiLevel, timezone), HttpStatus.OK);
 	}
     

@@ -2,10 +2,10 @@ package objective.taskboard.followup.kpi.touchtime;
 
 import java.util.List;
 
-class TouchTimeChartDataSet {
-    public final List<TouchTimeDataPoint> points;
+class TouchTimeByIssueKpiDataSet {
+    public final List<TouchTimeByIssueKpiDataPoint> points;
 
-    public TouchTimeChartDataSet(List<TouchTimeDataPoint> points) {
+    public TouchTimeByIssueKpiDataSet(List<TouchTimeByIssueKpiDataPoint> points) {
          this.points = points;
     }
 

@@ -18,13 +18,13 @@ import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeChartDataSet;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeDataPoint;
-import objective.taskboard.followup.kpi.touchtime.TouchTimeKPIDataProvider;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataProvider;
 import objective.taskboard.jira.properties.JiraProperties;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TouchTimeKPIDataProviderTest {
+public class TouchTimeByIssueKpiDataProviderTest {
 
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
@@ -164,7 +164,7 @@ public class TouchTimeKPIDataProviderTest {
         private String projectKey;
         private KpiLevel issueLevel;
         private ZoneId timezone;
-        private TouchTimeChartDataSet dataset;
+        private TouchTimeByIssueKpiDataSet dataset;
 
         public TouchTimeDataProviderBehavior(String projectKey, KpiLevel issueLevel, ZoneId timezone) {
             this.projectKey = projectKey;
@@ -177,7 +177,7 @@ public class TouchTimeKPIDataProviderTest {
             KPIProperties kpiProperties = environment.getKPIProperties();
             JiraProperties jiraProperties = environment.getJiraProperties();
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
-            TouchTimeKPIDataProvider suject = new TouchTimeKPIDataProvider(issueKpiService, jiraProperties, kpiProperties);
+            TouchTimeByIssueKpiDataProvider suject = new TouchTimeByIssueKpiDataProvider(issueKpiService, jiraProperties, kpiProperties);
             this.dataset = suject.getDataSet(projectKey, issueLevel, timezone);
         }
 
@@ -189,9 +189,9 @@ public class TouchTimeKPIDataProviderTest {
 
     private class TouchTimeDataSetAsserter {
 
-        private TouchTimeChartDataSet dataset;
+        private TouchTimeByIssueKpiDataSet dataset;
 
-        public TouchTimeDataSetAsserter(TouchTimeChartDataSet dataset) {
+        public TouchTimeDataSetAsserter(TouchTimeByIssueKpiDataSet dataset) {
             this.dataset = dataset;
         }
 
@@ -206,10 +206,10 @@ public class TouchTimeKPIDataProviderTest {
 
         private class TouchTimePointsAsserter {
 
-            private TouchTimeDataPoint currentPoint;
-            private Iterator<TouchTimeDataPoint> iterator;
+            private TouchTimeByIssueKpiDataPoint currentPoint;
+            private Iterator<TouchTimeByIssueKpiDataPoint> iterator;
 
-            public TouchTimePointsAsserter(List<TouchTimeDataPoint> points) {
+            public TouchTimePointsAsserter(List<TouchTimeByIssueKpiDataPoint> points) {
                 iterator = points.iterator();
                 currentPoint = iterator.next();
             }
