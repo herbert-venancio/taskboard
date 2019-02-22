@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
@@ -18,6 +18,9 @@ import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeChartDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeKPIDataProvider;
 import objective.taskboard.jira.properties.JiraProperties;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.touchTime.KpiValidationException;
 import objective.taskboard.jira.ProjectService;
 
 @RestController

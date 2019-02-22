@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import java.util.List;
 

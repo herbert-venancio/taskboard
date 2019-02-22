@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import static objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker.withTouchTimeSubtaskConfig;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
@@ -23,6 +23,9 @@ import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekDataProvider;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataSet;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 

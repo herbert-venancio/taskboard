@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import static org.mockito.Mockito.when;
 
@@ -14,6 +14,7 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.ProjectRangeByConfiguration;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.touchTime.WithinRangeFilter;
 import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.DateTimeUtils;
 

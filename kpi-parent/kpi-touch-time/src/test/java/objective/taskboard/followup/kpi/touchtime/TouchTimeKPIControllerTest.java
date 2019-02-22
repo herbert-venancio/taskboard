@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
@@ -18,6 +18,13 @@ import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekDataProvider;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeChartByWeekDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeChartDataSet;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeDataPoint;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeKPIController;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeKPIDataProvider;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 
