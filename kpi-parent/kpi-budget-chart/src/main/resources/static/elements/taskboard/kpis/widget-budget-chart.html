@@ -73,6 +73,7 @@
                     this.xhr.done((data) => {
                         if (!data) {
                             this.errorMessage = 'Budget has no data';
+                            return;
                         }
                         this._prepareData(data);
                     });

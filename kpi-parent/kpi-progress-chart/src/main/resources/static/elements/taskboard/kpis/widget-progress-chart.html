@@ -9,11 +9,31 @@
             }
         </style>
 
-        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" 
-                error-message="{{errorMessage}}" highcharts-chart="{{chart}}">
+        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}"
+                options="{{options}}" highcharts-chart="{{chart}}">
             <div id="progress-chart" class="tb-chart"></div>
         </widget-wrap>
 
+        <modal-wrap id="modal" title="Progress Filters">
+
+            <modal-wrap-content>
+                <div class="modal-content">
+                    <form class="progress-chart-modal" style="width: 250px">
+                        <paper-input id="projectProjectionTimespan"
+                            label="Projection Timespan (in days)"
+                            value="{{tempProjectionTimespan}}"
+                            type="number"
+                            min="0"
+                            auto-validate></paper-input>
+                    </form>
+                </div>
+            </modal-wrap-content>
+
+            <modal-wrap-footer>
+                <tb-button button="[[_btUpdate]]"></tb-button>
+            </modal-wrap-footer>
+
+        </modal-wrap>
         
     </template>
 
@@ -37,8 +57,19 @@
                     chart: {
                         type: Object
                     },
+                    options: {
+                        type: Array,
+                        value: function() { return []; }
+                    },
+                    tempProjectionTimespan: {
+                        type: Number,
+                        value: null
+                    },
                     isVisible: {
                         type: Boolean
+                    },
+                    _btUpdate: {
+                        type: Object
                     },
                     _plotData: {
                         type: Object
@@ -56,14 +87,27 @@
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
                     }
+                    this._resetProjectionTimespan();
                     this._fetchData(newSelectedProjectKey);
+                },
+
+                _resetProjectionTimespan: function() {
+                    this.tempProjectionTimespan = null;
                 },
 
                 _fetchData: function (selectedProjectKey) {
                     this.reset();
                     var url = `/api/projects/${selectedProjectKey}/followup/progress?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
+                    
+                    if (this.tempProjectionTimespan)
+                        url = `${url}&projection=${this.tempProjectionTimespan}`;
+
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
+                        if (!data.actual.length && !data.actualProjection.length && !data.expected.length) {
+                            this.errorMessage = 'Progress has no data';
+                            return;
+                        }
                         this._prepareData(data);
                     });
                     
@@ -87,6 +131,8 @@
                         });
                         return serie;
                     };
+
+                    this.tempProjectionTimespan = data.projectionTimespan;
             
                     var graphData = [];
                     
@@ -143,6 +189,29 @@
                         this.xhr = null;
                     }
                     this._resetChart();
+                },
+
+                ready: function() {
+                    this._createChartOptions();
+                    this._btUpdate = ButtonBuilder('Update chart')
+                        .id('update')
+                        .onClick(() => {
+                            this.$.modal.close();
+                            this._fetchData(this.selectedProjectKey);
+                        })
+                        .build();
+                },
+
+                _createChartOptions: function() {
+                    this.options = [
+                        {
+                            icon:'taskboard-icons:dashboard-filter',
+                            title: 'Chart filters',
+                            tap: () => {
+                                this.$.modal.open();
+                            }
+                        }
+                    ];
                 },
 
                 _resetChart: function () {

@@ -88,8 +88,8 @@
                     this._isPlotDataUpdated = true;
                 },
 
-                _createChart: function (isPlotDataUpdated, isStylesApplied) {
-                    if (!isStylesApplied || !isPlotDataUpdated) {
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
                         return;
                     }
                     this._resetChart();

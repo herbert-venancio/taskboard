@@ -30,7 +30,7 @@
                 <h3 class="tb-label">Level</h3>
                 <div>
                     <label id="labelLevel"></label>
-                    <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}" aria-labelledby="labelLevel">
+                    <paper-radio-group class="radio-group" selected="{{issueLevel}}" aria-labelledby="labelLevel">
                         <paper-radio-button name="Demand">Demand</paper-radio-button>
                         <paper-radio-button name="Features">Feature</paper-radio-button>
                         <paper-radio-button name="Subtasks">Subtask</paper-radio-button>
@@ -73,7 +73,7 @@
                         type: Array,
                         value: null
                     },
-                    settingIssueLevel: {
+                    issueLevel: {
                         type: String,
                         value: 'Subtasks'
                     },
@@ -166,11 +166,11 @@
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingIssueLevel) {
+                        if (savedLevel === this.issueLevel) {
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.issueLevel);
                         this.$$('.settings-modal').close();
                         this._fetchData(this.selectedProjectKey);
                     }).build();
