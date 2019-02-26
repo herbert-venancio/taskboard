@@ -105,7 +105,7 @@
                                 .withIcon('taskboard-icons:dashboard-filter')
                                 .withTitle('Chart filters')
                                 .withOnTap(() => this.$.modal.open())
-                                .withHidden(false)
+                                .withHidden(true)
                                 .build()
                         )
                         .withFullscreen()
@@ -228,16 +228,12 @@
                     return allYears.map(y => toPlotLineFormat(y));
                 },
 
-                attributeChanged: function (attributeName) {
-                    if (attributeName === 'class') {
-                        this._stylesApplied = this.getAttribute(attributeName).search(/active/) > -1;
-                    }
-                },
 
                 reset: function() {
                     this.isReady = false;
                     this.errorMessage = '';
-
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
                     if(this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
@@ -267,6 +263,7 @@
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
                     this._isPlotDataUpdated = false;
+                    this.set('options.0.hidden', false);
                     this.isReady = true;
                 }
             });

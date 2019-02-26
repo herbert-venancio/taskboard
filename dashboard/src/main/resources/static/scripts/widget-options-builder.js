@@ -34,7 +34,7 @@ class WidgetOptionsBuilder {
             .withIcon('taskboard-icons:settings')
             .withTitle('Settings')
             .withOnTap(() => {
-                this._widget.settingIssueLevel = this._widget._getSavedLevel();
+                this._widget.issueLevel = this._widget._getSavedLevel();
                 this._widget.$$('.settings-modal').open();
             })
             .build());

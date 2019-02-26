@@ -15,16 +15,6 @@
             <div id="touchTimeWeekly" class="tb-chart"></div>
         </widget-wrap>
 
-        <modal-wrap class="filters-modal" title="Filters">
-            <modal-wrap-content>
-                <h3 class="tb-label">Issue Types</h3>
-                <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
-            </modal-wrap-content>
-            <modal-wrap-footer>
-                <tb-button button="[[_btFilterClose]]"></tb-button>
-            </modal-wrap-footer>
-        </modal-wrap>
-
         <modal-wrap class="settings-modal" title="Settings">
             <modal-wrap-content>
                 <h3 class="tb-label">Level</h3>
@@ -154,7 +144,10 @@
                 },    
 
                 ready: function () {
-                    ChartUtils.registerOptions(this);
+                    this.options = new WidgetOptionsBuilder(this)
+                        .withFullscreen()
+                        .withSettings()
+                        .build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
                         if (savedLevel === this.issueLevel) {

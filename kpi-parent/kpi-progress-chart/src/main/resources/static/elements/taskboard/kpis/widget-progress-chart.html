@@ -158,40 +158,12 @@
                     this.chart = builder.build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
-
-                },
-
-                ready: function () {
-                    this._createChartOptions();
-                },
-
-                _createChartOptions: function() {
-                    this.options = new WidgetOptionsBuilder(this)
-                        .withCustomOption(
-                            new WidgetOptionBuilder()
-                                .withIcon('taskboard-icons:dashboard-filter')
-                                .withTitle('Chart filters')
-                                .withOnTap(() => this.$.modal.open())
-                                .withHidden(false)
-                                .build()
-                        )
-                        .withFullscreen()
-                        .build();
                     this._isPlotDataUpdated = false;
+                    this.set('options.0.hidden', false);
                     this.isReady = true;
                 },
 
-                reset: function () {
-                    this.isReady = false;
-                    this.errorMessage = '';
-                    if (this.xhr) {
-                        this.xhr.abort();
-                        this.xhr = null;
-                    }
-                    this._resetChart();
-                },
-
-                ready: function() {
+                ready: function () {
                     this._createChartOptions();
                     this._btUpdate = ButtonBuilder('Update chart')
                         .id('update')
@@ -203,15 +175,29 @@
                 },
 
                 _createChartOptions: function() {
-                    this.options = [
-                        {
-                            icon:'taskboard-icons:dashboard-filter',
-                            title: 'Chart filters',
-                            tap: () => {
-                                this.$.modal.open();
-                            }
-                        }
-                    ];
+                    this.options = new WidgetOptionsBuilder(this)
+                        .withCustomOption(
+                            new WidgetOptionBuilder()
+                                .withIcon('taskboard-icons:dashboard-filter')
+                                .withTitle('Chart filters')
+                                .withOnTap(() => this.$.modal.open())
+                                .withHidden(true)
+                                .build()
+                        )
+                        .withFullscreen()
+                        .build();
+                },
+
+                reset: function () {
+                    this.isReady = false;
+                    this.errorMessage = '';
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
+                    this._resetChart();
                 },
 
                 _resetChart: function () {
