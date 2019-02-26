@@ -26,7 +26,7 @@ public class WithinRangeFilterTest {
     public void filterHappyDay() {
         IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-11")
@@ -47,9 +47,8 @@ public class WithinRangeFilterTest {
     public void issueBeforeRange() {
         IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-02")
 		        			.status("Doing").date("2018-01-03")
@@ -70,9 +69,8 @@ public class WithinRangeFilterTest {
     public void issueRangeEndingAtStartOfTimelineRange() {
         IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-02")
 		        			.status("Doing").date("2018-01-03")
@@ -92,9 +90,8 @@ public class WithinRangeFilterTest {
     public void issueStartingAtEndOfRange() {
         IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-19")
 		        			.status("Doing").date("2018-01-20")
@@ -114,9 +111,8 @@ public class WithinRangeFilterTest {
     public void issueAfterRange() {
         IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-20")
 		        			.status("Doing").date("2018-01-23")
@@ -136,9 +132,8 @@ public class WithinRangeFilterTest {
     public void issueWithSameRange() {
     	IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-09")
 		        			.status("Doing").date("2018-01-10")
@@ -158,9 +153,8 @@ public class WithinRangeFilterTest {
     public void openIssue() {
     	IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-15")
 		        			.status("Doing").noDate()
@@ -180,9 +174,8 @@ public class WithinRangeFilterTest {
     public void workingIssue_startingAfterInsideRange() {
         IssueKpi kpi = 
         		environment()
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-10")
 		        			.status("Doing").date("2018-01-15")
@@ -203,9 +196,8 @@ public class WithinRangeFilterTest {
         IssueKpi kpi = 
         		environment()
         		    .todayIs("2018-02-25")
-		        	.givenIssue("I-1")
+		        	.givenSubtask("I-1")
 		        		.type("Development")
-		        		.isSubtask()
 		        		.withTransitions()
 		        			.status("To Do").date("2018-01-08")
 		        			.status("Doing").date("2018-01-09")

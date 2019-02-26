@@ -260,7 +260,7 @@ public class FeatureTouchTimeTest {
         }
 
         public IssueKpiMocker givenFeature(String pkey) {
-            return dsl.environment().givenIssue(pkey).isFeature();
+            return dsl.environment().givenFeature(pkey);
         }
 
         public DSLWrapper configureStatuses() {
@@ -281,7 +281,7 @@ public class FeatureTouchTimeTest {
 
             public SubtaskBuilder(String father, String key, String type) {
                 this.subtask = dsl.environment()
-                            .givenIssue(father)
+                            .givenFeature(father)
                             .subtask(key)
                             .type(type);
             }
