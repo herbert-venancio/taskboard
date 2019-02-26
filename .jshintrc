@@ -30,6 +30,11 @@
     "sucess": false,
     "taskboard": true,
     "authorizer": true,
-    "issueSelectorService": true
+    "issueSelectorService": true,
+    "Highcharts": true,
+    "ChartUtils": true,
+    "WidgetOptionBuilder": true,
+    "WidgetFullscreenOption": true,
+    "WidgetOptionsBuilder": true
   }
 }

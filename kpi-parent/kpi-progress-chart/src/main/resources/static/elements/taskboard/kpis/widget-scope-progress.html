@@ -81,7 +81,7 @@
                     },
                     options: {
                         type: Array,
-                        value: []
+                        value: () => []
                     },
                     _plotSeries: {
                         type: Object,
@@ -122,16 +122,17 @@
                 },
 
                 _createChartOptions: function() {
-                    var self = this;
-                    this.set('options', [
-                        {
-                            icon:'taskboard-icons:dashboard-filter',
-                            title: 'Chart filters',
-                            tap: function() {
-                                self.$.modal.open();
-                            }
-                        }
-                    ]);
+                    this.options = new WidgetOptionsBuilder(this)
+                        .withCustomOption(
+                            new WidgetOptionBuilder()
+                                .withIcon('taskboard-icons:dashboard-filter')
+                                .withTitle('Chart filters')
+                                .withOnTap(() => this.$.modal.open())
+                                .withHidden(true)
+                                .build()
+                        )
+                        .withFullscreen()
+                        .build();
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {

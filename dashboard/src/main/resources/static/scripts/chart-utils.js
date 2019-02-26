@@ -83,6 +83,19 @@ class ChartUtils {
         return options;
     }
 
+    static resizeHighchartsChart(chart) {
+        if (chart) {
+            const chartDiv = chart.container;
+            // section is the first ancestral that has the correct height
+            const section = chartDiv.closest('section');
+            const header = section.children[0];
+            const borderSizeWidgetBody = 16;
+            const height = section.offsetHeight - header.offsetHeight - borderSizeWidgetBody * 2;
+            const width = section.offsetWidth - borderSizeWidgetBody * 2;
+            chart.setSize(width, height);
+        }
+    }
+
     static resizeAllHighchartsCharts () {
         /*
          * This function performs a resize on all Highchart charts.
@@ -92,16 +105,7 @@ class ChartUtils {
          * default size which gives an erroneous size.
          */
         Highcharts.charts.forEach((chart) => {
-            if (chart) {
-                const chartDiv = chart.container;
-                // section is the first ancestral that has the correct height
-                const section = chartDiv.closest('section');
-                const header = section.children[0];
-                const borderSizeWidgetBody = 16;
-                const height = section.offsetHeight - header.offsetHeight - borderSizeWidgetBody * 2;
-                const width = section.offsetWidth - borderSizeWidgetBody * 2;
-                chart.setSize(width, height);
-            }
+            ChartUtils.resizeHighchartsChart(chart);
         });
     }
 
@@ -157,24 +161,11 @@ class ChartUtils {
     }
 
     static registerOptions (widget) {
-        const options = [
-            {
-                icon:'taskboard-icons:dashboard-filter',
-                title: 'Filters',
-                tap: () => widget.$$('.filters-modal').open(),
-                hidden: true
-            },
-            {
-                icon: 'taskboard-icons:settings',
-                title: 'Settings',
-                tap: () => {
-                    widget.settingIssueLevel = widget._getSavedLevel();
-                    widget.$$('.settings-modal').open();
-                },
-                cssClasses: ''
-            }
-        ];
-        widget.options = options;
+        widget.options = new WidgetOptionsBuilder(widget)
+            .withFilters()
+            .withFullscreen()
+            .withSettings()
+            .build();
     }
 
     static zoomOut (chart) {

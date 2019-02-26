@@ -28,7 +28,7 @@
             }
         </style>
 
-        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" has-reset="true" error-message="{{errorMessage}}" highcharts-chart="{{chart}}">
+        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" has-reset="true" error-message="{{errorMessage}}" highcharts-chart="{{chart}}" options="{{options}}">
 
             <div id="planned-x-ballpark" class="tb-chart"></div>
 
@@ -61,8 +61,16 @@
                         notify: true,
                         value: null
                     },
+                    options: {
+                        type: Array,
+                        value: () => []
+                    }
                 },
-                
+
+                ready: function() {
+                    this.options = new WidgetOptionsBuilder(this).withFullscreen().build();
+                },
+
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
