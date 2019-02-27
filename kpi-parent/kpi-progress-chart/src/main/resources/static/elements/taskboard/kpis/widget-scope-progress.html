@@ -9,7 +9,7 @@
             }
         </style>
 
-        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" 
+        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}"
                 options="{{options}}" highcharts-chart="{{chart}}">
             <div id="scope-progress" class="tb-chart"></div>
         </widget-wrap>
@@ -70,6 +70,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btUpdate: {
                         type: Object,
                         value: null
@@ -83,8 +87,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 ready: function() {
                     this._createChartOptions();
@@ -149,7 +163,7 @@
                     this._parseData(data);
                     this.tempProjectionTimespan = data.projectionTimespan;
                     const yearsPlotLines = this._getYearsStartLineToPlot(data);
-                    
+
                     const reduceFunction = (previous, current) => {
                         previous.get('done').data.push([current.date.getTime(), current.sumEffortDone]);
                         previous.get('backlog').data.push([current.date.getTime(), current.sumEffortBacklog]);

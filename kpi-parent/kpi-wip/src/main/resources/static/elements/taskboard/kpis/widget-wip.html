@@ -1,4 +1,4 @@
-<dom-module id="widget-wip"> 
+<dom-module id="widget-wip">
   <template>
 
     <style>
@@ -12,13 +12,13 @@
         error-message="{{errorMessage}}" options="{{options}}"
         highcharts-chart="{{chart}}">
       <div id="wip" class="tb-chart"></div>
-    </widget-wrap> 
+    </widget-wrap>
     <modal-wrap class="filters-modal" title="Filters">
       <modal-wrap-content>
         <h3 class="tb-label">Issue Types</h3>
         <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
       </modal-wrap-content>
-      <modal-wrap-footer> 
+      <modal-wrap-footer>
         <tb-button button="[[_btFilterClose]]"></tb-button>
       </modal-wrap-footer>
     </modal-wrap>
@@ -28,17 +28,17 @@
         <div>
           <label id="labelLevel"></label>
           <paper-radio-group class="radio-group" selected="{{issueLevel}}"
-              aria-labelledby="labelLevel"> 
-            <paper-radio-button name="Demand">Demand</paper-radio-button> 
-            <paper-radio-button name="Feature">Feature</paper-radio-button> 
-            <paper-radio-button name="Subtask">Subtask</paper-radio-button> 
+              aria-labelledby="labelLevel">
+            <paper-radio-button name="Demand">Demand</paper-radio-button>
+            <paper-radio-button name="Feature">Feature</paper-radio-button>
+            <paper-radio-button name="Subtask">Subtask</paper-radio-button>
           </paper-radio-group>
         </div>
-      </modal-wrap-content> 
-      <modal-wrap-footer> 
-        <tb-button button="[[_btLevelSave]]"></tb-button> 
-      </modal-wrap-footer> 
-    </modal-wrap> 
+      </modal-wrap-content>
+      <modal-wrap-footer>
+        <tb-button button="[[_btLevelSave]]"></tb-button>
+      </modal-wrap-footer>
+    </modal-wrap>
   </template>
   <script>
         (function () {
@@ -79,6 +79,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btFilterClose: {
                         type: Object,
                         value: null
@@ -100,8 +104,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -249,5 +263,5 @@
                 }
             });
         })();
-    </script> 
+    </script>
 </dom-module>

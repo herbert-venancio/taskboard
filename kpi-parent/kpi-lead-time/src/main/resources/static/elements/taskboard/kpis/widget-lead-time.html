@@ -9,8 +9,8 @@
             }
         </style>
 
-        <widget-wrap title="Lead Time" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chart}}" 
+        <widget-wrap title="Lead Time" is-ready="{{isReady}}" tags="{{tags}}"
+                options="{{options}}" highcharts-chart="{{chart}}"
                 error-message="{{errorMessage}}">
             <div id="leadTime" class="tb-chart"></div>
         </widget-wrap>
@@ -84,6 +84,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btFilterClose: {
                         type: Object,
                         value: null
@@ -105,8 +109,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -141,7 +155,7 @@
 
                 _prepareData: function (data) {
                     this._parseDates(data);
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
                     this._plotData = {
                         allData: data,
                         filteredData: data,

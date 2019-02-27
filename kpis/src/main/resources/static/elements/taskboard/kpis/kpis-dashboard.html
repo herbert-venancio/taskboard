@@ -361,8 +361,10 @@
                 ready: function () {
                     this.populateProjects();
                     this.set('user', taskboard.getLoggedUser());
+
                     window.addEventListener('resize',  () => {
-                        ChartUtils.scheduleResize(100);
+                        const chartWidgets = this.querySelectorAll('.kpis__widget');
+                        chartWidgets.forEach(widget => widget.windowHasResized = true);
                     }); 
 
                     // adds the reversed option in the tooltip

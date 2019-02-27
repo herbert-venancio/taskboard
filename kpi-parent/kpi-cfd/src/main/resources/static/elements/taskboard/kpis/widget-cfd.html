@@ -8,8 +8,8 @@
             }
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chart}}" 
+        <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}"
+                options="{{options}}" highcharts-chart="{{chart}}"
                 error-message="{{errorMessage}}">
             <div id="cfd" class="tb-chart"></div>
         </widget-wrap>
@@ -84,6 +84,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btFilterClose: {
                         type: Object,
                         value: null
@@ -105,8 +109,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -148,8 +162,8 @@
 
                 _hashmapToArray: function (data) {
                     const flattenData = Object.entries(data)
-                        .map(([status, dataPoints]) => 
-                            dataPoints.map((dataPoint) => 
+                        .map(([status, dataPoints]) =>
+                            dataPoints.map((dataPoint) =>
                                 Object.assign(dataPoint, {status: status})))
                         .flat();
                     return flattenData;

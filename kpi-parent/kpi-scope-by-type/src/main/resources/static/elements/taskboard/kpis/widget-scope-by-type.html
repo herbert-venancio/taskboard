@@ -44,6 +44,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _plotData: {
                         type: Object
                     },
@@ -53,8 +57,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 ready: function() {
                     this.options = new WidgetOptionsBuilder(this).withFullscreen().build();

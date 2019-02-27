@@ -34,7 +34,7 @@
             </modal-wrap-footer>
 
         </modal-wrap>
-        
+
     </template>
 
     <script>
@@ -68,6 +68,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btUpdate: {
                         type: Object
                     },
@@ -80,8 +84,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -98,7 +112,7 @@
                 _fetchData: function (selectedProjectKey) {
                     this.reset();
                     var url = `/api/projects/${selectedProjectKey}/followup/progress?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
-                    
+
                     if (this.tempProjectionTimespan)
                         url = `${url}&projection=${this.tempProjectionTimespan}`;
 
@@ -110,7 +124,7 @@
                         }
                         this._prepareData(data);
                     });
-                    
+
                     this.xhr.fail((error) => {
                         this.errorMessage = error.responseText;
                     });
@@ -133,16 +147,16 @@
                     };
 
                     this.tempProjectionTimespan = data.projectionTimespan;
-            
+
                     var graphData = [];
-                    
+
                     graphData.push(formatPlotData('Actual', data.actual, dcUtils.colors.DONE));
                     graphData.push(formatPlotData('Projection', data.actualProjection, dcUtils.colors.DONE_PROJECTION));
                     graphData.push(formatPlotData('Expected', data.expected, dcUtils.colors.EXPECTED));
 
                     this.startDate = getDateFromIso(data.startingDate);
                     this.endDate = getDateFromIso(data.endingDate);
-                    
+
                     this._plotData = graphData;
                     this._isPlotDataUpdated = true;
                 },

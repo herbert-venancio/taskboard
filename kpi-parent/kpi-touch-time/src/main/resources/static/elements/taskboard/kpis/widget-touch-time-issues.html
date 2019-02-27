@@ -9,8 +9,8 @@
             }
         </style>
 
-        <widget-wrap title="Touch Time by Issues" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chartWrapper.highchartChart}}" 
+        <widget-wrap title="Touch Time by Issues" is-ready="{{isReady}}" tags="{{tags}}"
+                options="{{options}}" highcharts-chart="{{chartWrapper.highchartChart}}"
                 error-message="{{errorMessage}}">
             <div id="touchTimeIssues" class="tb-chart"></div>
         </widget-wrap>
@@ -84,6 +84,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btFilterClose: {
                         type: Object,
                         value: null
@@ -105,8 +109,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -135,13 +149,13 @@
                         this.errorMessage = error.responseText;
                     });
                 },
-                
+
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtasks';
                 },
 
                 _prepareData: function (data) {
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
 
                     this._plotData = {
                         allData: data,
@@ -150,7 +164,7 @@
                     };
                     this._isPlotDataUpdated = true;
                 },
-                
+
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
                     return `dashboard.touchTimeIssues-chart.${selectedProjectKey}.level`;
                 },
@@ -221,7 +235,7 @@
                     this.isReady = true;
                 },
 
-                
+
                 _updateSeries: function () {
                     const plotData = this._getDataToPlot();
                     const series = plotData.series;
@@ -232,7 +246,7 @@
                     series.forEach(s => this.chartWrapper.highchartChart.addSeries(s, redraw));
                     this.chartWrapper.highchartChart.redraw();
                 },
-                
+
                 _getDataToPlot: function () {
                     const issuesFilteredByTimeline = this._filterByTimeline();
                     this._orderIssuesByTotalEffort(issuesFilteredByTimeline);
@@ -246,7 +260,7 @@
 
                 _filterByTimeline: function () {
                     const [tlStart, tlEnd] = dcDateRangeChartsService.getTimelineRange();
-                    return this._plotData.filteredData.filter(issue => 
+                    return this._plotData.filteredData.filter(issue =>
                         issue.startProgressingDate <= tlEnd && issue.endProgressingDate >= tlStart);
                 },
 
@@ -265,7 +279,7 @@
                         return totalEffort2 - totalEffort1;
                     };
                     const totalEffortByIssueKey = issues.reduce(reduceTotalEffort, {});
-                    issues.sort(({issueKey: issueKey1}, {issueKey: issueKey2}) => 
+                    issues.sort(({issueKey: issueKey1}, {issueKey: issueKey2}) =>
                         compareTotalEffort(totalEffortByIssueKey[issueKey1], totalEffortByIssueKey[issueKey2], { ascending: false }));
                 },
 

@@ -9,8 +9,8 @@
             }
         </style>
 
-        <widget-wrap title="Cycle Time" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chart}}" 
+        <widget-wrap title="Cycle Time" is-ready="{{isReady}}" tags="{{tags}}"
+                options="{{options}}" highcharts-chart="{{chart}}"
                 error-message="{{errorMessage}}">
             <div id="cycleTime" class="tb-chart"></div>
         </widget-wrap>
@@ -84,6 +84,10 @@
                     isVisible: {
                         type: Boolean
                     },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btFilterClose: {
                         type: Object,
                         value: null
@@ -105,8 +109,18 @@
                 },
 
                 observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
                     '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
@@ -134,14 +148,14 @@
                         this.errorMessage = error.responseText;
                     });
                 },
-                
+
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtasks';
                 },
-                
+
                 _prepareData: function (data) {
                     this._parseDates(data);
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
                     this._plotData = {
                         issueTypes: issueTypes,
                         allData: data,
@@ -149,14 +163,14 @@
                     };
                     this._isPlotDataUpdated = true;
                 },
-                
+
                 _parseDates: function (data) {
                     data.forEach((item) => {
                         item.enterDate = new Date(item.enterDate);
                         item.exitDate = new Date(item.exitDate);
                     });
                 },
-                
+
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
                     return `dashboard.cycleTime-chart.${selectedProjectKey}.level`;
                 },
