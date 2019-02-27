@@ -9,8 +9,8 @@
             }
         </style>
 
-        <widget-wrap title="Lead Time" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chart}}" 
+        <widget-wrap title="Lead Time" is-ready="{{isReady}}" tags="{{tags}}"
+                options="{{options}}" highcharts-chart="{{chart}}"
                 error-message="{{errorMessage}}">
             <div id="leadTime" class="tb-chart"></div>
         </widget-wrap>
@@ -30,7 +30,7 @@
                 <h3 class="tb-label">Level</h3>
                 <div>
                     <label id="labelLevel"></label>
-                    <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}" aria-labelledby="labelLevel">
+                    <paper-radio-group class="radio-group" selected="{{issueLevel}}" aria-labelledby="labelLevel">
                         <paper-radio-button name="Demand">Demand</paper-radio-button>
                         <paper-radio-button name="Features">Feature</paper-radio-button>
                         <paper-radio-button name="Subtasks">Subtask</paper-radio-button>
@@ -73,7 +73,7 @@
                         type: Array,
                         value: null
                     },
-                    settingIssueLevel: {
+                    issueLevel: {
                         type: String,
                         value: 'Subtasks'
                     },
@@ -81,13 +81,44 @@
                         type: String,
                         computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
                     },
+                    isVisible: {
+                        type: Boolean
+                    },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _btFilterClose: {
+                        type: Object,
+                        value: null
+                    },
                     _btLevelSave: {
                         type: Object,
                         value: null
                     },
                     _plotData: {
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
+                    },
+                    _typeFilter: {
                         type: Object,
-                        value: null
+                        computed: '_createIssueTypeFilter(_plotData)'
+                    }
+                },
+
+                observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
+                    '_createChart(_isPlotDataUpdated, isVisible)'
+                ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
                     }
                 },
 
@@ -95,11 +126,49 @@
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
                     }
-                    this._reloadChart();
+                    this._fetchData(newSelectedProjectKey);
+                },
+
+                _fetchData: function (selectedProjectKey) {
+                    this.reset();
+                    const savedLevel = this._getSavedLevel();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${selectedProjectKey}/followup/leadTime?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        if (data.length === 0) {
+                            this.errorMessage = 'Lead Time chart has no data';
+                            return;
+                        }
+
+                        this._prepareData(data);
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
                 },
 
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtasks';
+                },
+
+                _prepareData: function (data) {
+                    this._parseDates(data);
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
+                    this._plotData = {
+                        allData: data,
+                        filteredData: data,
+                        issueTypes: issueTypes
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+
+                _parseDates: function (data) {
+                    data.forEach((item) => {
+                        item.enterDate = new Date(item.enterDate);
+                        item.exitDate = new Date(item.exitDate);
+                    });
                 },
 
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
@@ -108,16 +177,18 @@
 
                 ready: function () {
                     ChartUtils.registerOptions(this);
+                    this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingIssueLevel) {
+                        if (savedLevel === this.issueLevel) {
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.issueLevel);
                         this.$$('.settings-modal').close();
-                        this._reloadChart();
+                        this._fetchData(this.selectedProjectKey);
                     }).build();
+                    this.issueLevel = this._getSavedLevel();
                 },
 
                 reset: function () {
@@ -130,97 +201,33 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
                     if (this.chart) {
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
                 },
 
-                _createIssueListFilter: function () {
+                _createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
-                    new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
-                        this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                    const filterPlotData = (selectedTypes, isToggledAll) => {
+                        this._plotData.filteredData = this._plotData.allData.filter(item => selectedTypes.includes(item.issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this._recreateChart();
-                    });
+                        this._isPlotDataUpdated = true;
+                    };
+                    return new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, filterPlotData);
                 },
 
-                _recreateChart: function () {
-                    if (this.chart != null) {
-                        this.chart.destroy();
-                        this.chart = null;
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
                     }
-                    this._createChart();
-                },
-
-                _reloadChart: function() {
-                    this.reset();
-                    const savedLevel = this._getSavedLevel();
-                    const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/leadTime?level=${savedLevel}&timezone=${timezone}`;
-                    this.xhr = $.getJSON(url);
-                    this.xhr.done((data) => {
-                        if (data.length === 0) {
-                            this.errorMessage = 'Lead Time chart has no data';
-                            return;
-                        }
-
-                        this._prepareData(data);
-                        this._createIssueListFilter();
-                        this._createChart();
-                        this.isReady = true;
-                    });
-                    this.xhr.fail((error) => {
-                        this.errorMessage = error.responseText;
-                    });
-                },
-
-                _prepareData: function (data) {
-                    this._parseDates(data);
-
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
-
-                    const ndx = crossfilter(data);
-                    const lastStatusDimension = ndx.dimension('lastStatus');
-                    const typeDimension = ndx.dimension('issueType');
-                    const lastStatusGroup = lastStatusDimension.group();
-                    lastStatusGroup.reduce(
-                        (previous, current) => {
-                            if (previous[current.exitDate.getTime()] === undefined) {
-                                previous[current.exitDate.getTime()] = [];
-                            }
-                            previous[current.exitDate.getTime()].push(current);
-                            return previous;
-                        },
-                        (previous, current) => {
-                            const issues = previous[current.exitDate.getTime()];
-                            const pos = issues.indexOf(current);
-                            if (pos > -1) {
-                                issues.splice(pos, 1);
-                            }
-                            return previous;
-                        }, 
-                        () => {
-                            return {};
-                        });
-                    this._plotData = Object.freeze({
-                        lastStatusGroup: lastStatusGroup,
-                        issueTypes: issueTypes,
-                        typeDimension: typeDimension
-                    });
-                },
-
-                _parseDates: function (data) {
-                    data.forEach((item) => {
-                        item.enterDate = new Date(item.enterDate);
-                        item.exitDate = new Date(item.exitDate);
-                    });
-                },
-
-                _createChart: function () {
-                    const issuesByExitDateByLastStatus = [...this._plotData.lastStatusGroup.all()].reverse();
-                    const series = this._transformToHighchartsSeries(issuesByExitDateByLastStatus);
+                    this._resetChart();
+                    const series = this._transformToHighchartsSeries(this._plotData.filteredData);
 
                     this.chart = new LeadTimeChartBuilder('leadTime')
                         .withChartType('scatter')
@@ -230,33 +237,31 @@
                         .build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
-                _transformToHighchartsSeries: function (issuesByExitDateByLastStatus) {
-                    return issuesByExitDateByLastStatus.map(({key: lastStatus, value: issuesByExitDate}) => {
-                        return {
-                            name: lastStatus,
-                            data: this._transformToHighchartsData(issuesByExitDate)
-                        };
-                    });
-                },
-
-                _transformToHighchartsData: function (issuesByExitDate) {
-                    const data = [];
-                    Object.entries(issuesByExitDate).forEach(([exitDate, issues]) => {
-                        issues.forEach(i => {
-                            data.push({
-                                name: i.issueKey,
-                                x: exitDate,
-                                y: i.leadTime,
-                                extraData: {
-                                    enterDate: i.enterDate,
-                                    exitDate: i.exitDate
-                                }
-                            });
+                _transformToHighchartsSeries: function (filteredData) {
+                    const reduceFunction = (previous, current) => {
+                        if (previous[current.lastStatus] === undefined) {
+                            previous[current.lastStatus] = {
+                                name: current.lastStatus,
+                                data: []
+                            };
+                        }
+                        previous[current.lastStatus].data.push({
+                            name: current.issueKey,
+                            x: current.exitDate.getTime(),
+                            y: current.leadTime,
+                            extraData: {
+                                enterDate: current.enterDate,
+                                exitDate: current.exitDate
+                            }
                         });
-                    });
-                    return data;
+                        return previous;
+                    };
+                    const series = Object.values(filteredData.reduce(reduceFunction, {})).sort((a, b) => -1 * a.name.localeCompare(b.name));
+                    return series;
                 }
             });
         })();

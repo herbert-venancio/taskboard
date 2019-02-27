@@ -4,34 +4,23 @@
 
         <style>
             #touchTimeWeekly {
-                display: flex;
                 height: 100%;
                 width: 100%;
             }
         </style>
 
-        <widget-wrap title="Touch Time by Week" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chart}}" 
+        <widget-wrap title="Touch Time by Week" is-ready="{{isReady}}" tags="{{tags}}"
+                options="{{options}}" highcharts-chart="{{chart}}"
                 error-message="{{errorMessage}}">
             <div id="touchTimeWeekly" class="tb-chart"></div>
         </widget-wrap>
-
-        <modal-wrap class="filters-modal" title="Filters">
-            <modal-wrap-content>
-                <h3 class="tb-label">Issue Types</h3>
-                <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
-            </modal-wrap-content>
-            <modal-wrap-footer>
-                <tb-button button=[[_btFilterClose]]></tb-button>
-            </modal-wrap-footer>
-        </modal-wrap>
 
         <modal-wrap class="settings-modal" title="Settings">
             <modal-wrap-content>
                 <h3 class="tb-label">Level</h3>
                 <div>
                     <label id="labelLevel"></label>
-                    <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}" aria-labelledby="labelLevel">
+                    <paper-radio-group class="radio-group" selected="{{issueLevel}}" aria-labelledby="labelLevel">
                         <paper-radio-button name="Demand">Demand</paper-radio-button>
                         <paper-radio-button name="Features">Feature</paper-radio-button>
                         <paper-radio-button name="Subtasks">Subtask</paper-radio-button>
@@ -53,26 +42,18 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
-                    },
-                    selectedDate: {
-                        type: String,
-                        notify: true,
-                        value: ''
+                        observer: '_onProjectSelected'
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
                         type: String,
-                        notify: true,
                         value: ''
                     },
                     chart: {
                         type: Object,
-                        notify: true,
                         value: null
                     },
                     tags: {
@@ -82,56 +63,116 @@
                         type: Array,
                         value: null
                     },
-                    settingIssueLevel: {
+                    issueLevel: {
                         type: String,
-                        notify: true,
                         value: 'Subtasks'
                     },
                     localStorageLevelItemName: {
                         type: String,
                         computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
                     },
+                    isVisible: {
+                        type: Boolean
+                    },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btLevelSave: {
                         type: Object,
                         value: null
                     },
                     _plotData: {
-                        type: Object,
-                        value: null
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
                     }
                 },
 
                 observers: [
-                    '_onProjectSelected(selectedProjectKey, selectedDate)'
+                    '_reflowChart(isVisible, windowHasResized)',
+                    '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
                     }
-                    this._reloadChart();
+                    this._fetchData(newSelectedProjectKey);
+                },
+
+                _fetchData: function(selectedProjectKey) {
+                    this.reset();
+                    const savedLevel = this._getSavedLevel();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${selectedProjectKey}/followup/touchtime/byWeek?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        data = data.points;
+                        if (data.length === 0) {
+                            this.errorMessage = 'Touch Time chart has no data';
+                            return;
+                        }
+
+                        this._prepareData(data);
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
                 },
 
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtasks';
                 },
 
+                _prepareData: function (data) {
+                    this._parseDates(data);
+
+                    this._plotData = {
+                        allData: data
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+
+                _parseDates: function (data) {
+                    data.forEach((item) => {
+                        item.date = new Date(item.date);
+                        item.date.setHours(0, 0, 0, 0);
+                    });
+                },
+
+
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
                     return `dashboard.touchTimeWeekly-chart.${selectedProjectKey}.level`;
                 },
 
                 ready: function () {
-                    ChartUtils.registerOptions(this);
+                    this.options = new WidgetOptionsBuilder(this)
+                        .withFullscreen()
+                        .withSettings()
+                        .build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingIssueLevel) {
+                        if (savedLevel === this.issueLevel) {
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.issueLevel);
                         this.$$('.settings-modal').close();
-                        this._reloadChart();
+                        this._fetchData(this.selectedProjectKey);
                     }).build();
+                    this.issueLevel = this._getSavedLevel();
                 },
 
                 reset: function () {
@@ -142,51 +183,23 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
                     if (this.chart) {
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
                 },
 
-                _reloadChart: function() {
-                    this.reset();
-                    const savedLevel = this._getSavedLevel();
-                    const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/touchtime/byWeek?level=${savedLevel}&timezone=${timezone}`;
-                    this.xhr = $.getJSON(url);
-                    this.xhr.done((data) => {
-                        data = data.points;
-                        if (data.length === 0) {
-                            this.errorMessage = 'Touch Time chart has no data';
-                            return;
-                        }
-
-                        this._prepareData(data);
-                        this._createChart();
-                        this.isReady = true;
-                    });
-                    this.xhr.fail((error) => {
-                        this.errorMessage = error.responseText;
-                    });
-                },
-
-                _prepareData: function (data) {
-                    const stackNamesOrderedLUT = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'stackName');
-                    const ndx = crossfilter(data);
-                    const stackNamesDimension = ndx.dimension('stackName');
-                    const stackNamesGroup = stackNamesDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(stackNamesGroup, 'date', 'effortInHours');
-
-                    this._plotData = Object.freeze({
-                        stackNamesGroup: stackNamesGroup,
-                        stackNamesOrderedLUT: stackNamesOrderedLUT
-                    });
-                },
-
-                _createChart: function () {
-                    const effortByStackNameByWeek = [...this._plotData.stackNamesGroup.all()];
-                    const series = this._transformToHighchartsSeries(effortByStackNameByWeek, this._plotData.stackNamesOrderedLUT);
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const series = this._transformToHighchartsSeries(this._plotData.allData);
 
                     this.chart = new TouchTimeByWeekChartBuilder('touchTimeWeekly')
                         .withChartType('column')
@@ -196,23 +209,34 @@
                         .build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
-                _transformToHighchartsSeries: function (effortByStackNameByWeek, stackNamesOrderedLUT) {
-                    effortByStackNameByWeek.sort(( { key: nameA }, { key: nameB } ) => 
-                        stackNamesOrderedLUT.indexOf(nameA) - stackNamesOrderedLUT.indexOf(nameB));
-                    return effortByStackNameByWeek.map(
-                        ({key: stackName, value: effortByWeek}) => {
-                            return {
-                                name: stackName, 
-                                data: this._transformToHighchartsData(effortByWeek)
-                            };
+                _transformToHighchartsSeries: function (allData) {
+                    const reduceFunction = (previous, current) => {
+                        if (previous.get(current.stackName) === undefined) {
+                            previous.set(current.stackName, {
+                                name: current.stackName,
+                                data: []
+                            });
                         }
-                    );
-                },
-
-                _transformToHighchartsData: function (effortByDate) {
-                    return Object.entries(effortByDate).map(( [date, effortInHour] ) => [Number(date), effortInHour]);
+                        const series = previous.get(current.stackName);
+                        const currentDate = current.date.getTime();
+                        const dataPoint = series.data.find(dataPoint => {
+                            const date = dataPoint[0];
+                            return date === currentDate;
+                        });
+                        if (!dataPoint) {
+                            series.data.push([currentDate, current.effortInHours]);
+                            return previous;
+                        }
+                        const totalEffort = dataPoint[1];
+                        dataPoint[1] = totalEffort + current.effortInHours;
+                        return previous;
+                    };
+                    const series = [...allData.reduce(reduceFunction, new Map()).values()];
+                    return series;
                 }
             });
         })();

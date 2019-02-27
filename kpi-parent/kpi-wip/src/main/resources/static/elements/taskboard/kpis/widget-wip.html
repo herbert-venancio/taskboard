@@ -1,12 +1,8 @@
-<dom-module id="widget-wip"> 
+<dom-module id="widget-wip">
   <template>
 
     <style>
-        .widget__body {
-            display: flex;
-        }
         #wip {
-            display: flex;
             height: 100%;
             width: 100%;
         }
@@ -16,14 +12,14 @@
         error-message="{{errorMessage}}" options="{{options}}"
         highcharts-chart="{{chart}}">
       <div id="wip" class="tb-chart"></div>
-    </widget-wrap> 
+    </widget-wrap>
     <modal-wrap class="filters-modal" title="Filters">
       <modal-wrap-content>
         <h3 class="tb-label">Issue Types</h3>
         <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
       </modal-wrap-content>
-      <modal-wrap-footer> 
-        <tb-button button=[[_btFilterClose]]></tb-button>
+      <modal-wrap-footer>
+        <tb-button button="[[_btFilterClose]]"></tb-button>
       </modal-wrap-footer>
     </modal-wrap>
     <modal-wrap class="settings-modal" title="Settings">
@@ -31,18 +27,18 @@
         <h3 class="tb-label">Level</h3>
         <div>
           <label id="labelLevel"></label>
-          <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}"
-              aria-labelledby="labelLevel"> 
-            <paper-radio-button name="Demand">Demand</paper-radio-button> 
-            <paper-radio-button name="Feature">Feature</paper-radio-button> 
-            <paper-radio-button name="Subtask">Subtask</paper-radio-button> 
+          <paper-radio-group class="radio-group" selected="{{issueLevel}}"
+              aria-labelledby="labelLevel">
+            <paper-radio-button name="Demand">Demand</paper-radio-button>
+            <paper-radio-button name="Feature">Feature</paper-radio-button>
+            <paper-radio-button name="Subtask">Subtask</paper-radio-button>
           </paper-radio-group>
         </div>
-      </modal-wrap-content> 
-      <modal-wrap-footer> 
-        <tb-button button="[[_btLevelSave]]"></tb-button> 
-      </modal-wrap-footer> 
-    </modal-wrap> 
+      </modal-wrap-content>
+      <modal-wrap-footer>
+        <tb-button button="[[_btLevelSave]]"></tb-button>
+      </modal-wrap-footer>
+    </modal-wrap>
   </template>
   <script>
         (function () {
@@ -52,7 +48,6 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true,
                         value: '',
                         observer: '_onProjectSelected'
                     },
@@ -61,30 +56,32 @@
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
-                        type: String,
-                        notify: true
+                        type: String
                     },
                     chart: {
-                        type: Object,
-                        notify: true,
-                        value: null
+                        type: Object
                     },
                     options: {
                         type: Array,
                         value: null
                     },
-                    settingIssueLevel: {
+                    issueLevel: {
                         type: String,
-                        notify: true,
                         value: 'Subtask'
                     },
                     localStorageLevelItemName: {
                         type: String,
                         computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
+                    },
+                    isVisible: {
+                        type: Boolean
+                    },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
                     },
                     _btFilterClose: {
                         type: Object,
@@ -95,12 +92,28 @@
                         value: null
                     },
                     _plotData: {
-                        type: Object,
-                        value: null
+                        type: Object
                     },
-                    _decimalPrecision: {
-                        type: Number,
-                        value: 5
+                    _isPlotDataUpdated: {
+                        type: Boolean
+                    },
+                    _typeFilter: {
+                        type: Object,
+                        computed: '_createIssueTypeFilter(_plotData)'
+                    }
+                },
+
+                observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
+                    '_createChart(_isPlotDataUpdated, isVisible)'
+                ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
                     }
                 },
 
@@ -108,11 +121,49 @@
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
                     }
-                    this._reloadChart();
+                    this._fetchData(newSelectedProjectKey);
+                },
+
+                _fetchData: function (selectedProjectKey) {
+                    this.reset();
+                    const savedLevel = this._getSavedLevel();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${selectedProjectKey}/followup/wip?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        data = data.rows;
+                        if (!data.length) {
+                            this.errorMessage = 'WIP has no data';
+                            return;
+                        }
+                        this._prepareData(data);
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
                 },
 
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtask';
+                },
+
+                _prepareData: function (data) {
+                    this._parseDates(data);
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
+                    this._plotData = {
+                        allData: data,
+                        filteredData: data,
+                        issueTypes: issueTypes
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+
+                _parseDates: function (data) {
+                    data.forEach((item) => {
+                        item.date = new Date(item.date);
+                        item.date.setHours(0, 0, 0, 0);
+                    });
                 },
 
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
@@ -122,16 +173,17 @@
                 ready: function () {
                     ChartUtils.registerOptions(this);
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
-                    this._btLevelSave = ButtonBuilder('Ok').onClick(() => {
-                        let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingIssueLevel) {
+                    this._btLevelSave = ButtonBuilder('Save').onClick(() => {
+                        const savedLevel = this._getSavedLevel();
+                        if (savedLevel === this.issueLevel) {
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.issueLevel);
                         this.$$('.settings-modal').close();
-                        this._reloadChart();
+                        this._fetchData(this.selectedProjectKey);
                     }).build();
+                    this.issueLevel = this._getSavedLevel();
                 },
 
                 reset: function () {
@@ -154,61 +206,22 @@
                     }
                 },
 
-                _reloadChart: function () {
-                    this.reset();
-                    const savedLevel = this._getSavedLevel();
-                    const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/wip?level=${savedLevel}&timezone=${timezone}`;
-                    this.xhr = $.getJSON(url);
-                    this.xhr.done((data) => {
-                        data = data.rows;
-                        if (!data.length) {
-                            this.errorMessage = 'WIP has no data';
-                            return;
-                        }
-                        this._prepareData(data);
-                        this._createIssueTypeFilter();
-                        this._createChart();
-                        this.isReady = true;
-                    });
-                    this.xhr.fail((error) => {
-                        this.errorMessage = error.responseText;
-                    });
-                },
-
-                _prepareData: function (data) {
-                    this._parseDates(data);
-                    const issueStatusesOrdered = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueStatus');
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
-
-                    const ndx = crossfilter(data);
-                    const statusesDimension = ndx.dimension('issueStatus');
-                    const typeDimension = ndx.dimension('issueType');
-                    const statusesGroup = statusesDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'date', 'average');
-
-                    this._plotData = Object.freeze({
-                        issueStatusesOrdered: issueStatusesOrdered,
-                        issueTypes: issueTypes,
-                        statusesGroup: statusesGroup,
-                        typeDimension: typeDimension,
-                    });
-                },
-
                 _createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
-                    const filterCallback = (selectedTypes, isToggledAll) => {
-                        this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                    const filterPlotData = (selectedTypes, isToggledAll) => {
+                        this._plotData.filteredData = this._plotData.allData.filter(item => selectedTypes.includes(item.issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this._createChart();
+                        this._isPlotDataUpdated = true;
                     };
-                    new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, filterCallback);
-
+                    return new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, filterPlotData);;
                 },
 
-                _createChart: function () {
-                    const series = this._transformToHighchartsSeries(this._plotData.statusesGroup, this._plotData.issueStatusesOrdered);
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const series = this._transformToHighchartsSeries(this._plotData.filteredData);
                     const builder = new WeeklyChartBuilder('wip')
                         .withChartType('column')
                         .withTooltipNumberOfDecimals(2)
@@ -219,36 +232,36 @@
                     this.chart = builder.build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
-                _parseDates: function (data) {
-                    data.forEach((item) => {
-                        item.date = new Date(item.date);
-                        item.date.setHours(0, 0, 0, 0);
-                        item.date = item.date.getTime().toString();
-                    });
-                },
-
-                _transformToHighchartsSeries: function (statusesGroup, issueStatusesOrdered) {
-                    // need to copy since sort is performed in place and messes with crossfilter
-                    const wipGroupedByStatusByDate = [...statusesGroup.all()]; 
-                    wipGroupedByStatusByDate.sort(( { key: statusA }, { key: statusB } ) => 
-                        issueStatusesOrdered.indexOf(statusA) - issueStatusesOrdered.indexOf(statusB));
-                    const series = wipGroupedByStatusByDate.map(( { key: status, value: wipByDate } ) => {
-                        return { 
-                            name: status, 
-                            data: this._transformToHighchartsData(wipByDate) 
-                        };
-                    });
+                _transformToHighchartsSeries: function (filteredData) {
+                    const reduceFunction = (previous, current) => {
+                        if (previous.get(current.issueStatus) === undefined) {
+                            previous.set(current.issueStatus, {
+                                name: current.issueStatus,
+                                data: []
+                            });
+                        }
+                        const series = previous.get(current.issueStatus);
+                        const currentDate = current.date.getTime();
+                        const dataPoint = series.data.find(dataPoint => {
+                            const date = dataPoint[0];
+                            return date === currentDate;
+                        });
+                        if (!dataPoint) {
+                            series.data.push([currentDate, current.average]);
+                            return previous;
+                        }
+                        const totalAverage = dataPoint[1];
+                        dataPoint[1] = totalAverage + current.average;
+                        return previous;
+                    };
+                    const series = [...filteredData.reduce(reduceFunction, new Map()).values()];
                     return series;
-                },
-
-                _transformToHighchartsData: function (wipByDate) {
-                    // need to round to avoid float precision error
-                    return Object.entries(wipByDate).map(( [date, wip] ) => 
-                        [Number(date), Number(wip.toFixed(this._decimalPrecision))] );
                 }
             });
         })();
-    </script> 
+    </script>
 </dom-module>

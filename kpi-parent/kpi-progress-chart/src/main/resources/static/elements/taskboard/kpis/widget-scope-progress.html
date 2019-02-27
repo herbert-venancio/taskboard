@@ -9,14 +9,13 @@
             }
         </style>
 
-        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" highcharts-chart="{{chart}}">
+        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}"
+                options="{{options}}" highcharts-chart="{{chart}}">
             <div id="scope-progress" class="tb-chart"></div>
         </widget-wrap>
 
 
-        <modal-wrap id="modal"
-                    title="Scope Progress Filters"
-                    >
+        <modal-wrap id="modal" title="Scope Progress Filters">
 
             <modal-wrap-content>
                 <div class="modal-content">
@@ -41,84 +40,76 @@
 
     <script>
         (function () {
-            var DONE_INDEX = 0;
-            var BACKLOG_INDEX = 1;
-            var DONE_PROJECTION_INDEX = 2;
-            var BACKLOG_PROJECTION_INDEX = 3;
-            var LAYERS = ["Done", "Backlog", "Done Projection", "Backlog Projection"];
-            var INDICES = {
-                "Done": DONE_INDEX
-                , "Backlog": BACKLOG_INDEX
-                , "Done Projection": DONE_PROJECTION_INDEX
-                , "Backlog Projection": BACKLOG_PROJECTION_INDEX};
-
             Polymer({
                 is: 'widget-scope-progress',
 
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
-                    },
-                    selectedDate: {
-                        type: String,
-                        notify: true,
-                        value: '',
+                        observer: '_onProjectSelected'
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
-                        type: String,
-                        notify: true
+                        type: String
                     },
                     chart: {
                         type: Object,
-                        notify: true,
                         value: null
                     },
                     options: {
                         type: Array,
                         value: () => []
                     },
-                    _plotSeries: {
-                        type: Object,
-                        value: []
-                    },
-                    _plotStartLines: {
-                        type: Object,
-                        value: []
-                    },
                     tempProjectionTimespan: {
                         type: Number,
                         value: null
                     },
+                    isVisible: {
+                        type: Boolean
+                    },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
                     _btUpdate: {
                         type: Object,
-                        value: function () { return {} }
+                        value: null
+                    },
+                    _plotData: {
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
                     }
                 },
 
                 observers: [
-                    '_resetProjectionTimespan(selectedProjectKey, selectedDate)',
-                    '_onProjectSelected(selectedProjectKey, selectedDate)',
+                    '_reflowChart(isVisible, windowHasResized)',
+                    '_createChart(_isPlotDataUpdated, isVisible)'
                 ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
 
                 ready: function() {
                     this._createChartOptions();
 
-                    var btUpdate = ButtonBuilder('Update chart')
+                    this._btUpdate = ButtonBuilder('Update chart')
                         .id('update')
                         .onClick(() => {
                             this.$.modal.close();
-                            this.reloadChart();
+                            this._fetchData(this.selectedProjectKey);
                         })
                         .build();
-
-                    this.set('_btUpdate', btUpdate);
-                    this.reloadChart();
                 },
 
                 _createChartOptions: function() {
@@ -135,191 +126,159 @@
                         .build();
                 },
 
-                _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    this.reloadChart();
+                _onProjectSelected: function(newSelectedProjectKey, oldSelectedProjectKey) {
+                    if (newSelectedProjectKey === oldSelectedProjectKey) {
+                        return;
+                    }
+                    this._resetProjectionTimespan();
+                    this._fetchData(newSelectedProjectKey);
                 },
 
-                reloadChart: function () {
+                _resetProjectionTimespan: function() {
+                    this.tempProjectionTimespan = null;
+                },
+
+                _fetchData: function (selectedProjectKey) {
                     this.reset();
                     const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    let url = `/api/projects/${this.selectedProjectKey}/followup/progress?timezone=${timezone}`;
+                    let url = `/api/projects/${selectedProjectKey}/followup/progress?timezone=${timezone}`;
 
                     if (this.tempProjectionTimespan)
                         url = `${url}&projection=${this.tempProjectionTimespan}`;
 
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
-                        if(!data.actual.length && !data.actualProjection.length && !data.expected.length) {
+                        if (!data.actual.length && !data.actualProjection.length) {
                             this.errorMessage = 'Scope Progress has no data';
                             return;
                         }
                         this._prepareData(data);
-                        this._createChart();
-
-                        this.isReady = true;
-                        this.errorMessage = '';
                     });
                     this.xhr.fail((error) => {
                         this.errorMessage = error.responseText;
                     });
                 },
 
+                _prepareData: function(data) {
+                    this._parseData(data);
+                    this.tempProjectionTimespan = data.projectionTimespan;
+                    const yearsPlotLines = this._getYearsStartLineToPlot(data);
+
+                    const reduceFunction = (previous, current) => {
+                        previous.get('done').data.push([current.date.getTime(), current.sumEffortDone]);
+                        previous.get('backlog').data.push([current.date.getTime(), current.sumEffortBacklog]);
+                        return previous;
+                    };
+                    let initial = new Map([
+                        ['done', {
+                            name: 'Done',
+                            color: dcUtils.colors.DONE,
+                            data: []
+                        }],
+                        ['backlog', {
+                            name: 'Backlog',
+                            color: dcUtils.colors.BACKLOG,
+                            data: []
+                        }]
+                    ]);
+                    const actual = data.actual.reduce(reduceFunction, initial);
+                    initial = new Map([
+                        ['done', {
+                            name: 'Done Projection',
+                            color: dcUtils.colors.DONE_PROJECTION,
+                            data: []
+                        }],
+                        ['backlog', {
+                            name: 'Backlog Projection',
+                            color: dcUtils.colors.BACKLOG_PROJECTION,
+                            data: []
+                        }]
+                    ]);
+                    const projection = data.actualProjection.reduce(reduceFunction, initial);
+                    this._plotData = {
+                        startDate: data.startingDate.getTime(),
+                        yearsPlotLines: yearsPlotLines,
+                        series: [...actual.values(), ...projection.values()]
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+
+                _parseData: function (data) {
+                    data.startingDate = getDateFromIso(data.startingDate);
+                    data.endingDate = getDateFromIso(data.endingDate);
+                    data.actual.forEach(d => {
+                        d.date = getDateFromIso(d.date);
+                    });
+                    data.actualProjection.forEach(d => {
+                        d.date = getDateFromIso(d.date);
+                    });
+                    // remove first element of projection, since it repeats last actual element
+                    data.actualProjection.shift();
+                },
+
+                _getYearsStartLineToPlot: function(data) {
+
+                    const toPlotLineFormat = (year) => {
+                        const januaryFirstDate = new Date(year, 0, 1);
+                        const januaryFirstMillis = januaryFirstDate.getTime();
+                        const line = {};
+                        line.id = januaryFirstMillis,
+                        line.color = 'white';
+                        line.width = 1,
+                        line.value = januaryFirstMillis,
+                        line.zIndex = 5,
+
+                        line.label = {
+                            text: year,
+                            rotation: 0,
+                            style: { color: 'white'}
+                        };
+
+                        return line;
+                    };
+                    const yearsActual = data.actual.map(d => d.date.getFullYear());
+                    const yearsProjection = data.actualProjection.map(d => d.date.getFullYear());
+                    const allYears = [...new Set([...yearsActual, ...yearsProjection])];
+                    return allYears.map(y => toPlotLineFormat(y));
+                },
+
+
                 reset: function() {
                     this.isReady = false;
                     this.errorMessage = '';
-
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
                     if(this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if(this.chart) {
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
+                    if (this.chart) {
                         dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
                 },
 
-                _resetProjectionTimespan: function() {
-                    this.set('tempProjectionTimespan', null);
-                },
-
-                _prepareData: function(data) {
-
-                    this.tempProjectionTimespan = data.projectionTimespan;
-                    this.startDate = getDateFromIso(data.startingDate);
-                    this.endDate = getDateFromIso(data.endingDate);
-
-                    this.chartData = {
-                        types: ["Actual", "Projection"]
-                        , dateRange: [getDateFromIso(data.startingDate), getDateFromIso(data.endingDate)]
-                        , data: []
-                    };
-
-                    // remove first element of projection, since it repeats last actual element
-                    data.actualProjection.shift();
-
-                    const series = [data.actual, data.actualProjection];
-
-                    series.forEach((serie, i) =>
-                        serie.forEach((d) =>
-                            this.chartData.data.push({
-                                type         : i,
-                                date         : getDateFromIso(d.date),
-                                value        : d.progress * 100,
-                                sumDone      : d.sumEffortDone,
-                                sumBacklog   : d.sumEffortBacklog
-                            })
-                        )
-                    );
-                    this.ndx = crossfilter(this.chartData.data);
-                    this.dimension = this.ndx.dimension(function(d) {
-                        return d.date;
-                    });
-
-                    function fAdd(p, d) {
-                        if(d.type === 0) {
-                            p[DONE_INDEX] += d.sumDone;
-                            p[BACKLOG_INDEX] += d.sumBacklog;
-                        } else {
-                            p[DONE_PROJECTION_INDEX] += d.sumDone;
-                            p[BACKLOG_PROJECTION_INDEX] += d.sumBacklog;
-                        }
-                        return p;
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
                     }
-                    function fRemove(p, d) {
-                        if(d.type === 0) {
-                            p[DONE_INDEX] -= d.sumDone;
-                            p[BACKLOG_INDEX] -= d.sumBacklog;
-                        } else {
-                            p[DONE_PROJECTION_INDEX] -= d.sumDone;
-                            p[BACKLOG_PROJECTION_INDEX] -= d.sumBacklog;
-                        }
-                        return p;
-                    }
-                    function fInit() {
-                        return [0, 0, 0, 0];
-                    }
-                    const group = this.dimension.group().reduce(fAdd, fRemove, fInit);
-                    this._parseDataToHichartsFormat(group);
-                    this._setYearsStartLineToPlot(group);
-                },
-
-                _createChart: function() {
-                    const builder = new ScopeProgressChartBuilder('scope-progress', this.startDate, this._plotStartLines)
+                    this._resetChart();
+                    const builder = new ScopeProgressChartBuilder('scope-progress', this._plotData.startDate, this._plotData.yearsPlotLines)
                         .withChartType('column')
-                        .withSeriesData(this._plotSeries);
+                        .withSeriesData(this._plotData.series);
 
                     this.chart = builder.build();
 
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
-                },
-
-                _parseDataToHichartsFormat: function(groupData) {
-                    const toSerieFormat = (type, color) => {
-                        var serie = {};
-                        serie.name = type;
-                        serie.color = color;
-                        serie.data = [];
-
-                        return serie;
-                    }
-
-                    const toDataFormat = (date, value) => {
-                        return [
-                            new Date(date).getTime(),
-                            value
-                        ]
-                    };
-
-                    const highChartSeriesData = [];
-                    const done = toSerieFormat('Done', dcUtils.colors.DONE);
-                    const backlog = toSerieFormat('Backlog', dcUtils.colors.BACKLOG);
-                    const doneProjection = toSerieFormat('Done Projection', dcUtils.colors.DONE_PROJECTION);
-                    const backlogProjection = toSerieFormat('Backlog Projection', dcUtils.colors.BACKLOG_PROJECTION);
-
-                    groupData.all()
-                        .forEach(d => {
-                            done.data.push(toDataFormat(d.key, d.value[DONE_INDEX]));
-                            backlog.data.push(toDataFormat(d.key, d.value[BACKLOG_INDEX]));
-                            doneProjection.data.push(toDataFormat(d.key, d.value[DONE_PROJECTION_INDEX]));
-                            backlogProjection.data.push(toDataFormat(d.key, d.value[BACKLOG_PROJECTION_INDEX]));
-                        });
-
-                    highChartSeriesData.push(done);
-                    highChartSeriesData.push(backlog);
-                    highChartSeriesData.push(doneProjection);
-                    highChartSeriesData.push(backlogProjection);
-
-                    this._plotSeries = highChartSeriesData;
-                },
-
-                _setYearsStartLineToPlot: function(groupData) {
-
-                    this._plotStartLines = [];
-
-                    const toPlotLineFormat = (timeValue) => {
-                        var line = {};
-                        line.id = timeValue,
-                        line.color = 'white';
-                        line.width = 1,
-                        line.value = timeValue,
-                        line.zIndex = 999 + timeValue,
-
-                        line.label = {
-                            text: new Date(timeValue).getFullYear(),
-                            rotation: 0,
-                            style: { color: 'white'}
-                        };
-
-                        return line;
-                    }
-
-                    if (groupData.all().length === 0)
-                        return;
-
-                    const allYears = [...new Set(groupData.all().map(d => new Date(d.key).getFullYear()))]
-                    this._plotStartLines = allYears.map(y => toPlotLineFormat(new Date(y, 0, 1).getTime()));
+                    this._isPlotDataUpdated = false;
+                    this.set('options.0.hidden', false);
+                    this.isReady = true;
                 }
             });
         })();

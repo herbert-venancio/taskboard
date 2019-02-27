@@ -1,23 +1,3 @@
-<!--
-  [LICENSE]
-  Taskboard
-  ---
-  Copyright (C) 2015 - 2016 Objective Solutions
-  ---
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  [/LICENSE]
-  -->
 <dom-module id="kpis-dashboard">
 
     <template>
@@ -235,20 +215,6 @@
                                                  show-search-icon="{{!hasOnlyOneProject}}"
                                 ></tb-autocomplete>
                             </div>
-                            <div class="kpis__select-date-wrapper">
-                                <paper-dropdown-menu class="kpis__select-date"
-                                                     label="Select the date"
-                                                     no-label-float>
-                                    <paper-listbox class="dropdown-content"
-                                                   attr-for-selected="value"
-                                                   selected="{{selectedDate}}">
-                                        <paper-item value="">Today</paper-item>
-                                        <template is="dom-repeat" items="{{_projectDates}}" as="date">
-                                            <paper-item value="{{date}}">{{_getLocaleDate(date)}}</paper-item>
-                                        </template>
-                                    </paper-listbox>
-                                </paper-dropdown-menu>
-                            </div>
                         </section><!-- .kpis__selector -->
                     </nav><!-- .kpis__categories-wrapper -->
 
@@ -261,46 +227,38 @@
                         <template is="dom-if" if="{{_showTactical || _showOperational}}">
                             <widget-cfd class="kpis__widget kpis__widget--2-3 kpis__widget--height-half"
                                 data-category="tactical|operational"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-cfd>
                         </template>
 
                         <template is="dom-if" if="{{_showTactical}}">
                             <widget-scope-by-type class="kpis__widget kpis__widget--height-half"
                                 data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-scope-by-type>
 
                             <widget-progress-chart class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
                                 data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-progress-chart>
 
                             <widget-scope-progress class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
                                 data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-scope-progress>
                         </template>
                         <template is="dom-if" if="{{_showOperational}}">
                             <widget-planned-x-ballpark class="kpis__widget kpis__widget--height-half"
                                 data-category="operational"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                selected-category="{{selectedCategory}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-planned-x-ballpark>
                             <widget-wip class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
                                 data-category="operational"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-wip>
                             <widget-throughput class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
                                 data-category="operational"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-throughput>
                             <widget-touch-time-issues class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
                                 data-category="operational"
@@ -322,8 +280,7 @@
                         <template is="dom-if" if="{{_showCustomer}}">
                             <widget-budget-chart class="kpis__widget kpis__widget--2-3 kpis__widget--height-half"
                                 data-category="customer"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}">
+                                selected-project-key="{{selectedProjectKey}}">
                             </widget-budget-chart>
                         </template>
 
@@ -404,11 +361,11 @@
                 ready: function () {
                     this.populateProjects();
                     this.set('user', taskboard.getLoggedUser());
-                    // register callback to resize all highcharts charts 
-                    // when the browser window is resized
-                    window.addEventListener('resize', function() {
-                        ChartUtils.scheduleResize(200);
-                    });
+
+                    window.addEventListener('resize',  () => {
+                        const chartWidgets = this.querySelectorAll('.kpis__widget');
+                        chartWidgets.forEach(widget => widget.windowHasResized = true);
+                    }); 
 
                     // adds the reversed option in the tooltip
                     Highcharts.wrap(Highcharts.Tooltip.prototype, 'refresh', function(proceed, items, event) {
@@ -476,9 +433,11 @@
                         const categories = el.dataset.category.split('|');
 
                         if (categories.indexOf(category) >= 0) {
-                            el.classList.add(activeClass)
+                            el.classList.add(activeClass);
+                            el.isVisible = true;
                         } else {
-                            el.classList.remove(activeClass)
+                            el.classList.remove(activeClass);
+                            el.isVisible = false;
                         }
                     });
 
@@ -488,9 +447,6 @@
                 _onClickCategory: function(event) {
                     var categoryClicked = event.target.dataset.category;
                     this._activeCategory(categoryClicked);
-
-                    ChartUtils.scheduleResize(100);
-                    dc.renderAll();
                 },
 
                 _getLocaleDate: function(yyyymmdd) {

@@ -1,12 +1,8 @@
-<dom-module id="widget-throughput"> 
+<dom-module id="widget-throughput">
   <template>
 
     <style>
-        .widget__body {
-            display: flex;
-        }
         #throughput {
-            display: flex;
             height: 100%;
             width: 100%;
         }
@@ -16,14 +12,14 @@
         error-message="{{errorMessage}}" options="{{options}}"
         highcharts-chart="{{chart}}">
       <div id="throughput" class="tb-chart"></div>
-    </widget-wrap> 
+    </widget-wrap>
     <modal-wrap class="filters-modal" title="Filters">
       <modal-wrap-content>
         <h3 class="tb-label">Issue Types</h3>
         <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
       </modal-wrap-content>
-      <modal-wrap-footer> 
-        <tb-button button=[[_btFilterClose]]></tb-button>
+      <modal-wrap-footer>
+        <tb-button button="[[_btFilterClose]]"></tb-button>
       </modal-wrap-footer>
     </modal-wrap>
     <modal-wrap class="settings-modal" title="Settings">
@@ -31,18 +27,18 @@
         <h3 class="tb-label">Level</h3>
         <div>
           <label id="labelLevel"></label>
-          <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}"
-              aria-labelledby="labelLevel"> 
-            <paper-radio-button name="Demand">Demand</paper-radio-button> 
-            <paper-radio-button name="Feature">Feature</paper-radio-button> 
-            <paper-radio-button name="Subtask">Subtask</paper-radio-button> 
+          <paper-radio-group class="radio-group" selected="{{issueLevel}}"
+              aria-labelledby="labelLevel">
+            <paper-radio-button name="Demand">Demand</paper-radio-button>
+            <paper-radio-button name="Feature">Feature</paper-radio-button>
+            <paper-radio-button name="Subtask">Subtask</paper-radio-button>
           </paper-radio-group>
         </div>
-      </modal-wrap-content> 
-      <modal-wrap-footer> 
-        <tb-button button="[[_btLevelSave]]"></tb-button> 
-      </modal-wrap-footer> 
-    </modal-wrap> 
+      </modal-wrap-content>
+      <modal-wrap-footer>
+        <tb-button button="[[_btLevelSave]]"></tb-button>
+      </modal-wrap-footer>
+    </modal-wrap>
   </template>
   <script>
         (function () {
@@ -51,7 +47,6 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true,
                         value: '',
                         observer: '_onProjectSelected'
                     },
@@ -60,30 +55,33 @@
                     },
                     isReady: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
+                    isVisible: {
+                        type: Boolean
+                    },
                     errorMessage: {
-                        type: String,
-                        notify: true
+                        type: String
                     },
                     chart: {
                         type: Object,
-                        notify: true,
                         value: null
                     },
                     options: {
                         type: Array,
                         value: null
                     },
-                    settingIssueLevel: {
+                    issueLevel: {
                         type: String,
-                        notify: true,
                         value: 'Subtask'
                     },
                     localStorageLevelItemName: {
                         type: String,
                         computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
+                    },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
                     },
                     _btFilterClose: {
                         type: Object,
@@ -94,20 +92,81 @@
                         value: null
                     },
                     _plotData: {
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
+                    },
+                    _typeFilter:  {
                         type: Object,
-                        value: null
+                        computed: '_createIssueTypeFilter(_plotData)'
                     }
                 },
-        
+
+                observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
+                    '_createChart(_isPlotDataUpdated, isVisible)'
+                ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
+
                 _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
                     if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
                     }
-                    this.reloadChart();
+                    this._fetchData(newSelectedProjectKey);
+                },
+
+                _fetchData: function (selectedProjectKey) {
+                    this.reset();
+                    const savedLevel = this._getSavedLevel();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${selectedProjectKey}/followup/throughput?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        data = data.rows;
+                        if (!data.length) {
+                            this.errorMessage = 'Throughput has no data';
+                            return;
+                        }
+                        this._prepareData(data);
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
                 },
 
                 _getSavedLevel: function () {
                     return localStorage.getItem(this.localStorageLevelItemName) || 'Subtask';
+                },
+
+                _prepareData: function (data) {
+                    this._parseData(data);
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
+                    this._plotData = {
+                        allData: data,
+                        selectedTypes: issueTypes,
+                        issueTypes: issueTypes
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+
+                _parseData: function (data) {
+                    data.forEach((item) => {
+                        item.date = new Date(item.date);
+                        item.date.setHours(0, 0, 0, 0);
+                        item.throughput = item.count;
+                        // clean-up
+                        delete item.count;
+                    });
                 },
 
                 _computeLocalStorageLevelItemName: function (selectedProjectKey) {
@@ -119,14 +178,15 @@
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingIssueLevel) {
+                        if (savedLevel === this.issueLevel) {
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.issueLevel);
                         this.$$('.settings-modal').close();
-                        this.reloadChart();
+                        this._fetchData(this.selectedProjectKey);
                     }).build();
+                    this.issueLevel = this._getSavedLevel();
                 },
 
                 reset: function () {
@@ -138,103 +198,60 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
                     if (this.chart) {
                         dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
                 },
-        
-                reloadChart: function () {
-                    this.reset();
-                    const savedLevel = this._getSavedLevel();
-                    const timezone = taskboard.getTimeZoneIdFromBrowser();
-                    this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/throughput?level=${savedLevel}&timezone=${timezone}`;
-                    this.xhr = $.getJSON(url);
-                    this.xhr.done((data) => {
-                        data = data.rows;
-                        if (!data.length) {
-                            this.errorMessage = 'Throughput has no data';
-                            return;
-                        }
-                        this._prepareData(data);
-                        this._createIssueTypeFilter();
-                        this._createChart();
-                        this.isReady = true;
-                    });
-                    this.xhr.fail((error) => {
-                        this.errorMessage = error.responseText;
-                    });
-                },
-
-                _prepareData: function (data) {
-                    this._parseData(data);
-                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType');
-                    
-                    const ndx = crossfilter(data);
-                    const typeDimension = ndx.dimension('issueType');
-                    // need a second dimension on the same attribute to filter because of 
-                    // https://github.com/crossfilter/crossfilter/wiki/Crossfilter-Gotchas#a-group-does-not-observe-its-dimensions-filters
-                    const typeFilterDimension = ndx.dimension('issueType');
-
-                    const typesGroup = typeDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(typesGroup, 'date', 'throughput');
-
-                    this._plotData = Object.freeze({
-                        typeFilterDimension: typeFilterDimension,
-                        issueTypes: issueTypes,
-                        typesGroup: typesGroup
-                    });
-                },
 
                 _createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
                     const filterCallback = (selectedTypes, isToggledAll) => {
-                        this._plotData.typeFilterDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                        this._plotData.selectedTypes = selectedTypes;
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this._createChart();
+                        this._isPlotDataUpdated = true;
                     };
-                    new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, filterCallback);
+                    return new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, filterCallback);
                 },
 
-                _createChart: function () {
-                    const series = this._transformToHighchartsSeries(this._plotData.typesGroup);
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const series = this._transformToHighchartsSeries(this._plotData.allData);
+                    series.forEach(s => s.visible = this._plotData.selectedTypes.includes(s.name));
                     const builder = new WeeklyChartBuilder('throughput')
                         .withChartType('column')
                         .withSeriesData(series);
                     this.chart = builder.build();
                     dcDateRangeChartsService.registerHighchartsChart(this.chart);
                     dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
                 },
 
-                _parseData: function (data) {
-                    data.forEach((item) => {
-                        item.date = new Date(item.date);
-                        item.date.setHours(0, 0, 0, 0);
-                        item.date = item.date.getTime().toString();
-                        item.throughput = item.count;
-                        // clean-up
-                        delete item.count;
-                    });
-                },
-
-                _transformToHighchartsSeries: function (typesGroup) {
-                    const throughputGroupedByTypeByDate = typesGroup.all();
-                    const series = throughputGroupedByTypeByDate.map(( { key: type, value: throughputByDate } ) => {
-                        return {
-                            name: type,
-                            data: this._transformToHighchartsData(throughputByDate)
-                        };
-                    });
+                _transformToHighchartsSeries: function (filteredData) {
+                    const reduceFunction = (previous, current) => {
+                        if (previous.get(current.issueType) === undefined) {
+                            previous.set(current.issueType, {
+                                name: current.issueType,
+                                data: []
+                            });
+                        }
+                        const series = previous.get(current.issueType);
+                        series.data.push([current.date.getTime(), current.throughput]);
+                        return previous;
+                    };
+                    const series = [...filteredData.reduce(reduceFunction, new Map()).values()];
                     return series;
-                },
-
-                _transformToHighchartsData: function (throughputByDate) {
-                    return Object.entries(throughputByDate).map(( [date, throughput] ) => [Number(date), throughput]);
                 }
-
             });
         })();
-    </script> 
+    </script>
 </dom-module>
