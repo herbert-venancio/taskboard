@@ -140,26 +140,6 @@ class ChartUtils {
             .value();
     }
 
-    static groupChartDataByGroupKey (crossfilterGroup, groupPropertyNameKey, valuePropertyNameKey) {
-        const reduceAdd = (accumulator, current) => {
-            const groupingKey = current[groupPropertyNameKey];
-            if (accumulator[groupingKey] === undefined) {
-                accumulator[groupingKey] = 0;
-            }
-            accumulator[groupingKey] += current[valuePropertyNameKey];
-            return accumulator;
-        };
-        const reduceSub = (accumulator, current) => {
-            const groupingKey = current[groupPropertyNameKey];
-            accumulator[groupingKey] -= current[valuePropertyNameKey];
-            return accumulator;
-        };
-        const reduceInit = () => {
-            return {};
-        };
-        crossfilterGroup.reduce(reduceAdd, reduceSub, reduceInit);
-    }
-
     static registerOptions (widget) {
         widget.options = new WidgetOptionsBuilder(widget)
             .withFilters()
