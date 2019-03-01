@@ -780,7 +780,6 @@
         </style>
 
         <iron-signals on-iron-signal-issues-updated="updateIssue"
-                      on-iron-signal-ballpark-updated="_updateBallpark"
                       on-iron-signal-close-all-pickers="_closeAllPickers"></iron-signals>
         <paper-dialog id="modal" with-backdrop modal
                       entry-animation="scale-up-animation"
@@ -973,7 +972,7 @@
                                     <tshirt-picker
                                         id="tShirtSelector"
                                         class="people-picker"
-                                        options="{{tShirtOptions}}"
+                                        options="{{tShirtSizes}}"
                                         on-selected-tshirt = "_changeTShirt"
                                         on-tap="_stopPropagation"
                                         >
@@ -1011,7 +1010,8 @@
                                 item={{item}}
                                 isOpen=[[isOpen]]
                                 metadata={{issueMetadata}}
-                                on-selected-card="changeCard"
+                                on-create-subtasks="_createSubtasks"
+                                on-ballpark-updated="_updateBallpark"
                             ></issue-detail-tabs>
                         </div>
                         <div class="rightPanel">
@@ -1203,6 +1203,11 @@
                         notify: true
                     },
 
+                    tShirtSizes: {
+                        type: Array,
+                        value: () => []
+                    },
+
                     shouldShowTimetracking: {
                         type: Boolean,
                         value: true,
@@ -1332,12 +1337,6 @@
                         value: false
                     },
 
-                    tShirtOptions: {
-                        type: Array,
-                        value: [],
-                        notify: true
-                    },
-
                     tShirtPickerIsVisible: {
                         type: Boolean,
                         value: false
@@ -1352,7 +1351,8 @@
 
                 attached: function() {
                     var self = this;
-                    
+                    this.tShirtSizes = taskboard.tShirtSizes;
+
                     self.isObserving = false;
                     new MutationObserver(function(mutations) {
                         if (!self.isObserving)
@@ -1891,7 +1891,7 @@
 
                 setCard: function(item) {
                     var self = this;
-this.editableDescription = item.description;
+                    this.editableDescription = item.description;
                     this.hasSubtasks = (typeof item.subtasks !== undefined && item.subtasks.length > 0);
                     this.canHaveSubtasks = item.feature || item.demand;
                     this.canShowSize = item.subTask && item.cardTshirtSize;
@@ -1902,6 +1902,10 @@ this.editableDescription = item.description;
                     this.updatedIssue = null;
                     this.item = item;
                     this.blocked = this.item.blocked;
+
+                    if (this.tShirtSizes.length > 1) {
+                        this.tShirtPickerIsVisible = true;
+                    }
 
                     taskboard.getIssueMetadata(item.issueKey, function(metadata, el) {
                         self.issueMetadata = metadata;
@@ -1943,20 +1947,11 @@ this.editableDescription = item.description;
 
                 setFieldOptions: function(metadata) {
                     var self = this;
-
                     this.issueMetadata = metadata;
                     this.getFieldOptions(this.item, this.item.classOfServiceFieldId, function(data, el) {
                         self.classOfServiceOptions = data;
-
                          if (data.length > 1) {
                              self.classOfServicePickerIsVisible = true;
-                         }
-                     });
-                     this.getFieldOptions(this.item, this.item.cardTshirtSizeFieldId, function(data, el) {
-                         self.tShirtOptions = data;
-
-                         if (data.length > 1) {
-                             self.tShirtPickerIsVisible = true;
                          }
                      });
                 },
@@ -2151,6 +2146,10 @@ this.editableDescription = item.description;
                         .always(function() {
                            data.callback.call();
                        });
+                },
+
+                _createSubtasks: function(e, data) {
+                    this._issueAction('addSubtasks', 'add new subtasks for issue ' + this.item.issueKey, data.subtasks);
                 },
 
                 _issueAction: function(action, actionName, data) {

@@ -31,6 +31,7 @@ import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.auth.authorizer.permission.ProjectAdministrationPermission;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.ProjectsUpdateEvent;
+import objective.taskboard.data.SubtaskDto;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
@@ -40,6 +41,8 @@ import objective.taskboard.domain.converter.ParentProvider;
 import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
+import objective.taskboard.issue.SubtasksService;
+import objective.taskboard.issue.SubtasksService.SubtaskValidationException;
 import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
@@ -72,6 +75,9 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
 
     @Autowired
     private JiraService jiraBean;
+
+    @Autowired
+    private SubtasksService subtasksService;
 
     @Autowired
     private IssuePriorityService issuePriorityService;
@@ -399,7 +405,17 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         return updateIssueBuffer(issueKey);
     }
 
-    private Issue syncIssueTeams(String issueKey, Issue issue) {
+    public Issue createSubtasks(String issueKey, List<SubtaskDto> subtasks) throws SubtaskValidationException {
+        subtasksService.validateSubtasks(subtasks);
+       
+        subtasks.stream().forEach(subtask -> {
+            jiraBean.createSubtask(issueKey, subtask);
+        });
+
+        return updateIssueBuffer(issueKey);
+    }
+
+    Issue syncIssueTeams(String issueKey, Issue issue) {
         jiraBean.setTeams(issue.getIssueKey(),issue.getRawAssignedTeamsIds());
         return updateIssueBuffer(issueKey);
     }

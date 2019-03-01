@@ -1,10 +1,12 @@
 package objective.taskboard.jira;
 
 import static objective.taskboard.jira.JiraSearchService.postProcessWorklogs;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValueOrId;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -27,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
+import objective.taskboard.data.SubtaskDto;
 import objective.taskboard.data.User;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraResolutionDto;
@@ -191,7 +194,13 @@ public class JiraService {
 
     public String createIssueAsMaster(JiraIssue.Input issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue (master)");
-        JiraIssue issue = jiraEndpointAsMaster.request(JiraIssue.Service.class).create(issueInput);
+            JiraIssue issue = jiraEndpointAsMaster.request(JiraIssue.Service.class).create(issueInput);
+            return issue.key;
+    }
+
+    public String createIssueAsUser(JiraIssue.Input issueInput) {
+        log.debug("⬣⬣⬣⬣⬣  createIssue (user)");
+        JiraIssue issue = jiraEndpointAsUser.request(JiraIssue.Service.class).create(issueInput);
         return issue.key;
     }
 
@@ -253,6 +262,23 @@ public class JiraService {
 
          if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
             throw new FrontEndMessageException("Unexpected return code during saveBallpark: " + result.getStatus());
+    }
+
+    public void createSubtask(String issueKey, SubtaskDto subtask) {
+        JiraIssueDto jiraIssue = this.getIssueByKeyAsMaster(issueKey);
+
+        JiraIssue.CustomInputBuilder issueBuilder = JiraIssue.Input.builder(properties, jiraIssue.getProject().getKey(), jiraIssue.getIssueType().getId())
+                .project(byKey(jiraIssue.getProject().getKey()))
+                .issueType(byId(subtask.issuetype))
+                .parent(byKey(jiraIssue.getKey()))
+                .summary(subtask.summary);
+
+        if (!StringUtils.isBlank(subtask.tShirtSize)) {
+            issueBuilder.tShirtSize(byValue(subtask.tShirtSize));
+        }
+
+        JiraIssue.Input issueInput = issueBuilder.build();
+        createIssueAsUser(issueInput);
     }
 
     public void setTeams(String issueKey, List<Long> teamsIds) {

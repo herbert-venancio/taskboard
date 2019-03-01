@@ -92,7 +92,9 @@
             properties: {
                 ballpark: {
                     type: Object,
-                    value: () => {}
+                    value: () => {
+                        return {};
+                    }
                 },
 
                 index: {
@@ -154,15 +156,12 @@
                     tShirtPicker.close();
                     return;
                 }
-                
-                this.fire('iron-signal', {
-                    name: 'ballpark-updated',
-                    data: {
-                        fieldId: this.ballpark.fieldId,
-                        value: selectedTShirt,
-                        callback: function() {
-                            tShirtPicker.close();
-                        }
+
+                this.fire('ballpark-updated', {
+                    fieldId: this.ballpark.fieldId,
+                    value: selectedTShirt,
+                    callback: function() {
+                        tShirtPicker.close();
                     }
                 });
 

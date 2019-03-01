@@ -47,30 +47,7 @@
             .subtasks--panel {
                 width: 100%;
             }
-            
-            .subtask--issue-type {
-                width: 48px;
-            }
-            
-            .subtask--issue-type img {
-                margin: auto;
-            }
-            
-            .subtask--issue-key {
-                color: #5DAFFF;
-                margin-right: 10px;
-            }
-            
-            paper-button.subtask-link {
-                color: #5DAFFF;
-                margin: 0 5px 0 0;
-                padding: 0;
-                display: inline;
-            }
-            
-            .subtask--summary {
-                flex: 10;
-            }        </style>
+         </style>
         <iron-signals on-iron-signal-card-is-closed="_activeFirstTab"></iron-signals>
 
         <div class="tabs-wrapper">
@@ -92,43 +69,32 @@
             <iron-pages selected="{{selected}}">
                 <template is="dom-if" if="{{_hasSubtasks(item)}}">
                     <div class="tabs-content">
-                        <div class="details-row">
-                            <div id="subtasks_content" class="subtasks--panel">
-                                <template is="dom-repeat" items="{{item.subtasks}}" as="subtask">
-                                    <paper-material class="subtask-panel" elevation="0">
-                                        <div class="subtask--issue-type">
-                                            <img class="icon-tiny" src$="{{subtask.issueTypeUri}}" title$="{{subtask.issueType}}"/>
-                                        </div>
-                                        <div class="subtask--issue-key">
-                                            <paper-button class="subtask-link" on-tap="_changeCard"  data-issue-key$="{{subtask.issueKey}}" id="child-issue-{{index}}">
-                                                {{subtask.issueKey}}
-                                            </paper-button>
-                                        </div>
-                                        <div class="subtask--summary">
-                                            {{subtask.summary}}
-                                        </div>
-                                        <div class="subtask--status" style$="background-color: {{subtask.color}}">
-                                            <span>{{subtask.status}}</span>
-                                        </div>
-                                    </paper-material>
-                                </template>
-                            </div>
+                        <div id="subtasks_content" class="subtasks--panel">
+                            <template is="dom-repeat" items="{{item.subtasks}}" as="subtask">
+                                <subtask-item
+                                    subtask="[[subtask]]"
+                                >
+                                </subtask-item>
+                            </template>
+                            <template is="dom-if" if="{{_canAddSubtasks(item)}}">
+                                <subtask-add
+                                    item="{{item}}"
+                                ></subtask-add>
+                            </template>
                         </div>
                     </div>
                 </template>
                 <template is="dom-if" if="{{_hasBallparks(item)}}">
                     <div class="tabs-content">
-                        <div class="details-row">
-                            <div id="subtasks_content" class="subtasks--panel">
-                                <template is="dom-repeat" items="{{item.ballparks}}" as="ballpark">
-                                    <ballpark-item
-                                        ballpark="[[ballpark]]"
-                                        index="[[index]]",
-                                        metadata="{{metadata}}"
-                                    >
-                                    </ballpark-item>
-                                </template>
-                            </div>
+                        <div id="subtasks_content" class="subtasks--panel">
+                            <template is="dom-repeat" items="{{item.ballparks}}" as="ballpark">
+                                <ballpark-item
+                                    ballpark="[[ballpark]]"
+                                    index="[[index]]",
+                                    metadata="{{metadata}}"
+                                >
+                                </ballpark-item>
+                            </template>
                         </div>
                     </div>
                 </template>
@@ -152,26 +118,13 @@
                         notify: true
                     },
                     
-                    isOpen: {
-                        type: Boolean,
-                        notify: true,
-                        value: () => false
-                    },
-
-                    issueBallparks: {
-                        type: Array,
-                        value: () => [],
-                        notify: true
-                    },
-
                     selected: {
                         type: Number,
                         value: 0
                     },
 
                     metadata: {
-                        type: Array,
-                        observer: '_updateMeta'
+                        type: Array
                     }
                 },
 
@@ -179,28 +132,20 @@
                     this.selected = 0;
                 },
 
-                _subtaskHeader: function (item) {
-                    if (this.item.type === ISSUETYPE_ID.DEMANDA)
-                        return "Tasks";
-                    else
-                        return "Sub-tasks";
+                _canAddSubtasks: function(item) {
+                    return item.feature;
+                },
+
+                _subtaskHeader: function () {
+                    return this.item.demand ? 'Tasks' : 'Sub-tasks';
                 },
 
                 _hasSubtasks: function(item) {
                     return typeof item.subtasks !== undefined && (item.feature || item.demand);
                 },
 
-                _updateMeta: function() {
-                    var self = this;
-                },
-
                 _hasBallparks: function(item) {
                     return item.ballparks.length > 0;
-                },
-
-                _changeCard: function(event) {
-                    var issueKey = event.target.getAttribute('data-issue-key');
-                    navigatorService.openCard(issueKey);
                 }
             });
         })();

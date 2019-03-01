@@ -19,6 +19,7 @@ import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
+import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.rules.CleanupDataFolderRule;
 import objective.taskboard.testUtils.JiraMockServer;
 import objective.taskboard.utils.IOUtilities;
@@ -120,6 +121,18 @@ public abstract class AbstractIntegrationTest {
         return newIssueKey;
     }
 
+    protected static void emulateCreateIssueTaskb800subtaskOf624() {
+        String issueJson = IOUtilities.resourceToString("webhook/create-TASKB-800-subtaskof-TASKB-624.json");
+
+         emulateCreateIssueWithoutWebhookNotification("TASKB-800", issueSearchResponseGenerator(issueJson));
+
+         RequestBuilder
+            .url(getSiteBase() + "/webhook/" + TASKB_PROJECT_KEY)
+            .header("Content-Type", "application/json")
+            .body(webhookJsonGenerator(WebhookEvent.ISSUE_CREATED, issueJson))
+            .post();
+    }
+
     protected static void emulateUpdateIssue(String issueKey, IssueUpdateFieldJson... jsonList) {
         if (jsonList.length == 0)
             throw new IllegalArgumentException();
@@ -140,7 +153,34 @@ public abstract class AbstractIntegrationTest {
         sendNotificationByWebhook(issueKey, payloadJson, TASKB_PROJECT_KEY);
     }
 
-    protected static void emulateDeleteIssue(final String issueKey) {
+    private static String issueSearchResponseGenerator(String issueJson) {
+        return "{ \"issues\": [" + issueJson + "]}";
+    }
+
+     private static String webhookJsonGenerator(WebhookEvent webhookEvent, String issueJson) {
+        return "{" +
+                "\"timestamp\": 1517590550124," + 
+                "\"webhookEvent\": \""+ webhookEvent.typeName +"\"," + 
+                "\"user\": {" + 
+                "    \"self\": \"http:\\/\\/localhost:4567\\/rest\\/api\\/latest\\/user?username=foo\"," + 
+                "    \"name\": \"Foo\"," + 
+                "    \"key\": \"foo\"," + 
+                "    \"emailAddress\": \"foo@test.com\"," + 
+                "    \"avatarUrls\": {" + 
+                "        \"48x48\": \"http:\\/\\/www.gravatar.com\\/avatar\\/64e1b8d34f425d19e1ee2ea7236d3028?d=mm&s=48\"," + 
+                "        \"24x24\": \"http:\\/\\/www.gravatar.com\\/avatar\\/64e1b8d34f425d19e1ee2ea7236d3028?d=mm&s=24\"," + 
+                "        \"16x16\": \"http:\\/\\/www.gravatar.com\\/avatar\\/64e1b8d34f425d19e1ee2ea7236d3028?d=mm&s=16\"," + 
+                "        \"32x32\": \"http:\\/\\/www.gravatar.com\\/avatar\\/64e1b8d34f425d19e1ee2ea7236d3028?d=mm&s=32\"" + 
+                "    }," + 
+                "    \"displayName\": \"Foo\"," + 
+                "    \"active\": true," + 
+                "    \"timeZone\": \"America\\/Sao_Paulo\"" + 
+                "}," +
+                "\"issue\": " + issueJson +
+            "}";
+    }
+
+     protected static void emulateDeleteIssue(final String issueKey) {
         emulateDeleteIssueWithoutWebhookNotification(issueKey);
 
         String payloadJson = "_deletePayload.json";

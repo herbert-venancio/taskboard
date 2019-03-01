@@ -69,6 +69,7 @@ function Taskboard() {
         this.refitSteps();
     };
 
+    
     function setIssuesBySteps(issues) {
         _issuesBySteps = {};
         forEachInArray(self.getAllSteps(), function(step) {
@@ -82,6 +83,22 @@ function Taskboard() {
             _issuesBySteps[step.id] = issuesByStep;
         });
     }
+
+    this.setTshirtSizes = function(tShirtSizes) {
+        this.tShirtSizes = tShirtSizes;
+    };
+
+    this.getTshirtSizes = function() {
+        return this.tShirtSizes;
+    };
+
+    this.setIssueTypes = function(issueTypes) {
+        this.issueTypes = issueTypes;
+    };
+
+    this.getIssueTypes = function() {
+        return this.issueTypes;
+    };
 
     this.getIssueStep = function(issue) {
         var steps = self.getAllSteps()
@@ -272,6 +289,7 @@ function Taskboard() {
 
     this.getIssueTypeName = function(issueTypeId) {
         var types = JSON.parse(localStorage.getItem("issueTypes"));
+        
         for (var i in types)
             if (types[i].id == issueTypeId)
                 return types[i].name;
@@ -677,6 +695,7 @@ function StepLocalStateBuilder(idOfStep) {
 }
 
 var buttonTypes = {
+    DEFAULT: 'default',
     BUTTON: 'button',
     LINK: 'link'
 };

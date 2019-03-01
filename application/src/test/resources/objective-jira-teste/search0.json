@@ -43707,7 +43707,7 @@
                         "unsupported": {
                             "required": true,
                             "schema": {
-                                "type": "unsupported",
+                                "type": "unsupported"
                             },
                             "name": "Unsupported",
                             "operations": [

@@ -1,0 +1,89 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+
+<dom-module id="subtask-item">
+    <template>
+        <style is="custom-property">
+            .subtask--issue-type {
+                width: 48px;
+            }
+            
+            .subtask--issue-type img {
+                margin: auto;
+            }
+            
+            .subtask--issue-key {
+                color: #5DAFFF;
+                margin-right: 10px;
+            }
+            
+            paper-button.subtask-link {
+                color: #5DAFFF;
+                margin: 0 5px 0 0;
+                padding: 0;
+                display: inline;
+            }
+            
+            .subtask--summary {
+                flex: 10;
+            }       
+        </style>
+
+        <paper-material class="subtask-panel" elevation="0">
+            <div class="subtask--issue-type">
+                <img class="icon-tiny" src$="{{subtask.issueTypeUri}}" title$="{{subtask.issueType}}"/>
+            </div>
+            <div class="subtask--issue-key">
+                <paper-button class="subtask-link" on-tap="_changeCard" data-issue-key$="{{subtask.issueKey}}">
+                    {{subtask.issueKey}}
+                </paper-button>
+            </div>
+            <div class="subtask--summary">
+                {{subtask.summary}}
+            </div>
+            <div class="subtask--status" style$="background-color: {{subtask.color}}">
+                <span>{{subtask.status}}</span>
+            </div>
+        </paper-material>
+    </template>
+
+    <script>
+        (function(){
+            Polymer({
+                is: "subtask-item",
+
+                properties: {
+                    subtask: {
+                        type: Object,
+                        value: () => {
+                            return {};
+                        }
+                    }
+                },
+
+                _changeCard: function(event){
+                    var issueKey = event.target.getAttribute('data-issue-key');
+                    navigatorService.openCard(issueKey);
+               }
+            })
+        })();
+    </script>
+</dom-module>

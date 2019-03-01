@@ -44,10 +44,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.data.CardFieldFilter;
 import objective.taskboard.data.Issue;
+import objective.taskboard.data.IssueTypeDto;
+import objective.taskboard.data.SubtaskDto;
 import objective.taskboard.database.TaskboardDatabaseService;
 import objective.taskboard.filterPreferences.CardFieldFilterService;
 import objective.taskboard.filterPreferences.UserPreferencesService;
 import objective.taskboard.issue.CardStatusOrderCalculator;
+import objective.taskboard.issue.SubtasksService;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
@@ -90,6 +93,9 @@ public class IssueController {
 
     @Autowired
     private UserTeamService userTeamService;
+
+    @Autowired
+    private SubtasksService subtasksService;
 
     @Autowired
     private CardStatusOrderCalculator statusOrderCalculator;
@@ -184,6 +190,11 @@ public class IssueController {
         return toCardDto(issueBufferService.saveBallPark(issueKey, parameters.get("fieldId"), parameters.get("size")));
     }
 
+    @RequestMapping(path="addSubtasks/{issue}", method = RequestMethod.POST, consumes="application/json")
+    public CardDto addSubtasks(@PathVariable("issue") String issueKey, @RequestBody List<SubtaskDto> subtasks) {
+        return toCardDto(issueBufferService.createSubtasks(issueKey, subtasks));
+    }
+
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public CardDto transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
         Map<String, Object> fields = tr.fields == null ? Collections.emptyMap() : tr.fields;
@@ -204,7 +215,8 @@ public class IssueController {
     public Map<String, Object> configuration() {
         Map<String, Object> map = new HashMap<>();
         map.put("laneConfiguration", taskService.laneConfiguration());
-        map.put("issueTypes", metadataService.getIssueTypeMetadataAsLoggedInUser());
+        map.put("tShirtSizes", jiraProperties.getCustomfield().getTShirtSize().getSizes());
+        map.put("issueTypes", getIssueTypes());
         map.put("issueTypesConfig", issueTypeVisibilityService.getIssueTypeVisibility());
         map.put("priorities", metadataService.getPrioritiesMetadata());
         map.put("statuses", metadataService.getStatusesMetadataAsLoggedInUser());
@@ -213,6 +225,13 @@ public class IssueController {
         map.put("urlLinkGraph", linkGraphProperties.getUrl());
         map.put("userPreferences", userPreferencesService.getLoggedUserPreferences().getPreferences());
         return map;
+    }
+
+    private List<IssueTypeDto> getIssueTypes() {
+        return metadataService.getIssueTypeMetadataAsLoggedInUser().values().stream()
+                .sorted((it1, it2) -> it1.getId().compareTo(it2.getId()))
+                .map(it -> new IssueTypeDto(it, subtasksService.isSizeRequired(it), subtasksService.issueTypeIsVisibibleAtSubtaskCreation(it)))
+                .collect(Collectors.toList());
     }
 
     @RequestMapping("card-field-filters")

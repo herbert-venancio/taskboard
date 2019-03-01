@@ -1,0 +1,166 @@
+
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+
+<dom-module id="subtask-add">
+    <style>
+        .subtask-button-wrapper {
+            padding-left:24px;
+            padding-right:8px;
+            display:flex;
+            justify-content:space-between;
+        }
+
+        #add-subtask-button {
+            padding:0;
+            background-color:transparent;
+            border:0;
+        }
+
+        #add-subtask-button:active {
+            outline:none;
+        }
+
+        #subtask-button-content paper-button:focus {
+            outline-width:initial;
+        }
+    </style>
+    <style is="custom-property">
+        tb-button {
+            --button-style: {
+                margin-top:15px;
+                margin-left:15px;
+            }
+        }
+    </style>
+    <template>
+        <template is="dom-if" if="{{isAddingSubtasks}}">
+            <template is="dom-repeat" items="{{newSubtasks}}" as="newSubtask">
+                <subtask-item-form
+                    subtasks-issues-types="[[subtasksIssuesTypes]]"
+                    subtask="[[newSubtask]]"
+                    item="[[item]]"
+                >
+                </subtask-item-form>
+            </template>
+        </template>
+
+        <div class="subtask-button-wrapper">
+            <button id="add-subtask-button" on-tap="_addSubtask" class="people-action-link" title="Add a new subtask to this issue">
+                <iron-icon class="add-people-icon" icon="taskboard-icons:add-team"></iron-icon>
+                <span>Subtask</span>
+            </button>
+            <template is="dom-if" if="{{isAddingSubtasks}}">
+                <div id="subtask-button-content">
+                    <tb-button button="[[cancelButton]]"></tb-button>
+                    <tb-button button="[[saveButton]]"></tb-button>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <script>
+        (function(){
+            Polymer({
+                is: 'subtask-add',
+
+                
+                properties: {
+                    item: {
+                        observer: '_onCardOpen'
+                    },
+
+                    cancelButton: {
+                        type: Object,
+                        value: () => {return {};}
+                    },
+
+                    saveButton: {
+                        type: Object,
+                        value: () => { return {}; }
+                    },
+
+                    subtasksIssuesTypes: {
+                        type: Array,
+                        value: () => []
+                    },
+
+                    newSubtasks: {
+                        type: Array,
+                        value: () => []
+                    },
+
+                    isAddingSubtasks: {
+                        type: Boolean,
+                        value: false
+                    }
+                },
+
+                attached: function() {
+                    this.subtasksIssuesTypes = taskboard.getIssueTypes().filter(issueType => issueType.visibleAtSubtaskCreation);
+
+                    this.cancelButton = ButtonBuilder('Cancel')
+                        .type(buttonTypes.DEFAULT)
+                        .onClick(this._cancelSubtasksCreation.bind(this))
+                        .build();
+
+                    this.saveButton = ButtonBuilder('Save')
+                        .classes('subtask-save-button')
+                        .type(buttonTypes.BUTTON)
+                        .onClick(this._saveNewSubtasks.bind(this))
+                        .build()
+                },
+
+                _onCardOpen: function() {
+                    this.newSubtasks = [];
+                    this.isAddingSubtasks = false;
+                },
+
+                _addSubtask: function() {
+                    var newSubtask = {
+                        issuetype: '',
+                        summary: '',
+                        tShirtSize: '',
+                        updated: false
+                    };
+                    
+                    this.push('newSubtasks', newSubtask);
+                    this.isAddingSubtasks = true;
+                },
+
+                _cancelSubtasksCreation: function(){
+                    this.newSubtasks = [];
+                    this.isAddingSubtasks = false;
+                },
+
+                _saveNewSubtasks: function() {
+                    var updatedSubtasks = this.newSubtasks.filter(item => item.updated);
+                    
+                    if (updatedSubtasks.length > 0) {
+                        this.fire('create-subtasks', {subtasks: updatedSubtasks});
+                    } else {
+                        this._cancelSubtasksCreation();
+                    }
+                }
+            })
+        })();
+    </script>
+</dom-module>
