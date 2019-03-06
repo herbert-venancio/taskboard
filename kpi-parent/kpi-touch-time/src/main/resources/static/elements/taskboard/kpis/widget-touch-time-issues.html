@@ -265,10 +265,7 @@
 
                 _orderIssuesByTotalEffort: function (issues) {
                     const reduceTotalEffort = (previous, current) => {
-                        if (previous[current.issueKey] === undefined) {
-                            previous[current.issueKey] = 0;
-                        }
-                        previous[current.issueKey] += current.effortInHours;
+                        previous[current.issueKey] = current.stacks.reduce((p, c) => p += c.effortInHours, 0);
                         return previous;
                     };
                     const compareTotalEffort = (totalEffort1, totalEffort2, {ascending = true} = {}) => {
@@ -284,16 +281,18 @@
 
                 _transformToHighchartsSeries: function (issues) {
                     const reduceFunction = (previous, current) => {
-                        if (previous[current.issueStatus] === undefined) {
-                            previous[current.issueStatus] = {
-                                name: current.issueStatus,
-                                data: []
-                            };
-                        }
-                        previous[current.issueStatus].data.push(current.effortInHours);
+                        current.stacks.forEach(({stackName, effortInHours}) => {
+                            if (previous.get(stackName) === undefined) {
+                                previous.set(stackName, {
+                                    name: stackName,
+                                    data: []
+                                });
+                            }
+                            previous.get(stackName).data.push(effortInHours);
+                        });
                         return previous;
                     };
-                    const series = Object.values(issues.reduce(reduceFunction, {})).sort((a, b) => a.name.localeCompare(b.name));
+                    const series = [...issues.reduce(reduceFunction, new Map()).values()];
                     return series;
                 }
             });
