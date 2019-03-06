@@ -6,10 +6,12 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
+import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint.Stack;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class TouchTimeByIssueKpiStrategy implements TouchTimeKpiStrategy<TouchTimeByIssueKpiDataPoint> {
@@ -38,23 +40,23 @@ public class TouchTimeByIssueKpiStrategy implements TouchTimeKpiStrategy<TouchTi
 
     private List<TouchTimeByIssueKpiDataPoint> transformToDataPoints(List<IssueKpi> issues, List<String> statuses, ZoneId timezone) {
         final List<TouchTimeByIssueKpiDataPoint> points = new LinkedList<>();
-        issues.forEach(issue ->
-            statuses.forEach(status -> {
+        issues.forEach(issue -> {
+            final Range<LocalDate> progressingRange = issue.getDateRangeBasedOnProgressingStatuses(timezone).get();
+            final ZonedDateTime startProgressingDate = progressingRange.getMinimum().atStartOfDay(timezone);
+            final ZonedDateTime endProgressingDate = progressingRange.getMaximum().atStartOfDay(timezone);
+            List<Stack> stacks = statuses.stream().map(status -> {
                 final Long effortInSeconds = issue.getEffort(status);
                 final double effortInHours = DateTimeUtils.secondsToHours(effortInSeconds);
-                final Range<LocalDate> progressingRange = issue.getDateRangeBasedOnProgressingStatuses(timezone).get();
-                final ZonedDateTime startProgressingDate = progressingRange.getMinimum().atStartOfDay(timezone);
-                final ZonedDateTime endProgressingDate = progressingRange.getMaximum().atStartOfDay(timezone);
-                final TouchTimeByIssueKpiDataPoint dataPoint = new TouchTimeByIssueKpiDataPoint(
-                        issue.getIssueKey(),
-                        issue.getIssueTypeName(),
-                        status,
-                        effortInHours,
-                        startProgressingDate.toInstant(),
-                        endProgressingDate.toInstant());
-                points.add(dataPoint);
-            })
-        );
+                return new TouchTimeByIssueKpiDataPoint.Stack(status, effortInHours);
+            }).collect(Collectors.toList());
+            final TouchTimeByIssueKpiDataPoint dataPoint = new TouchTimeByIssueKpiDataPoint(
+                    issue.getIssueKey(),
+                    issue.getIssueTypeName(),
+                    startProgressingDate.toInstant(),
+                    endProgressingDate.toInstant(),
+                    stacks);
+            points.add(dataPoint);
+        });
         return points;
     }
 
