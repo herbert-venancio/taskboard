@@ -57,7 +57,7 @@ class TouchTimeKpiController {
     private ResponseEntity<Object> getResponse(String method, String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         try {
             return new ResponseEntity<>(provider.getDataSet(method, projectKey, kpiLevel, timezone), HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) { //NOSONAR
             throw new KpiValidationException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -65,7 +65,7 @@ class TouchTimeKpiController {
     private KpiLevel getLevel(String level) {
         try {
             return KpiLevel.valueOf(level.toUpperCase());
-        } catch (IllegalArgumentException e) {//NOSONAR
+        } catch (IllegalArgumentException e) { //NOSONAR
             final String message = String.format("Invalid level value: %s.", level);
             throw new KpiValidationException(HttpStatus.BAD_REQUEST,message);
         }

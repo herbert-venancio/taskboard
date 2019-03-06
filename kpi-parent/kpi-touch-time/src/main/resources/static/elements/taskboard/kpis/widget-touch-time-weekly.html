@@ -119,7 +119,6 @@
                     const url = `/api/projects/${selectedProjectKey}/followup/touchtime/byWeek?level=${savedLevel}&timezone=${timezone}`;
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
-                        data = data.points;
                         if (data.length === 0) {
                             this.errorMessage = 'Touch Time chart has no data';
                             return;
