@@ -17,6 +17,7 @@ import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
 import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehaviorBuilder;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
@@ -434,8 +435,9 @@ public class TouchTimeKpiControllerTest {
             KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             JiraProperties jiraProperties = environment.getJiraProperties();
+            MetadataService metadataService = environment.services().metadata().getService();
             TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
+            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties, metadataService);
             ProjectService projectService = environment.services().projects().getService();
             return new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         }

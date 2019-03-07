@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Range;
 
+import com.google.common.collect.Streams;
+
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
 
@@ -108,6 +110,15 @@ public class IssueKpi {
                 .collect(Collectors.toList());
     }
 
+    public long getEffortSumFromChildrenWithSubtaskTypeId(long subtaskTypeId) {
+        return getDecendants()
+                .filter(c -> c.issueType.map(type -> type.getId().equals(subtaskTypeId)).orElse(false))
+                .map(IssueKpi::collectWorklogs)
+                .flatMap(List::stream)
+                .mapToLong(ZonedWorklog::getTimeSpentSeconds)
+                .sum();
+    }
+
     public Optional<StatusTransition> findStatus(String status) {
         return firstStatus.flatMap(s -> s.find(status));
     }
@@ -170,5 +181,15 @@ public class IssueKpi {
     private Optional<LocalDate> earliestOfStatuses(Stream<DatedStatusTransition> all) {
         Optional<ZonedDateTime> minimum = all.map(s -> s.getDate()).min(Comparator.naturalOrder());
         return minimum.flatMap(zd -> Optional.of(zd.toLocalDate()));
+    }
+
+    private Stream<IssueKpi> getDecendants() {
+        if (children.isEmpty()) {
+            return Stream.empty();
+        }
+        return Streams.concat(
+                children.stream(),
+                children.stream().flatMap(IssueKpi::getDecendants)
+            );
     }
 }

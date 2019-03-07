@@ -1,7 +1,7 @@
 package objective.taskboard.followup.kpi.touchtime.helpers;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.assertj.core.api.Assertions;
 
@@ -31,23 +31,30 @@ class TTByIssueKpiDataPointAsserter implements KpiDataPointAsserter<TouchTimeByI
         Assertions.assertThat(subject.endProgressingDate)
             .as("Start progressing dates must be equals")
             .isEqualTo(expected.endProgressingDate);
-        Assertions.assertThat(subject.stacks).hasSize(expected.stacks.size());
-        this.assertStacks(subject.stacks, expected.stacks);
+        Assertions.assertThat(subject.stacks)
+            .as("Stacks must have same size")
+            .hasSize(expected.stacks.size());
+        this.assertStacks(subject.stacks, expected.stacks, subject.issueKey);
     }
 
-    private void assertStacks(List<Stack> subjectStacks, List<Stack> expectedStacks) {
-        Iterator<Stack> subjectStacksIterator = subjectStacks.iterator();
-        Iterator<Stack> expectedStacksIterator = expectedStacks.iterator();
+    private void assertStacks(List<Stack> subjectStacks, List<Stack> expectedStacks, String issueKey) {
+        ListIterator<Stack> subjectStacksIterator = subjectStacks.listIterator();
+        ListIterator<Stack> expectedStacksIterator = expectedStacks.listIterator();
         while (subjectStacksIterator.hasNext()) {
+            int currentIndex = subjectStacksIterator.nextIndex();
             Stack subjectStack = subjectStacksIterator.next();
             Stack expectedStack = expectedStacksIterator.next();
-            this.assertStack(subjectStack, expectedStack);
+            this.assertStack(subjectStack, expectedStack, issueKey, currentIndex);
         }
 
     }
 
-    private void assertStack(Stack subject, Stack expected) {
-        Assertions.assertThat(subject.stackName).isEqualTo(expected.stackName);
-        Assertions.assertThat(subject.effortInHours).isCloseTo(expected.effortInHours, Assertions.within(DELTA));
+    private void assertStack(Stack subject, Stack expected, String issueKey, int stackNumber) {
+        Assertions.assertThat(subject.stackName)
+            .as("Stack names at position %d of %s must be equals", stackNumber, issueKey)
+            .isEqualTo(expected.stackName);
+        Assertions.assertThat(subject.effortInHours)
+            .as("Efforts at position %d of %s must be equals", stackNumber, issueKey)
+            .isCloseTo(expected.effortInHours, Assertions.within(DELTA));
     }
 }

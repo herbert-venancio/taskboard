@@ -11,6 +11,7 @@ import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiStrategyFactory;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategyFactory;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeKpiProvider;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 
@@ -34,8 +35,9 @@ abstract class GetTTDataSetProviderBehavior<DSA> implements DSLSimpleBehaviorWit
         KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
         IssueKpiService issueKpiService = environment.services().issueKpi().getService();
         ProjectService projectService = environment.services().projects().getService();
+        MetadataService metadataService = environment.services().metadata().getService();
         TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-        TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
+        TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties, metadataService);
         TouchTimeKpiProvider subject = new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         List<?> dataset = subject.getDataSet(methodName, projectKey, kpiLevel, timezone);
         createAsserter(dataset);
