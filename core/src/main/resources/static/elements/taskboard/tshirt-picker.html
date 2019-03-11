@@ -2,7 +2,7 @@
     <template>
         <tag-picker
                 id = "tshirt-selector-autocomplete"
-                source="{{options}}"
+                source="{{_normalizeOptions(options)}}"
                 text-property="value"
                 value-property="value"
                 on-selected-value="_onSelect"
@@ -46,9 +46,24 @@
                 
                 focus: function() {
                     this.tagPicker.focus();
-                    this.tagPicker.suggestions(this.options);
+                    this.tagPicker.suggestions(this._normalizeOptions(this.options));
                 },
-                
+
+                _normalizeOptions: function(items) {
+                    if (_.isEmpty(items))
+                        return [];
+
+                    if (typeof items[0] === 'object') {
+                        return items;
+                    } else {
+                        return items.map(function (item) {
+                            return {
+                                value: item.toString()
+                            };
+                        });
+                    }
+                },
+
                 _onSelect: function(e) {
                     var tShirt = e.detail;
                     if (tShirt)

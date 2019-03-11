@@ -1,9 +1,11 @@
 package objective.taskboard.it;
 
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.Select;
 
 class IssueDetails extends AbstractUiFragment {
 
@@ -138,7 +141,7 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails openFirstChildCard() {
-        return openAnotherCardByClick(By.id("child-issue-0"));
+        return openAnotherCardByClick(By.cssSelector("#subtasks_content .subtask-panel:first-child .subtask-link"));
     }
 
     private IssueDetails openAnotherCardByClick(By by) {
@@ -387,6 +390,50 @@ class IssueDetails extends AbstractUiFragment {
         waitTextInElement(releaseElement, release);
 
         return this;
+    }
+
+    public IssueDetails addSubtaskForm() {
+        WebElement addSubtaskButton = getElementWhenItExists(By.id("add-subtask-button"));
+        waitForClick(addSubtaskButton);
+        waitElementExistenceAndVisibilityIs(true, cssSelector(".subtask-item-form"));
+        return this;
+    }
+
+     public IssueDetails addSubtaskIssueType(String type) {
+        WebElement issueTypeField = getElementWhenItExists(By.className("select-subtask-issuetype-field"));
+        Select dropdown = new Select(issueTypeField);
+        dropdown.selectByVisibleText(type);
+        return this;
+    }
+
+     public IssueDetails addSubtaskSummary(String summary) {
+        WebElement summaryField = getElementWhenItExists(By.className("subtask-summary-field"));
+        setInputValue(summaryField, summary);
+        return this;
+    }
+
+     public IssueDetails addSubtaskSize(String size) {
+        WebElement sizeField = getElementWhenItExists(By.cssSelector(".select-subtask-size-field"));
+        Select dropdown = new Select(sizeField);
+        dropdown.selectByVisibleText(size);
+        return this;
+    }
+
+     public IssueDetails saveSubtaskForm() {
+        WebElement saveSubtasksButton = getElementWhenItExists(By.className("subtask-save-button"));
+        waitForClick(saveSubtasksButton);
+        waitElementNotExistsOrInvisible(By.cssSelector(".subtask-item-form"));
+        return this;
+    }
+
+     public IssueDetails assertSubtasks(String... issueKeys) {
+         waitAssertEquals(join(issueKeys, "\n"), () -> {
+             return getElementsWhenTheyExists(By.cssSelector(".subtask-link")).stream()
+                .map(r -> r.getText())
+                .collect(Collectors.joining("\n"));
+         });
+
+         return this;
     }
 
     private By replaceButtonSelector(String team) {

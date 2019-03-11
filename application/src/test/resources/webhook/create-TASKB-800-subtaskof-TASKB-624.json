@@ -1,0 +1,154 @@
+{
+    "id": "990000",
+    "self": "http://localhost:4567/rest/api/latest/issue/10001",
+    "key": "TASKB-800",
+    "fields": {
+        "assignee": {
+            "active": true,
+            "avatarUrls": {
+                "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
+                "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
+                "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
+                "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+            },
+            "displayName": "Gabriel Takeuchi",
+            "key": "gtakeuchi",
+            "name": "gtakeuchi",
+            "self": "http://localhost:4567/rest/api/2/user?username=gtakeuchi",
+            "timeZone": "America/Sao_Paulo"
+        },
+        "created": "2017-05-30T19:48:40.000+0000",
+        "customfield_11440": {
+            "id": "12606",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
+            "value": "Standard"
+        },
+        "customfield_11451": null,
+        "customfield_11452": null,
+        "customfield_11455": null,
+        "customfield_11456": [
+            {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
+                    "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
+                    "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
+                    "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+                },
+                "displayName": "Gabriel Takeuchi",
+                "key": "gtakeuchi",
+                "name": "gtakeuchi",
+                "self": "http://localhost:4567/rest/api/2/user?username=gtakeuchi",
+                "timeZone": "America/Sao_Paulo"
+            }
+        ],
+        "customfield_11457": {
+            "id": "12657",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12657",
+            "value": "S"
+        },
+        "description": "h2. Additional Details\r\nh2. Open Questions\r\n # In select image from site assets/asset library should we have pagination in assets listing? If not, may have perfomance issues when there's too many assets.\r\n\r\nh2. Assumptions\r\n * The WYSIWYG editor will be a custom skinned CKEdtior.\r\n * Additional capabilities will be added to the WYSIWYG editor to support image resizing.\r\n * Allowing users to input, store, and later display direct HTML does not violate Google security policies\r\n * Images included in the text widget will become site assets\r\n * It's not possible to change the image position after it's added to the widget\r\n * Select image\r\n ** Will display assets in the same way as in Dashboard Site Assets/Assets Library tab\r\n *** Folders first, then assets\r\n *** Sort by name or Last modified\r\n ** Search will behave in the same way as in Dashboard Site Assets/Assets Library tab\r\n *** User will have to hit Enter in order to perform the search \r\n *** There's no filters, just search by keyword\r\n** Upload by URL will create a copy of the image and store in Liferay Documents and Library \r\n*** If the image in the URL changes, will not change in Pario \r\n\r\nh2. {color:red}OUT OF SCOPE{color}\r\n* Crop and filters  - this is covered by FOO-32\r\n\r\nh2. Wireframes\r\n * Modal, one level deep : [https://drive.google.com/file/d/0BwKq6YhrAPzQT2lRd3g2Sm83RGs/view]\r\n * image in text widget: [https://foo.bar] ",
+        "issuelinks": [],
+        "issuetype": {
+            "avatarId": 12256,
+            "description": "Taskboard",
+            "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
+            "id": "10606",
+            "name": "Feature Review",
+            "self": "http://localhost:4567/rest/api/latest/issuetype/10606",
+            "subtask": true
+        },
+        "labels": [],
+        "parent": {
+            "fields": {
+                "issuetype": {
+                    "avatarId": 12262,
+                    "description": "A task that needs to be done.",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+                    "id": "11",
+                    "name": "Task",
+                    "self": "http://localhost:4567/rest/api/latest/issuetype/11",
+                    "subtask": false
+                },
+                "priority": {
+                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+                    "id": "9",
+                    "name": "M\u00e9dia",
+                    "self": "http://localhost:4567/rest/api/latest/priority/9"
+                },
+                "status": {
+                    "description": "Taskboard",
+                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                    "id": "10658",
+                    "name": "Feature Reviewing",
+                    "self": "http://localhost:4567/rest/api/latest/status/10658",
+                    "statusCategory": {
+                        "colorName": "yellow",
+                        "id": 4,
+                        "key": "indeterminate",
+                        "name": "In Progress",
+                        "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
+                    }
+                },
+                "summary": "teste3"
+            },
+            "id": "225879",
+            "key": "TASKB-624",
+            "self": "http://localhost:4567/rest/api/latest/issue/225879"
+        },
+        "priority": {
+            "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+            "id": "9",
+            "name": "M\u00e9dia",
+            "self": "http://localhost:4567/rest/api/latest/priority/9"
+        },
+        "project": {
+            "avatarUrls": {
+                "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
+            },
+            "id": "11315",
+            "key": "TASKB",
+            "name": "Taskboard",
+            "projectCategory": {
+                "id": "10001",
+                "name": "Externo",
+                "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
+            },
+            "self": "http://localhost:4567/rest/api/latest/project/11315"
+        },
+        "reporter": {
+            "active": true,
+            "avatarUrls": {
+                "16x16": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=16",
+                "24x24": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=24",
+                "32x32": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=32",
+                "48x48": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=48"
+            },
+            "displayName": "Jean Takano",
+            "key": "jean.takano",
+            "name": "jean.takano",
+            "self": "http://localhost:4567/rest/api/latest/user?username=jean.takano",
+            "timeZone": "America/Sao_Paulo"
+        },
+        "status": {
+            "description": "",
+            "iconUrl": "http://localhost:4567/images/icons/statuses/open.png",
+            "id": "10052",
+            "name": "To Do",
+            "self": "http://localhost:4567/rest/api/latest/status/10052",
+            "statusCategory": {
+                "colorName": "blue-gray",
+                "id": 2,
+                "key": "new",
+                "name": "To Do",
+                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+            }
+        },
+        "summary": "Sub-task for issue TASKB-624",
+        "timetracking": {},
+        "updated": "2017-06-28T16:59:35.000+0000"
+    }
+}

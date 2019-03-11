@@ -155,7 +155,7 @@ paper-button.tb-button[aria-disabled="true"] {
     opacity: .6;
 }
 
-paper-button.tb-button.tb-button__default {
+paper-button.tb-button.tb-button--type_default {
    	color:#555555;
     border:1px solid #E5E5E5;
 }
@@ -241,6 +241,22 @@ paper-button.tb-button.tb-button--type_link[disabled] {
 .tb-form select[readonly] {
     pointer-events:none;
     touch-action: none;
+}
+
+::-webkit-input-placeholder { 
+    color: #e5e5e5;
+}
+
+::-moz-placeholder { 
+    color: #e5e5e5;
+}
+
+:-ms-input-placeholder { 
+    color: #e5e5e5;
+}
+
+:-moz-placeholder { 
+    color: #e5e5e5;
 }
 
 /*

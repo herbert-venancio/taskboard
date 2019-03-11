@@ -1,0 +1,159 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2016 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+
+<dom-module id="subtask-item-form">
+    <style is="custom-property">
+         paper-material, paper-button {
+             box-shadow: none !important;
+         }
+
+        paper-material.subtask-panel:first-child {
+            border-top:0;
+        }
+        
+        paper-material.subtask-panel {
+            display: flex;
+            justify-content:space-between;
+            border-bottom: 1px solid #EFEFEF;
+            padding: 8px;
+        }
+        
+        paper-material.subtask-panel > div {
+            display: flex;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .subtask-summary-field {
+            font-family:'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding:0 5px;
+            width:100%;
+            height:32px;
+        }
+
+        .subtask--type {
+            width:110px;
+            margin-left:15px;
+        }
+
+        .subtask--input {
+            flex:10;
+            margin:0 16px;
+        }
+
+        .subtask--size {
+            width:110px;
+        }
+    </style>
+    
+    <template>
+        <paper-material class="subtask-panel">
+            <div class="subtask--type">
+                <tb-select
+                    class-name="subtask-issuetype-field"
+                    label="Type"
+                    field="issuetype"
+                    has-focus="true"
+                    value-property="id"
+                    text-property="name"
+                    options="[[subtasksIssuesTypes]]"
+                    on-update-value="_updateField"
+                >
+                </tb-select>
+            </div>
+            <div class="subtask--input">
+                <input class="subtask-summary-field" value="{{subtask.summary::input}}" placeholder="Title" />
+            </div>
+            <div class="subtask--size">
+                <tb-select
+                    class-name="subtask-size-field"
+                    label="Size"
+                    field="tShirtSize"
+                    options="[[tShirtSizeOptions]]"
+                    on-update-value="_updateField"
+                >
+                </tb-select>
+            </div>
+        </paper-material>
+    </template>
+
+    <script>
+    (function(){
+        Polymer({
+            is: 'subtask-item-form',
+
+            properties: {
+                item: {
+                    notify: true
+                },
+
+                subtask: {
+                    type: Object,
+                    value: () => {
+                        return {};
+                    },
+                    notify: true
+                },
+
+                tShirtSizeOptions: {
+                    type: Array,
+                    value: () => []
+                },
+
+                subtasksIssuesTypes: {
+                    type: Array
+                }
+            },
+
+            attached: function() {
+                this.tShirtSizeOptions = taskboard.getTshirtSizes();
+            },
+
+            _updateSummary: function(ev) {
+                this.subtask.summary = ev.target.value;
+                this.subtask.updated = true;
+            },
+
+            _updateField: function(event, data) {
+                this.subtask[data.field] = data.value;
+                this.subtask.updated = true;
+                
+                if (data.field === "issuetype") {
+                    this._verifySizeOptions(data.item);
+                }
+            },
+
+            _verifySizeOptions: function(item) {
+                if (item.isSizeRequired) {
+                    this.tShirtSizeOptions = taskboard.tShirtSizes;
+                    this.subtask.hasCardTshirtSize = true;
+                } else {
+                    this.tShirtSizeOptions = [];
+                    this.subtask.hasCardTshirtSize = false;
+                    this.subtask.cardTshirtSize = "";
+                }
+            }
+        })
+    })();
+    </script>
+</dom-module>

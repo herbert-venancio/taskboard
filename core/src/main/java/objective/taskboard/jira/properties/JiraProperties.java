@@ -643,12 +643,31 @@ public class JiraProperties implements JiraClientProperties {
             @DecimalMin("1")
             private long id;
 
+            private boolean isSizeRequired = true;
+            private boolean visibleAtSubtaskCreation = true;
+
             public long getId() {
                 return this.id;
             }
 
             public void setId(final long id) {
                 this.id = id;
+            }
+
+            public boolean isSizeRequired() {
+                return this.isSizeRequired;
+            }
+
+            public void setIsSizeRequired(final boolean isSizeRequired) {
+                this.isSizeRequired = isSizeRequired;
+            }
+
+            public boolean isVisibleAtSubtaskCreation() {
+                return visibleAtSubtaskCreation;
+            }
+
+            public void setVisibleAtSubtaskCreation(final boolean visibleAtSubtaskCreation) {
+                this.visibleAtSubtaskCreation = visibleAtSubtaskCreation;
             }
 
             @Override

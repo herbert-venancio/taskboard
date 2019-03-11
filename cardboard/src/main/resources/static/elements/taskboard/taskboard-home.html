@@ -576,6 +576,8 @@
                             taskboard.setLaneConfiguration(data.laneConfiguration);
                             taskboard.urlJira = data.urlJira;
                             taskboard.urlLinkGraph = data.urlLinkGraph;
+                            taskboard.setTshirtSizes(data.tShirtSizes);
+                            taskboard.setIssueTypes(data.issueTypes);
 
                             localStorage.setItem("issueTypes", JSON.stringify(data.issueTypes));
                             localStorage.setItem("issueTypeConfig", JSON.stringify(data.issueTypesConfig));
