@@ -47,4 +47,20 @@ abstract class GetTTDataSetProviderBehavior<DSA> implements DSLSimpleBehaviorWit
     public DSA then() {
         return asserter;
     }
+
+    String getMethodName() {
+        return methodName;
+    }
+
+    String getProjectKey() {
+        return projectKey;
+    }
+
+    KpiLevel getKpiLevel() {
+        return kpiLevel;
+    }
+
+    ZoneId getTimezone() {
+        return timezone;
+    }
 }
