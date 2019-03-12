@@ -15,17 +15,17 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <version>${taskboard.api.version}</version>
+            <version>${project.version}</version>
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <version>${taskboard.api.version}</version>
+            <version>${project.version}</version>
             <artifactId>followup-core</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <version>${taskboard.api.version}</version>
+            <version>${project.version}</version>
             <artifactId>kpis</artifactId>
         </dependency>
 
