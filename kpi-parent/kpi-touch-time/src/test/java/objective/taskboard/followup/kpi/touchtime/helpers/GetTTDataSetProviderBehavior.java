@@ -1,10 +1,11 @@
 package objective.taskboard.followup.kpi.touchtime.helpers;
 
 import java.time.ZoneId;
+import java.util.List;
 
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiStrategyFactory;
@@ -13,13 +14,14 @@ import objective.taskboard.followup.kpi.touchtime.TouchTimeKpiProvider;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 
-class GetTTByIssueDataSetThrowsProviderBehavior implements DSLSimpleBehavior {
+abstract class GetTTDataSetProviderBehavior<DSA> implements DSLSimpleBehaviorWithAsserter<DSA> {
     private String methodName;
     private String projectKey;
     private KpiLevel kpiLevel;
     private ZoneId timezone;
+    DSA asserter;
 
-    GetTTByIssueDataSetThrowsProviderBehavior(String methodName, String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
+    GetTTDataSetProviderBehavior(String methodName, String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         this.methodName = methodName;
         this.projectKey = projectKey;
         this.kpiLevel = kpiLevel;
@@ -35,6 +37,14 @@ class GetTTByIssueDataSetThrowsProviderBehavior implements DSLSimpleBehavior {
         TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
         TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
         TouchTimeKpiProvider subject = new TouchTimeKpiProvider(byWeek, byIssue, projectService);
-        subject.getDataSet(methodName, projectKey, kpiLevel, timezone);
+        List<?> dataset = subject.getDataSet(methodName, projectKey, kpiLevel, timezone);
+        createAsserter(dataset);
+    }
+
+    abstract void createAsserter(List<?> dataset);
+
+    @Override
+    public DSA then() {
+        return asserter;
     }
 }

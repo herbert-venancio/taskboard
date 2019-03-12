@@ -32,10 +32,6 @@ public class TouchTimeKpiControllerTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .givenSubtask("I-1")
                 .type("Backend Development")
                 .project("TEST")
@@ -166,9 +162,6 @@ public class TouchTimeKpiControllerTest {
                     .withChartStack("Review")
                         .statuses("Reviewing")
                     .eoS())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .givenSubtask("I-1")
                 .type("Backend Development")
                 .project("TEST")
@@ -269,7 +262,7 @@ public class TouchTimeKpiControllerTest {
     }
 
     @Test
-    public void requestTouchTimeByIssueData_whenNotHavePermission_thenStatusNotFound() {
+    public void requestTouchTimeByIssueData_whenDoNotHavePermission_thenStatusNotFound() {
         dsl().environment()
             .services()
                 .projects()
@@ -277,10 +270,6 @@ public class TouchTimeKpiControllerTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .when()
                 .appliesBehavior(createRequestTTByIssueDataBehavior()
                         .forProject("TEST")
@@ -295,7 +284,7 @@ public class TouchTimeKpiControllerTest {
     }
 
     @Test
-    public void requestTouchTimeChartData_whenProjectDoesNotExists_thenStatusNotFound() {
+    public void requestTouchTimeByIssueData_whenProjectDoesNotExists_thenStatusNotFound() {
         dsl().environment()
             .services()
                 .projects()
@@ -303,16 +292,12 @@ public class TouchTimeKpiControllerTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .when()
                 .appliesBehavior(createRequestTTByIssueDataBehavior()
                         .forProject("FOO")
                         .withLevel("Subtasks")
                         .withTimezone("America/Sao_Paulo")
-                        .withoutPermission()
+                        .withPermission()
                         .build())
             .then()
                 .httpStatus(HttpStatus.NOT_FOUND)
@@ -321,7 +306,7 @@ public class TouchTimeKpiControllerTest {
     }
 
     @Test
-    public void requestTouchTimeChartData_whenInvalidLevelValue_thenStatusBadRequest() {
+    public void requestTouchTimeByIssueData_whenInvalidLevelValue_thenStatusBadRequest() {
         dsl().environment()
             .services()
                 .projects()
@@ -329,10 +314,6 @@ public class TouchTimeKpiControllerTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .when()
                 .appliesBehavior(createRequestTTByIssueDataBehavior()
                         .forProject("TEST")
@@ -355,10 +336,6 @@ public class TouchTimeKpiControllerTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .when()
                 .appliesBehavior(createRequestTouchTimeDataBehavior()
                         .forMethod("foo")
@@ -395,7 +372,10 @@ public class TouchTimeKpiControllerTest {
                 .withProgressingStatuses("Doing", "Reviewing")
                 .withNotProgressingStatuses("Open", "To Do", "To Review", "Done")
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig());
+            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
+            .withJiraProperties()
+                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
+            .eoJp();
         return dsl;
     }
 
@@ -453,7 +433,7 @@ public class TouchTimeKpiControllerTest {
             JiraProperties jiraProperties = environment.getJiraProperties();
             TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
             TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-            ProjectService projectService = environment.services().projects().getService();;
+            ProjectService projectService = environment.services().projects().getService();
             return new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         }
 

@@ -12,8 +12,9 @@ public abstract class GetTTDataSetProviderBehaviorBuilder<DSB> {
     private KpiLevel kpiLevel;
     private ZoneId timezone;
 
-    public GetTTDataSetProviderBehaviorBuilder(String methodName) {
+    public GetTTDataSetProviderBehaviorBuilder<DSB> forMethod(String methodName) {
         this.methodName = methodName;
+        return this;
     }
 
     public GetTTDataSetProviderBehaviorBuilder<DSB> forProject(String projectKey) {

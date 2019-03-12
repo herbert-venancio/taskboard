@@ -28,9 +28,6 @@ public class TouchTimeByIssueKpiStrategyFactory implements TouchTimeKpiStrategyF
 
     @Override
     public TouchTimeByIssueKpiStrategy getStrategy(KpiLevel level, ProjectFilterConfiguration projectConfiguration, ZoneId timezone) {
-        if (level.equals(KpiLevel.UNMAPPED))
-            throw new IllegalArgumentException("Empty level");
-
         List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(
                 projectConfiguration.getProjectKey(), timezone, level);
 

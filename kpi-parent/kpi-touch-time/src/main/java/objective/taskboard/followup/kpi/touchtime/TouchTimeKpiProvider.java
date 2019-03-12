@@ -42,6 +42,9 @@ public class TouchTimeKpiProvider {
     public List<?> getDataSet(String methodName, String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         TouchTimeMethod method = TouchTimeMethod.fromMethod(methodName);
 
+        if (kpiLevel.equals(KpiLevel.UNMAPPED))
+            throw new IllegalArgumentException("Empty level");
+
         ProjectFilterConfiguration project = projectService.getTaskboardProjectOrCry(projectKey);
         return factories.get(method).getStrategy(kpiLevel, project, timezone).getDataSet();
     }

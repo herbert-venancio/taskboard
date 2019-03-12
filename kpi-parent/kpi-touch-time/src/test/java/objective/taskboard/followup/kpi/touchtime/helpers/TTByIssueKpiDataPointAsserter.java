@@ -15,11 +15,23 @@ class TTByIssueKpiDataPointAsserter implements KpiDataPointAsserter<TouchTimeByI
 
     @Override
     public void doAssert(TouchTimeByIssueKpiDataPoint subject) {
-        Assertions.assertThat(subject.issueKey).isEqualTo(expected.issueKey);
-        Assertions.assertThat(subject.issueType).isEqualTo(expected.issueType);
-        Assertions.assertThat(subject.issueStatus).isEqualTo(expected.issueStatus);
-        Assertions.assertThat(subject.effortInHours).isCloseTo(expected.effortInHours, Assertions.within(DELTA));
-        Assertions.assertThat(subject.startProgressingDate).isEqualTo(expected.startProgressingDate);
-        Assertions.assertThat(subject.endProgressingDate).isEqualTo(expected.endProgressingDate);
+        Assertions.assertThat(subject.issueKey)
+            .as("Issue keys must be equals")
+            .isEqualTo(expected.issueKey);
+        Assertions.assertThat(subject.issueType)
+            .as("Issue types must be equals")
+            .isEqualTo(expected.issueType);
+        Assertions.assertThat(subject.issueStatus)
+            .as("Statuses must be equals")
+            .isEqualTo(expected.issueStatus);
+        Assertions.assertThat(subject.effortInHours)
+            .as("Efforts must be equals")
+            .isCloseTo(expected.effortInHours, Assertions.within(DELTA));
+        Assertions.assertThat(subject.startProgressingDate)
+            .as("Start progressing dates must be equals")
+            .isEqualTo(expected.startProgressingDate);
+        Assertions.assertThat(subject.endProgressingDate)
+            .as("Start progressing dates must be equals")
+            .isEqualTo(expected.endProgressingDate);
     }
 }

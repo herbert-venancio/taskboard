@@ -15,8 +15,12 @@ public class TTByWeekKpiDataPointAsserter implements KpiDataPointAsserter<TouchT
 
     @Override
     public void doAssert(TouchTimeByWeekKpiDataPoint subject) {
-        Assertions.assertThat(subject.date).isEqualTo(expected.date);
-        Assertions.assertThat(subject.stackName).isEqualTo(expected.stackName);
-        Assertions.assertThat(subject.effortInHours).isCloseTo(expected.effortInHours, Assertions.within(0.1));
+        Assertions.assertThat(subject.date).as("Dates must be equals").isEqualTo(expected.date);
+        Assertions.assertThat(subject.stackName)
+            .as("Stacks names from week %s must be equals", subject.date.toString())
+            .isEqualTo(expected.stackName);
+        Assertions.assertThat(subject.effortInHours)
+            .as("Efforts from week %s must be equals", subject.date.toString())
+            .isCloseTo(expected.effortInHours, Assertions.within(DELTA));
     }
 }

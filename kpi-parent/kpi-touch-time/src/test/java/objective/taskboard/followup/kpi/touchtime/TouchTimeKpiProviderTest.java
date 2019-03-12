@@ -9,9 +9,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker;
-import objective.taskboard.followup.kpi.touchtime.helpers.GetTTByIssueDataSetBehaviorProviderBuilder;
-import objective.taskboard.followup.kpi.touchtime.helpers.GetTTByIssueDataSetThrowsProviderBehaviorBuilder;
+import objective.taskboard.followup.kpi.touchtime.helpers.GetTTByIssueDataSetProviderBehaviorBuilder;
 import objective.taskboard.followup.kpi.touchtime.helpers.GetTTByWeekDataSetProviderBehaviorBuilder;
+import objective.taskboard.followup.kpi.touchtime.helpers.GetTTDataSetThrowsProviderBehaviorBuilder;
 import objective.taskboard.followup.kpi.touchtime.helpers.TTByIssueKpiDataPointBuilder;
 import objective.taskboard.followup.kpi.touchtime.helpers.TTByWeekKpiDataPointBuilder;
 import objective.taskboard.utils.DateTimeUtils;
@@ -37,9 +37,6 @@ public class TouchTimeKpiProviderTest {
                     .withChartStack("Review")
                         .statuses("Reviewing")
                     .eoS())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .givenSubtask("I-1")
                 .type("Backend Development")
                 .project("TEST")
@@ -137,10 +134,6 @@ public class TouchTimeKpiProviderTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
             .givenSubtask("I-1")
                 .type("Backend Development")
                 .project("TEST")
@@ -190,7 +183,7 @@ public class TouchTimeKpiProviderTest {
             .eoI()
             .todayIs("2020-01-07")
         .when()
-            .appliesBehavior(new GetTTByIssueDataSetBehaviorProviderBuilder()
+            .appliesBehavior(new GetTTByIssueDataSetProviderBehaviorBuilder()
                     .forProject("TEST")
                     .withLevel(KpiLevel.SUBTASKS)
                     .withTimezone(DateTimeUtils.determineTimeZoneId("America/Sao_Paulo"))
@@ -246,13 +239,8 @@ public class TouchTimeKpiProviderTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
         .when()
-            .expectExceptionFromBehavior(new GetTTByIssueDataSetThrowsProviderBehaviorBuilder()
-                    .forMethod("byIssues")
+            .expectExceptionFromBehavior(new GetTTByIssueDataSetProviderBehaviorBuilder()
                     .forProject("FOO")
                     .withLevel(KpiLevel.SUBTASKS)
                     .withTimezone(DateTimeUtils.determineTimeZoneId("America/Sao_Paulo"))
@@ -271,12 +259,8 @@ public class TouchTimeKpiProviderTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
         .when()
-            .expectExceptionFromBehavior(new GetTTByIssueDataSetThrowsProviderBehaviorBuilder()
+            .expectExceptionFromBehavior(new GetTTDataSetThrowsProviderBehaviorBuilder()
                     .forMethod("byFoo")
                     .forProject("TEST")
                     .withLevel(KpiLevel.SUBTASKS)
@@ -296,13 +280,8 @@ public class TouchTimeKpiProviderTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
-            .withJiraProperties()
-                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
-            .eoJp()
         .when()
-            .expectExceptionFromBehavior(new GetTTByIssueDataSetThrowsProviderBehaviorBuilder()
-                    .forMethod("byIssue")
+            .expectExceptionFromBehavior(new GetTTByIssueDataSetProviderBehaviorBuilder()
                     .forProject("TEST")
                     .withLevel(KpiLevel.UNMAPPED)
                     .withTimezone(DateTimeUtils.determineTimeZoneId("America/Sao_Paulo"))
@@ -330,7 +309,10 @@ public class TouchTimeKpiProviderTest {
                 .withProgressingStatuses("Doing", "Reviewing")
                 .withNotProgressingStatuses("Open", "To Do", "To Review", "Done")
             .eoS()
-            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig());
+            .withKpiProperties(KpiTouchTimePropertiesMocker.withTouchTimeConfig())
+            .withJiraProperties()
+                .withSubtaskStatusPriorityOrder("Done", "Reviewing", "To Review", "Doing", "To Do", "Open")
+            .eoJp();
         return dsl;
     }
 }

@@ -2,7 +2,7 @@ package objective.taskboard.followup.kpi.touchtime.helpers;
 
 public class GetTTByWeekDataSetProviderBehaviorBuilder extends GetTTDataSetProviderBehaviorBuilder<GetTTByWeekDataSetProviderBehavior> {
     public GetTTByWeekDataSetProviderBehaviorBuilder() {
-        super("byWeek");
+        forMethod("byWeek");
     }
 
     @Override
