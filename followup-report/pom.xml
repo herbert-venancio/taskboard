@@ -24,12 +24,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<version>${kpi.plugins.version}</version>
+			<version>${project.version}</version>
 			<artifactId>kpi-throughput</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<version>${kpi.plugins.version}</version>
+			<version>${project.version}</version>
 			<artifactId>kpi-wip</artifactId>
 		</dependency>
 		<dependency>
