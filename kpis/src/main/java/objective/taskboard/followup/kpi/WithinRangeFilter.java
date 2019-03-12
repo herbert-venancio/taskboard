@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -6,9 +6,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.Range;
-
-import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.ProjectTimelineRange;
 
 public class WithinRangeFilter implements Predicate<IssueKpi>{
 
