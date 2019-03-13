@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>br.com.objective</groupId>
 		<artifactId>taskboard-parent</artifactId>
-		<version>0.0.82</version>
+		<version>0.0.83-SNAPSHOT</version>
 	</parent>
 	<artifactId>kpis</artifactId>
 	<properties>
