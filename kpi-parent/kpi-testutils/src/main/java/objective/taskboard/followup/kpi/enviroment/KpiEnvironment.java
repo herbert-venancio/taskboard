@@ -114,8 +114,7 @@ public class KpiEnvironment {
 
 
     public StatusDto withStatus(String name) {
-        StatusDto status = statusRepository.create(name);
-        return status;
+        return statusRepository.create(name);
     }
 
     public MockedServices services() {
@@ -136,12 +135,6 @@ public class KpiEnvironment {
 
     public TransitionsBuilder statusTransition() {
         return transitionsBuilder;
-    }
-
-    public IssueKpiMocker givenIssue(String pKey) {
-        IssueKpiMocker issueMocker = new IssueKpiMocker(this, pKey);
-        issues.putIfAbsent(pKey, issueMocker);
-        return issues.get(pKey);
     }
 
     public IssueKpiMocker givenSubtask(String pkey) {
@@ -173,17 +166,17 @@ public class KpiEnvironment {
     }
 
     public KpiEnvironment mockAllIssues() {
-        issues.values().forEach(i -> i.mockAllJiraIssue());
+        issues.values().forEach(IssueKpiMocker::mockAllJiraIssue);
         return this;
     }
 
     public List<Issue> collectIssuesMocked() {
-        return getAllIssueMockers().stream().map( i -> i.mockedIssue()).collect(Collectors.toList());
+        return getAllIssueMockers().stream().map(IssueKpiMocker::mockedIssue).collect(Collectors.toList());
     }
 
     public List<IssueKpiMocker> getAllIssueMockers(){
         return issues.values().stream()
-                .map(i -> i.allMockers())
+                .map(IssueKpiMocker::allMockers)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
@@ -197,6 +190,14 @@ public class KpiEnvironment {
                 .filter(type -> childrenTypes.contains(type.name))
                 .map(type -> type.id)
                 .collect(Collectors.toList());
+    }
+
+    Optional<IssueKpiMocker> getIssue(String key) {
+        return Optional.ofNullable(issues.get(key));
+    }
+
+    private IssueKpiMocker givenIssue(String pKey) {
+        return issues.computeIfAbsent(pKey, key -> new IssueKpiMocker(this,key));
     }
 
     public class IssueTypeRepository {
@@ -281,8 +282,8 @@ public class KpiEnvironment {
 
         public List<String> getProgressingStatuses() {
             return statuses.values().stream()
-                    .filter(s -> s.isProgressingStatus())
-                    .map(s -> s.name())
+                    .filter(StatusDto::isProgressingStatus)
+                    .map(StatusDto::name)
                     .collect(Collectors.toList());
         }
 

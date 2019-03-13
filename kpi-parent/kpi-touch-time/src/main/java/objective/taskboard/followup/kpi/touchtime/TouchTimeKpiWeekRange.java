@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -10,11 +10,11 @@ import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 
-public class TouchTimeWeekRange implements Comparable<TouchTimeWeekRange> {
+public class TouchTimeKpiWeekRange implements Comparable<TouchTimeKpiWeekRange> {
     private Range<LocalDate> range;
     private ZoneId timezone;
 
-    public TouchTimeWeekRange(Range<LocalDate> weekRange, ZoneId timezone) {
+    public TouchTimeKpiWeekRange(Range<LocalDate> weekRange, ZoneId timezone) {
         this.range = weekRange;
         this.timezone = timezone;
     }
@@ -39,17 +39,18 @@ public class TouchTimeWeekRange implements Comparable<TouchTimeWeekRange> {
         return timezone;
     }
 
+    public boolean progressOverlaps(IssueKpi issueKpi) {
+        return issueKpi.getDateRangeBasedOnProgressingStatuses(this.getTimezone())
+                .map(this::overlaps).orElse(false);
+    }
+
     @Override
     public String toString() {
         return "Week" + range;
     }
 
     @Override
-    public int compareTo(TouchTimeWeekRange other) {
+    public int compareTo(TouchTimeKpiWeekRange other) {
         return this.getFirstDay().compareTo(other.getFirstDay());
-    }
-
-    public boolean progressOverlaps(IssueKpi issueKpi) {
-        return issueKpi.getDateRangeBasedOnProgressingStatuses(this.getTimezone()).map(range -> this.overlaps(range)).orElse(false);
     }
 }

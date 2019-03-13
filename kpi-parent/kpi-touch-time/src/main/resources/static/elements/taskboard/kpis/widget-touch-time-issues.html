@@ -134,10 +134,9 @@
                     const savedLevel = this._getSavedLevel();
                     const timezone = taskboard.getTimeZoneIdFromBrowser();
                     this.tags = [savedLevel];
-                    const url = `/api/projects/${selectedProjectKey}/followup/touchtime/byIssues?level=${savedLevel}&timezone=${timezone}`;
+                    const url = `/api/projects/${selectedProjectKey}/followup/touchtime/byIssue?level=${savedLevel}&timezone=${timezone}`;
                     this.xhr = $.getJSON(url);
                     this.xhr.done((data) => {
-                        data = data.points;
                         if (data.length === 0) {
                             this.errorMessage = 'Touch Time By Issues chart has no data';
                             return;

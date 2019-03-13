@@ -32,16 +32,20 @@ public class ProjectServiceMocker {
             mockService();
         return projectService;
     }
-    
+
     public List<String> getProjectsKeys(){
         return projects.values().stream().map(p -> p.key).collect(Collectors.toList());
+    }
+
+    public ProjectFilterConfiguration getProject(String projectKey) {
+        return projects.get(projectKey).getMock();
     }
 
      void mockService() {
          projectService =  Mockito.mock(ProjectService.class);
          configureExceptionToNotConfiguredProjects();
          projects.values().stream().forEach(p -> p.mockProject(projectService));
-        
+
     }
 
     private void configureExceptionToNotConfiguredProjects() {
@@ -57,6 +61,7 @@ public class ProjectServiceMocker {
 
     public class ProjectBuilder {
 
+        private ProjectFilterConfiguration mockedProject;
         private String key;
         private String startDate;
         private String deliveryDate;
@@ -66,15 +71,25 @@ public class ProjectServiceMocker {
         }
 
         public void mockProject(ProjectService projectService) {
+            ProjectFilterConfiguration project = getMock();
+            Mockito.doReturn(project).when(projectService).getTaskboardProjectOrCry(key);
+            Mockito.when(projectService.taskboardProjectExists(key)).thenReturn(true);
+        }
+
+        private ProjectFilterConfiguration getMock() {
+            if(mockedProject == null)
+                mockedProject = prepareMock();
+            return mockedProject;
+
+        }
+
+        private ProjectFilterConfiguration prepareMock() {
             ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
 
             Mockito.when(project.getStartDate()).thenReturn(getStartDate());
             Mockito.when(project.getDeliveryDate()).thenReturn(getDeliveryDate());
-
-            Mockito.doReturn(project).when(projectService).getTaskboardProjectOrCry(key);
-
-            Mockito.when(projectService.taskboardProjectExists(key)).thenReturn(true);
-
+            Mockito.when(project.getProjectKey()).thenReturn(key);
+            return project;
         }
 
         private Optional<LocalDate> getStartDate() {
@@ -99,5 +114,4 @@ public class ProjectServiceMocker {
             return ProjectServiceMocker.this;
         }
     }
-
 }

@@ -1,38 +1,23 @@
-package objective.taskboard.followup.kpi.touchTime;
+package objective.taskboard.followup.kpi.touchtime;
 
-import static objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker.withTouchTimeSubtaskConfig;
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker.withTouchTimeConfig;
 
 import java.time.ZoneId;
-import java.util.Iterator;
-import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
-import objective.taskboard.jira.ProjectService;
-import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.followup.kpi.touchtime.helpers.GenerateTTByWeekDataSetStrategyBehavior;
+import objective.taskboard.followup.kpi.touchtime.helpers.TTByWeekKpiDataPointBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TouchTimeByWeekDataProviderTest {
+public class TouchTimeByWeekKpiStrategyTest {
 
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void getDataSet_happyDay_twoWeeks_fourIssues() {
@@ -47,7 +32,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoH()
             .eoKP()
             .withKpiProperties(
-                withTouchTimeSubtaskConfig()
+                withTouchTimeConfig()
                     .withChartStack("Development")
                         .types("Backend Development")
                         .statuses("Doing")
@@ -133,16 +118,16 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoW()
             .eoI()
         .when()
-            .appliesBehavior(generateDataSetFor("TASKB", KpiLevel.SUBTASKS, ZONE_ID))
+            .appliesBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.SUBTASKS, ZONE_ID))
         .then()
-            .assertSize(6)
-            .assertPoints()
-            .hasDate("2018-11-11").hasStackName("Development").hasWorkInHours(3.0).and()
-            .hasDate("2018-11-11").hasStackName("Review").hasNoHoursWorked().and()
-            .hasDate("2018-11-18").hasStackName("Development").hasWorkInHours(6.33).and()
-            .hasDate("2018-11-18").hasStackName("Review").hasWorkInHours(0.66).and()
-            .hasDate("2018-11-25").hasStackName("Development").hasWorkInHours(10.0).and()
-            .hasDate("2018-11-25").hasStackName("Review").hasNoHoursWorked();
+            .hasSize(6)
+            .hasPoints(
+                point().withDate("2018-11-17").withStackName("Development").withEffortInHours(3.0),
+                point().withDate("2018-11-17").withStackName("Review").withNoEffort(),
+                point().withDate("2018-11-24").withStackName("Development").withEffortInHours(6.33),
+                point().withDate("2018-11-24").withStackName("Review").withEffortInHours(0.66),
+                point().withDate("2018-11-26").withStackName("Development").withEffortInHours(10.0),
+                point().withDate("2018-11-26").withStackName("Review").withNoEffort());
     }
 
     @Test
@@ -158,7 +143,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoH()
             .eoKP()
             .withKpiProperties(
-                withTouchTimeSubtaskConfig()
+                withTouchTimeConfig()
                     .withChartStack("Development")
                         .types("Backend Development")
                         .statuses("Doing")
@@ -244,12 +229,12 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoW()
             .eoI()
         .when()
-            .appliesBehavior(generateDataSetFor("TASKB", KpiLevel.SUBTASKS, ZONE_ID))
+            .appliesBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.SUBTASKS, ZONE_ID))
         .then()
-            .assertSize(2)
-            .assertPoints()
-                .hasDate("2018-11-11").hasStackName("Development").hasWorkInHours(3.0).and()
-                .hasDate("2018-11-11").hasStackName("Review").hasNoHoursWorked();
+            .hasSize(2)
+            .hasPoints(
+                point().withDate("2018-11-16").withStackName("Development").withEffortInHours(3.0),
+                point().withDate("2018-11-16").withStackName("Review").withNoEffort());
     }
 
     @Test
@@ -275,7 +260,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoH()
             .eoKP()
             .withKpiProperties(
-                    withTouchTimeSubtaskConfig()
+                    withTouchTimeConfig()
             )
             .givenFeature("I-1")
                 .project("TASKB")
@@ -314,20 +299,20 @@ public class TouchTimeByWeekDataProviderTest {
                 .endOfSubtask()
             .eoI()
         .when()
-            .appliesBehavior(generateDataSetFor("TASKB", KpiLevel.FEATURES, ZONE_ID))
+            .appliesBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.FEATURES, ZONE_ID))
         .then()
-            .assertSize(10)
-            .assertPoints()
-                .hasDate("2018-12-30").hasStackName("Planning").hasWorkInHours(8.0).and()
-                .hasDate("2018-12-30").hasStackName("Doing").hasWorkInHours(4.0).and()
-                .hasDate("2019-01-06").hasStackName("Planning").hasNoHoursWorked().and()
-                .hasDate("2019-01-06").hasStackName("Doing").hasNoHoursWorked().and()
-                .hasDate("2019-01-13").hasStackName("Planning").hasNoHoursWorked().and()
-                .hasDate("2019-01-13").hasStackName("Doing").hasNoHoursWorked().and()
-                .hasDate("2019-01-20").hasStackName("Planning").hasNoHoursWorked().and()
-                .hasDate("2019-01-20").hasStackName("Doing").hasNoHoursWorked().and()
-                .hasDate("2019-01-27").hasStackName("Planning").hasNoHoursWorked().and()
-                .hasDate("2019-01-27").hasStackName("Doing").hasNoHoursWorked();
+            .hasSize(10)
+            .hasPoints(
+                point().withDate("2018-12-30").withStackName("Planning").withEffortInHours(8.0),
+                point().withDate("2018-12-30").withStackName("Doing").withEffortInHours(4.0),
+                point().withDate("2019-01-06").withStackName("Planning").withNoEffort(),
+                point().withDate("2019-01-06").withStackName("Doing").withNoEffort(),
+                point().withDate("2019-01-13").withStackName("Planning").withNoEffort(),
+                point().withDate("2019-01-13").withStackName("Doing").withNoEffort(),
+                point().withDate("2019-01-20").withStackName("Planning").withNoEffort(),
+                point().withDate("2019-01-20").withStackName("Doing").withNoEffort(),
+                point().withDate("2019-01-27").withStackName("Planning").withNoEffort(),
+                point().withDate("2019-01-27").withStackName("Doing").withNoEffort());
     }
 
     @Test
@@ -345,7 +330,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .withFeaturesStatusPriorityOrder("Done","Doing","To Do","Planning","To Plan","Open")
             .eoJp()
             .withKpiProperties(
-                    withTouchTimeSubtaskConfig()
+                    withTouchTimeConfig()
                         .withNoProgressingStatusesConfigured()
             )
             .givenFeature("I-1")
@@ -385,9 +370,9 @@ public class TouchTimeByWeekDataProviderTest {
                 .endOfSubtask()
             .eoI()
         .when()
-            .appliesBehavior(generateDataSetFor("TASKB", KpiLevel.FEATURES, ZONE_ID))
+            .appliesBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.FEATURES, ZONE_ID))
         .then()
-            .assertSize(0);
+            .emptyDataSet();
     }
 
     @Test
@@ -403,7 +388,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoH()
             .eoKP()
             .withKpiProperties(
-                withTouchTimeSubtaskConfig()
+                withTouchTimeConfig()
                     .withChartStack("Development")
                         .types("Backend Development")
                         .statuses("Doing")
@@ -422,9 +407,9 @@ public class TouchTimeByWeekDataProviderTest {
                 .eoPs()
             .eoS()
         .when()
-            .appliesBehavior(generateDataSetFor("TASKB", KpiLevel.SUBTASKS, ZONE_ID))
+            .appliesBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.SUBTASKS, ZONE_ID))
         .then()
-            .assertSize(0);
+            .emptyDataSet();
     }
 
     @Test
@@ -484,7 +469,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .endOfSubtask()
             .eoI()
         .when()
-            .expectExceptionFromBehavior(generateDataSetFor("TASKB", KpiLevel.FEATURES, ZONE_ID))
+            .expectExceptionFromBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.FEATURES, ZONE_ID))
         .then()
             .isFromException(ProjectDatesNotConfiguredException.class);
     }
@@ -547,7 +532,7 @@ public class TouchTimeByWeekDataProviderTest {
                 .endOfSubtask()
             .eoI()
         .when()
-            .expectExceptionFromBehavior(generateDataSetFor("TASKB", KpiLevel.FEATURES, ZONE_ID))
+            .expectExceptionFromBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.FEATURES, ZONE_ID))
         .then()
             .isFromException(ProjectDatesNotConfiguredException.class);
     }
@@ -610,13 +595,13 @@ public class TouchTimeByWeekDataProviderTest {
                 .endOfSubtask()
             .eoI()
         .when()
-            .expectExceptionFromBehavior(generateDataSetFor("TASKB", KpiLevel.FEATURES, ZONE_ID))
+            .expectExceptionFromBehavior(new GenerateTTByWeekDataSetStrategyBehavior("TASKB", KpiLevel.FEATURES, ZONE_ID))
         .then()
             .isFromException(ProjectDatesNotConfiguredException.class);
     }
 
-    private TouchTimeByWeekDataProviderBehavior generateDataSetFor(String projectKey, KpiLevel issueLevel, ZoneId timezone) {
-        return new TouchTimeByWeekDataProviderBehavior(projectKey, issueLevel, timezone);
+    private TTByWeekKpiDataPointBuilder point() {
+        return new TTByWeekKpiDataPointBuilder();
     }
 
     private DSLKpi dsl() {
@@ -629,92 +614,9 @@ public class TouchTimeByWeekDataProviderTest {
             .statuses()
                 .withNotProgressingStatuses("Open", "To Plan", "To Do", "To Review", "Done")
                 .withProgressingStatuses("Planning", "Doing", "Reviewing")
-            .eoS();
+            .eoS()
+            .withTimezone(ZONE_ID);
         return dsl;
-    }
-
-    private class TouchTimeByWeekDataProviderBehavior implements DSLSimpleBehaviorWithAsserter<TouchTimeDataSetAsserter> {
-
-        private String projectKey;
-        private KpiLevel issueLevel;
-        private ZoneId timezone;
-        private TouchTimeChartByWeekDataSet dataset;
-
-        public TouchTimeByWeekDataProviderBehavior(String projectKey, KpiLevel issueLevel, ZoneId timezone) {
-            this.projectKey = projectKey;
-            this.issueLevel = issueLevel;
-            this.timezone = timezone;
-        }
-
-        @Override
-        public void behave(KpiEnvironment environment) {
-            KpiTouchTimeProperties kpiProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
-            JiraProperties jiraProperties = environment.getJiraProperties();
-            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
-            ProjectService projectService = environment.services().projects().getService();
-            TouchTimeByWeekDataProvider subject = new TouchTimeByWeekDataProvider(issueKpiService, projectService, kpiProperties, jiraProperties);
-            this.dataset = subject.getDataSet(projectKey, issueLevel, timezone);
-        }
-
-        @Override
-        public TouchTimeDataSetAsserter then() {
-            return new TouchTimeDataSetAsserter(dataset);
-        }
-    }
-
-    private class TouchTimeDataSetAsserter {
-
-        private TouchTimeChartByWeekDataSet dataset;
-
-        public TouchTimeDataSetAsserter(TouchTimeChartByWeekDataSet dataset) {
-            this.dataset = dataset;
-        }
-
-        public TouchTimePointsAsserter assertPoints() {
-            return new TouchTimePointsAsserter(dataset.points);
-        }
-
-        public TouchTimeDataSetAsserter assertSize(int size) {
-            assertThat(dataset.points.size(), is(size));
-            return this;
-        }
-
-        private class TouchTimePointsAsserter {
-
-            private TouchTimeChartByWeekDataPoint currentPoint;
-            private Iterator<TouchTimeChartByWeekDataPoint> iterator;
-
-            public TouchTimePointsAsserter(List<TouchTimeChartByWeekDataPoint> points) {
-                iterator = points.iterator();
-                currentPoint = iterator.next();
-            }
-
-            public TouchTimePointsAsserter hasNoHoursWorked() {
-                return hasWorkInHours(0.0);
-            }
-
-            public TouchTimePointsAsserter hasStackName(String stackName) {
-                assertThat(currentPoint.stackName, is(stackName));
-                return this;
-            }
-
-            public TouchTimePointsAsserter hasDate(String date) {
-                assertThat(currentPoint.date, is(parseDateTime(date, "00:00:00", ZONE_ID).toInstant()));
-                return this;
-            }
-
-            public TouchTimePointsAsserter hasWorkInHours(double workInHours) {
-                assertThat(currentPoint.effortInHours, is(closeTo(workInHours, 0.01)));
-                return this;
-            }
-
-            public TouchTimePointsAsserter and() {
-                if (iterator.hasNext()) {
-                    this.currentPoint = iterator.next();
-                }
-                return this;
-            }
-        }
     }
 
 }

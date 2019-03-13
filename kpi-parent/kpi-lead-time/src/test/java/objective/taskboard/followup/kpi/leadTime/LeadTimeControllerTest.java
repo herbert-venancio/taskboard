@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
@@ -17,8 +16,9 @@ import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationa
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
+import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehaviorBuilder;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiController;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiDataProvider;
@@ -254,93 +254,39 @@ public class LeadTimeControllerTest {
         return dsl;
     }
 
-    private RequestDataBehaviorBuilder createRequestDataBehavior() {
-        return new RequestDataBehaviorBuilder();
+    private RequestLeadTimeDataBehaviorBuilder createRequestDataBehavior() {
+        return new RequestLeadTimeDataBehaviorBuilder();
     }
 
     private long parseZonedDateAsMillis(String date, String timezone) {
         return DateTimeUtils.parseDateTime(date, "00:00:00", timezone).toEpochSecond() * 1000;
     }
 
-    public class RequestDataBehaviorBuilder {
-        private String projectKey;
-        private String level;
-        private String zoneId;
-        private Boolean hasPermission;
-        private boolean preventProviderMock = false;
-        public RequestDataBehaviorBuilder forProject(String projectKey) {
-            this.projectKey = projectKey;
-            return this;
+    private class RequestLeadTimeDataBehaviorBuilder extends RequestChartDataBehaviorBuilder<RequestLeadTimeDataBehavior> {
+
+        @Override
+        public RequestLeadTimeDataBehavior doBuild() {
+            return new RequestLeadTimeDataBehavior(projectKey, level, zoneId, hasPermission, preventProviderMock);
         }
-        public RequestDataBehaviorBuilder preventDataProviderMock() {
-            this.preventProviderMock  = true;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withLevel(String level) {
-            this.level = level;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withTimezone(String timezone) {
-            this.zoneId = timezone;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withPermission() {
-            this.hasPermission = true;
-            return this;
-        }
-        public RequestDataBehaviorBuilder withoutPermission() {
-            this.hasPermission = false;
-            return this;
-        }
-        public RequestDataBehavior build() {
-            validate();
-            return new RequestDataBehavior(projectKey, level, zoneId, hasPermission, preventProviderMock);
-        }
-        private void validate() {
-            if (projectKey == null) {
-                Assertions.fail("Project key not configured");
-            }
-            if (level == null) {
-                Assertions.fail("Level not configured");
-            }
-            if (zoneId == null) {
-                Assertions.fail("ZoneId not configured");
-            }
-            if (hasPermission == null) {
-                Assertions.fail("Permission not configured");
-            }
-        }
+
     }
-    public class RequestDataBehavior implements DSLSimpleBehaviorWithAsserter<AssertResponse> {
-        private final String projectKey;
-        private final String level;
-        private final String zoneId;
-        private final boolean hasPermission;
-        private boolean preventProviderMock;
-        private AssertResponse asserter;
-        public RequestDataBehavior(String projectKey, String level, String zoneId, boolean hasPermission, boolean preventProviderMock) {
-            this.projectKey = projectKey;
-            this.level = level;
-            this.zoneId = zoneId;
-            this.hasPermission = hasPermission;
-            this.preventProviderMock = preventProviderMock;
+
+    private class RequestLeadTimeDataBehavior extends RequestChartDataBehavior<LeadTimeKpiDataProvider> {
+
+        public RequestLeadTimeDataBehavior(String projectKey, String level, String zoneId,
+                boolean hasPermission, boolean preventProviderMock) {
+            super(projectKey, level, zoneId, hasPermission, preventProviderMock);
         }
 
         @Override
-        public void behave(KpiEnvironment environment) {
-            ProjectDashboardOperationalPermission projectDashboardOperationalPermission = mockPermission();
+        public void doBehave(KpiEnvironment environment, ProjectDashboardOperationalPermission permission, ProjectService projectService) {
             LeadTimeKpiDataProvider dataProvider = mockProvider(environment);
-            ProjectService projectService = environment.services().projects().getService();
-            LeadTimeKpiController subject = new LeadTimeKpiController(projectDashboardOperationalPermission, projectService, dataProvider);
+            LeadTimeKpiController subject = new LeadTimeKpiController(permission, projectService, dataProvider);
             asserter = AssertResponse.of(subject.get(projectKey, zoneId, level));
         }
 
         @Override
-        public AssertResponse then() {
-            return asserter;
-        }
-
-        private LeadTimeKpiDataProvider mockProvider(KpiEnvironment environment) {
+        protected LeadTimeKpiDataProvider mockProvider(KpiEnvironment environment) {
             LeadTimeKpiDataProvider leadTimeDataProvider = Mockito.mock(LeadTimeKpiDataProvider.class);
             if (preventProviderMock) {
                 return leadTimeDataProvider;
@@ -361,10 +307,5 @@ public class LeadTimeControllerTest {
             return factory.create(issue);
         }
 
-        private ProjectDashboardOperationalPermission mockPermission() {
-            ProjectDashboardOperationalPermission projectDashboardOperationalPermission = Mockito.mock(ProjectDashboardOperationalPermission.class);
-            Mockito.when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(hasPermission);
-            return projectDashboardOperationalPermission;
-        }
     }
 }

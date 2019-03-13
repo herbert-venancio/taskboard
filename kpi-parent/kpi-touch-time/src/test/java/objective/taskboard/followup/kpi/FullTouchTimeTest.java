@@ -46,8 +46,7 @@ public class FullTouchTimeTest {
                     .eoP()
                 .eoPs()
             .eoS()
-            .givenIssue("PROJ-01")
-                .isDemand()
+            .givenDemand("PROJ-01")
                 .type("Demand")
                 .project("PROJ")
                 .withTransitions()
@@ -198,7 +197,7 @@ public class FullTouchTimeTest {
     private void prepareContinuous(DSLKpi dsl) {
         dsl
         .environment()
-            .givenIssue("PROJ-01")
+            .givenDemand("PROJ-01")
                 .feature("PROJ-20")
                     .type("Continous")
                     .project("PROJ")
@@ -225,7 +224,7 @@ public class FullTouchTimeTest {
     private void prepareFeature(DSLKpi dsl) {
         dsl
         .environment()
-            .givenIssue("PROJ-01")
+            .givenDemand("PROJ-01")
                 .feature("PROJ-05")
                     .type("Feature")
                     .project("PROJ")
@@ -440,7 +439,7 @@ public class FullTouchTimeTest {
 
     private void prepareTask(DSLKpi dsl) {
         dsl.environment()
-            .givenIssue("PROJ-01")
+            .givenDemand("PROJ-01")
                 .feature("PROJ-04")
                     .type("Task")
                     .project("PROJ")
@@ -483,7 +482,7 @@ public class FullTouchTimeTest {
 
     private void prepareBugs(DSLKpi dsl) {
         dsl.environment()
-            .givenIssue("PROJ-01")
+            .givenDemand("PROJ-01")
                 .feature("PROJ-02")
                     .type("Bug")
                     .project("PROJ")

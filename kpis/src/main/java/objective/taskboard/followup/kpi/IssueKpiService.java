@@ -12,7 +12,6 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
-import objective.taskboard.followup.kpi.touchTime.WithinRangeFilter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.followup.kpi.transformer.IssueKpiTransformer;

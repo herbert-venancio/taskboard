@@ -82,7 +82,13 @@ public class DSLKpi {
         }
 
         public IssueBehavior givenIssueKpi(String pkey) {
-            return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.environment.givenIssue(key)));
+            return issues.computeIfAbsent(pkey, key -> {
+                Optional<IssueKpiMocker> issue = kpiContext.environment.getIssue(key);
+                if (!issue.isPresent()) {
+                    Assertions.fail("Issue %s does not exist", pkey);
+                }
+                return new IssueBehavior(issue.get());
+            });
         }
 
         public ExceptionBehavior expectExceptionFromBehavior(DSLSimpleBehavior behavior){
