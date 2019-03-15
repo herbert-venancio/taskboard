@@ -298,6 +298,7 @@ public class MockedServices {
             environment.types().foreach(typeDto ->{
                 JiraIssueTypeDto jiraDto = new JiraIssueTypeDto(typeDto.id(), typeDto.name(), typeDto.isSubtask());
                 Mockito.when(metadataService.getIssueTypeByName(typeDto.name())).thenReturn(Optional.of(jiraDto));
+                Mockito.when(metadataService.getIssueTypeById(typeDto.id())).thenReturn(jiraDto);
             });
         }
 

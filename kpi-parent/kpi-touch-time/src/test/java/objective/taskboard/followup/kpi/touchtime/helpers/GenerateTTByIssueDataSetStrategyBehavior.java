@@ -11,6 +11,7 @@ import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiStrategy;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiStrategyFactory;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.properties.JiraProperties;
 
 public class GenerateTTByIssueDataSetStrategyBehavior extends GenerateTTDataSetStrategyBehavior<TTByIssueKpiDataSetAsserter> {
@@ -25,7 +26,8 @@ public class GenerateTTByIssueDataSetStrategyBehavior extends GenerateTTDataSetS
         JiraProperties jiraProperties = environment.getJiraProperties();
         IssueKpiService issueKpiService = environment.services().issueKpi().getService();
         ProjectFilterConfiguration projectConfiguration = environment.services().projects().getProject(getProjectKey());
-        TouchTimeByIssueKpiStrategyFactory factory = new TouchTimeByIssueKpiStrategyFactory(kpiProperties, issueKpiService, jiraProperties);
+        MetadataService metadataService = environment.services().metadata().getService();
+        TouchTimeByIssueKpiStrategyFactory factory = new TouchTimeByIssueKpiStrategyFactory(kpiProperties, issueKpiService, jiraProperties, metadataService);
         TouchTimeByIssueKpiStrategy subject = factory.getStrategy(getIssueLevel(), projectConfiguration, getTimezone());
         List<TouchTimeByIssueKpiDataPoint> dataSet = subject.getDataSet();
         return new TTByIssueKpiDataSetAsserter(dataSet);

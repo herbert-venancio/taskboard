@@ -30,6 +30,7 @@ public class IssueKpiAsserter<T> {
     private Map<String, StatusAsserter> statusesAsserter = new LinkedHashMap<>();
     private KpiEnvironment environment;
     private T parentContext;
+    private static final long NON_EXISTENT_TYPE_ID = -1L;
 
     public IssueKpiAsserter(IssueKpi subject, KpiEnvironment environment, T parentContext) {
         this.subject = subject;
@@ -84,6 +85,13 @@ public class IssueKpiAsserter<T> {
 
     public RangeAsserter rangeBasedOnProgressingStatuses() {
         return new RangeAsserter();
+    }
+
+    public void hasEffortSumFromChildrenWithSubtaskTypeName(double effortInHours, String typeName) {
+        Optional<IssueTypeDTO> type = environment.types().getOptional(typeName);
+        long expectedEffortInSeconds = DateTimeUtils.hoursToSeconds(effortInHours);
+        Long typeId = type.map(IssueTypeDTO::id).orElse(NON_EXISTENT_TYPE_ID);
+        Assertions.assertThat(subject.getEffortSumFromChildrenWithSubtaskTypeId(typeId)).isEqualTo(expectedEffortInSeconds);
     }
 
     private Optional<IssueKpi> findChildByKey(String childKey) {

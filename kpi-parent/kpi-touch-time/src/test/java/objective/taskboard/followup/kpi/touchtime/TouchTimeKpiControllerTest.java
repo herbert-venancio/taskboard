@@ -17,6 +17,7 @@ import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
 import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehaviorBuilder;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
@@ -95,50 +96,53 @@ public class TouchTimeKpiControllerTest {
                     + "{"
                         + "\"issueKey\": \"I-1\","
                         + "\"issueType\": \"Backend Development\","
-                        + "\"issueStatus\": \"Doing\","
-                        + "\"effortInHours\": 5.0,"
                         + "\"startProgressingDate\": " + getDateInMiliseconds("2020-01-03") + ","
-                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-07")
-                    + "},"
-                    + "{"
-                        + "\"issueKey\": \"I-1\","
-                        + "\"issueType\": \"Backend Development\","
-                        + "\"issueStatus\": \"Reviewing\","
-                        + "\"effortInHours\": 0.0,"
-                        + "\"startProgressingDate\": " + getDateInMiliseconds("2020-01-03") + ","
-                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-07")
+                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-07") + ","
+                        + "\"stacks\": "
+                            + "["
+                                + "{"
+                                    + "\"stackName\": \"Doing\","
+                                    + "\"effortInHours\": 5.0"
+                                + "},"
+                                + "{"
+                                    + "\"stackName\": \"Reviewing\","
+                                    + "\"effortInHours\": 0.0"
+                                + "}"
+                            + "]"
                     + "},"
                     + "{"
                         + "\"issueKey\": \"I-2\","
                         + "\"issueType\": \"Backend Development\","
-                        + "\"issueStatus\": \"Doing\","
-                        + "\"effortInHours\": 8.0,"
                         + "\"startProgressingDate\": " + getDateInMiliseconds("2020-01-04") + ","
-                        + "\"endProgressingDate\": "  + getDateInMiliseconds("2020-01-07")
-                    + "},"
-                    + "{"
-                        + "\"issueKey\": \"I-2\","
-                        + "\"issueType\": \"Backend Development\","
-                        + "\"issueStatus\": \"Reviewing\","
-                        + "\"effortInHours\": 5.0,"
-                        + "\"startProgressingDate\": " + getDateInMiliseconds("2020-01-04") + ","
-                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-07")
+                        + "\"endProgressingDate\": "  + getDateInMiliseconds("2020-01-07") + ","
+                        + "\"stacks\": "
+                            + "["
+                                + "{"
+                                    + "\"stackName\": \"Doing\","
+                                    + "\"effortInHours\": 8.0"
+                                + "},"
+                                + "{"
+                                    + "\"stackName\": \"Reviewing\","
+                                    + "\"effortInHours\": 5.0"
+                                + "}"
+                            + "]"
                     + "},"
                     + "{"
                         + "\"issueKey\": \"I-3\","
                         + "\"issueType\": \"Alpha Bug\","
-                        + "\"issueStatus\": \"Doing\","
-                        + "\"effortInHours\": 7.0,"
                         + "\"startProgressingDate\": " + getDateInMiliseconds("2020-01-03") + ","
-                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-06")
-                    + "},"
-                    + "{"
-                        + "\"issueKey\": \"I-3\","
-                        + "\"issueType\": \"Alpha Bug\","
-                        + "\"issueStatus\": \"Reviewing\","
-                        + "\"effortInHours\": 3.0,"
-                        + "\"startProgressingDate\": " + getDateInMiliseconds("2020-01-03") + ","
-                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-06")
+                        + "\"endProgressingDate\": " + getDateInMiliseconds("2020-01-06") + ","
+                        + "\"stacks\": "
+                            + "["
+                                + "{"
+                                    + "\"stackName\": \"Doing\","
+                                    + "\"effortInHours\": 7.0"
+                                + "},"
+                                + "{"
+                                    + "\"stackName\": \"Reviewing\","
+                                    + "\"effortInHours\": 3.0"
+                                + "}"
+                            + "]"
                     + "}"
               + "]");
     }
@@ -431,8 +435,9 @@ public class TouchTimeKpiControllerTest {
             KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             JiraProperties jiraProperties = environment.getJiraProperties();
+            MetadataService metadataService = environment.services().metadata().getService();
             TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
+            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties, metadataService);
             ProjectService projectService = environment.services().projects().getService();
             return new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         }
