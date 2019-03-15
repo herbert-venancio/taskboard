@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public class TouchTimeByWeekKpiDataPoint {
+public class TouchTimeByWeekKpiDataPoint implements Comparable<TouchTimeByWeekKpiDataPoint> {
 
     public final Instant date;
     public final String stackName;
@@ -19,5 +19,10 @@ public class TouchTimeByWeekKpiDataPoint {
     @Override
     public String toString() {
         return "{date=" + ZonedDateTime.ofInstant(date, ZoneId.systemDefault()) + ", stackName=" + stackName + ", effortInHours=" + effortInHours + "}";
+    }
+
+    @Override
+    public int compareTo(TouchTimeByWeekKpiDataPoint other) {
+        return this.date.compareTo(other.date);
     }
 }

@@ -2,16 +2,14 @@ package objective.taskboard.followup.kpi.touchtime;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.apache.commons.lang3.Range;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.properties.TouchTimeSubtaskConfiguration;
@@ -19,82 +17,106 @@ import objective.taskboard.utils.DateTimeUtils;
 
 class TouchTimeByWeekKpiSubtaskStrategy extends TouchTimeByWeekKpiStrategy {
 
-    private Table<TouchTimeKpiWeekRange, String, List<Double>> effortsByStackNameByWeek = HashBasedTable.create();
     private List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs;
+    private Map<Long, String> indexTypeIdToStackName = new HashMap<>();
 
     protected TouchTimeByWeekKpiSubtaskStrategy(
-            Range<LocalDate> projectRange, ZoneId timezone, List<IssueKpi> issues,
+            Range<LocalDate> projectRange,
+            ZoneId timezone,
+            List<IssueKpi> issues,
             List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs) {
         super(projectRange, timezone, issues);
         this.touchTimeSubtaskConfigs = touchTimeSubtaskConfigs;
+        touchTimeSubtaskConfigs.forEach(conf -> {
+            conf.getTypeIds().forEach(typeId ->
+                indexTypeIdToStackName.put(typeId, conf.getStackName())
+            );
+        });
     }
 
     @Override
     protected List<TouchTimeByWeekKpiDataPoint> getDataPoints() {
-        aggregateEffortAccordingToConfiguration();
-        return transformToDataPoints();
+        List<TouchTimeByWeekKpiDataPoint> points = new LinkedList<>();
+        issuesByWeek.forEach((week, issuesFromWeek) -> {
+            Map<String, Stack> stackByName = new StackAggregator(week).aggregate(issuesFromWeek);
+            touchTimeSubtaskConfigs.forEach(conf ->
+                points.add(new DataPointTransformer(stackByName.get(conf.getStackName()), conf.getStatuses(), issuesFromWeek.size()).transform())
+            );
+        });
+        Collections.sort(points);
+        return points;
     }
 
-    private void aggregateEffortAccordingToConfiguration() {
-        super.issuesByWeek.entrySet().forEach(entry -> aggregate(entry.getKey(), entry.getValue()));
-    }
-
-    private void aggregate(TouchTimeKpiWeekRange week, List<IssueKpi> issuesFromWeek) {
-        List<IssueKpi> issuesFromWeekCopy = new LinkedList<>(issuesFromWeek);
-
-        for (TouchTimeSubtaskConfiguration conf : touchTimeSubtaskConfigs) {
-            List<IssueKpi> issuesSelectedByType = filterIssuesByTypes(conf.getTypeIds(), issuesFromWeek);
-            effortsByStackNameByWeek.put(week,conf.getStackName(), getEffortsFromIssues(week, issuesSelectedByType));
-            issuesFromWeekCopy.removeAll(issuesSelectedByType);
-
-            collectEffortFromStatusesForStack(conf.getStackName(), conf.getStatuses(), week, issuesFromWeekCopy);
+    private class StackAggregator {
+        private Map<String, Stack> stackByName = new HashMap<>();
+        private StackAggregator(TouchTimeKpiWeekRange week) {
+            touchTimeSubtaskConfigs.forEach(conf ->
+                stackByName.put(conf.getStackName(), new Stack(week, conf.getStackName()))
+            );
+        }
+        private Map<String, Stack> aggregate(List<IssueKpi> issuesFromWeek) {
+            issuesFromWeek.forEach(issue ->
+                issue.getIssueType().ifPresent(type -> {
+                    String stackName = indexTypeIdToStackName.get(type.getId());
+                    if (stackName == null) {
+                        stackByName.values().forEach(stack -> stack.addByStatus(issue));
+                    } else {
+                        stackByName.get(stackName).addByType(issue);
+                    }
+                })
+            );
+            return stackByName;
         }
     }
 
-    private List<IssueKpi> filterIssuesByTypes(List<Long> typesIds, List<IssueKpi> issuesFromWeek) {
-        return issuesFromWeek.stream()
-            .filter(i -> filterByTypes(i, typesIds))
-            .collect(Collectors.toList());
+    private class Stack {
+        private TouchTimeKpiWeekRange week;
+        private String name;
+        private Collection<IssueKpi> issuesFromTypes = new LinkedList<>();
+        private Collection<IssueKpi> issuesFromStatuses = new LinkedList<>();
+        private Stack(TouchTimeKpiWeekRange week, String stackName) {
+            this.week = week;
+            this.name = stackName;
+        }
+        private void addByType(IssueKpi issue) {
+            issuesFromTypes.add(issue);
+        }
+        private void addByStatus(IssueKpi issue) {
+            issuesFromStatuses.add(issue);
+        }
     }
 
-    private boolean filterByTypes(IssueKpi issue, List<Long> typesIds) {
-        return issue.getIssueType().map(t -> typesIds.contains(t.getId())).orElse(false);
+    private class DataPointTransformer {
+        private Stack stack;
+        private List<String> statuses;
+        private int totalIssues;
+        private DataPointTransformer(Stack stack, List<String> statuses, int totalIssues) {
+            this.stack = stack;
+            this.statuses = statuses;
+            this.totalIssues = totalIssues;
+        }
+        public TouchTimeByWeekKpiDataPoint transform() {
+            return new TouchTimeByWeekKpiDataPoint(stack.week.getLastDay().toInstant(), stack.name, getEffortAverageInHours());
+        }
+        private double getEffortAverageInHours() {
+            if (totalIssues == 0) {
+                return 0;
+            }
+            double effortSumFromTypes = getEffortSumFromTypes();
+            double effortFromStatuses = getEffortSumFromStatuses();
+            return (effortSumFromTypes + effortFromStatuses) / totalIssues;
+        }
+        private double getEffortSumFromTypes() {
+            return stack.issuesFromTypes.stream()
+                    .map(i -> i.getEffortUntilDate(stack.week.getLastDay()))
+                    .mapToDouble(DateTimeUtils::secondsToHours)
+                    .sum();
+        }
+        private double getEffortSumFromStatuses() {
+            return stack.issuesFromStatuses.stream()
+                .map(i -> i.getEffortSumInSecondsFromStatusesUntilDate(statuses, stack.week.getLastDay()))
+                .mapToDouble(DateTimeUtils::secondsToHours)
+                .sum();
+        }
     }
-
-    private List<Double> getEffortsFromIssues(TouchTimeKpiWeekRange week, List<IssueKpi> issuesSelectedByType) {
-        return issuesSelectedByType.stream()
-            .map(i -> i.getEffortUntilDate(week.getLastDay()))
-            .map(DateTimeUtils::secondsToHours)
-            .collect(Collectors.toList());
-    }
-
-    private void collectEffortFromStatusesForStack(String stackName, List<String> statuses, TouchTimeKpiWeekRange week, List<IssueKpi> issuesFromWeek) {
-        issuesFromWeek.stream()
-            .map(i -> i.getEffortSumInSecondsFromStatusesUntilDate(statuses, week.getLastDay()))
-            .mapToDouble(DateTimeUtils::secondsToHours)
-            .forEach(effortSumInHours -> effortsByStackNameByWeek.get(week, stackName).add(effortSumInHours));
-    }
-
-    private List<TouchTimeByWeekKpiDataPoint> transformToDataPoints() {
-        return effortsByStackNameByWeek.cellSet().stream()
-                .sorted(Comparator.comparing(Cell::getRowKey))
-                .map(c -> new TouchTimeByWeekKpiDataPoint(
-                        c.getRowKey().getLastDay().toInstant(),
-                        c.getColumnKey(),
-                        calculateAverage(c)))
-                .collect(Collectors.toList());
-    }
-
-    private double calculateAverage(Cell<TouchTimeKpiWeekRange, String, List<Double>> effortsByStackNameByWeekCell) {
-        TouchTimeKpiWeekRange week = effortsByStackNameByWeekCell.getRowKey();
-        List<Double> efforts = effortsByStackNameByWeekCell.getValue();
-        double sum = efforts.stream().collect(Collectors.summingDouble(x -> x));
-        if (sum <= 0d)
-            return 0d;
-        int numberOfIssuesFromWeek = super.issuesByWeek.get(week).size();
-        if (numberOfIssuesFromWeek == 0)
-            throw new RuntimeException("Number of issues from week cannot be zero!");
-        return sum / numberOfIssuesFromWeek;
-    }
-
 }
