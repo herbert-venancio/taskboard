@@ -956,12 +956,43 @@ public class IssueKpiTest {
                         .at("2020-01-03").timeSpentInHours(2.0)
                         .at("2020-01-05").timeSpentInHours(3.0)
                     .eoW()
+                .endOfSubtask()
+                .subtask("PROJ-03")
+                    .type("Subtask")
+                    .withTransitions()
+                        .status("Open").date("2020-01-01")
+                        .status("To Do").date("2020-01-02")
+                        .status("Doing").date("2020-01-03")
+                        .status("To Review").date("2020-01-04")
+                        .status("Reviewing").date("2020-01-05")
+                        .status("Done").date("2020-01-06")
+                    .eoT()
+                    .worklogs()
+                        .at("2020-01-03").timeSpentInHours(3.0)
+                        .at("2020-01-05").timeSpentInHours(5.0)
+                    .eoW()
+                .endOfSubtask()
+                .subtask("PROJ-03")
+                    .type("Another Subtask")
+                    .withTransitions()
+                        .status("Open").date("2020-01-01")
+                        .status("To Do").date("2020-01-02")
+                        .status("Doing").date("2020-01-03")
+                        .status("To Review").date("2020-01-04")
+                        .status("Reviewing").date("2020-01-05")
+                        .status("Done").date("2020-01-06")
+                    .eoT()
+                    .worklogs()
+                        .at("2020-01-03").timeSpentInHours(5.0)
+                        .at("2020-01-05").timeSpentInHours(7.0)
+                    .eoW()
+                .endOfSubtask()
             .eoI()
         .then()
             .assertThat()
                 .issueKpi("PROJ-01")
                     .hasType("Demand")
-                    .hasEffortSumFromChildrenWithSubtaskTypeName(5.0, "Subtask");
+                    .hasEffortSumFromChildrenWithSubtaskTypeName(13.0, "Subtask");
     }
 
     @Test
@@ -1011,7 +1042,7 @@ public class IssueKpiTest {
             .types()
                 .addDemand("Demand")
                 .addFeatures("Feature")
-                .addSubtasks("Subtask")
+                .addSubtasks("Subtask", "Another Subtask")
             .eoT();
 
         return dsl;
