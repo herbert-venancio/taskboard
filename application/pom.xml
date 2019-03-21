@@ -99,8 +99,6 @@
 			<artifactId>kpi-wip</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
@@ -142,12 +140,6 @@
 		<dependency>
 			<groupId>com.safaribooks</groupId>
 			<artifactId>jenkins-helper-java</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<version>${project.version}</version>
-			<artifactId>test-support</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
