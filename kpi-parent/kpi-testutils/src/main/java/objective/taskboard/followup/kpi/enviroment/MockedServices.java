@@ -17,11 +17,15 @@ import org.mockito.Mockito;
 import objective.taskboard.data.Issue;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
+import objective.taskboard.followup.FollowUpSnapshot;
+import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.StatusDto;
+import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateAnalyticsDataSets;
+import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
@@ -42,6 +46,7 @@ public class MockedServices {
     private MetadataServiceMocker metadataService = new MetadataServiceMocker();
     private TransitionServiceMocker transitionsService = new TransitionServiceMocker();
     private IssueColorServiceMocker colorService = new IssueColorServiceMocker();
+    private FollowupSnapshotServiceMocker snapshotService = new FollowupSnapshotServiceMocker();
 
     public MockedServices(KpiEnvironment fatherEnvironment) {
         this.environment = fatherEnvironment;
@@ -55,6 +60,7 @@ public class MockedServices {
         metadataService.mockService();
         transitionsService.mockService();
         colorService.mock();
+        snapshotService.mock();
     }
 
     public ProjectServiceMocker projects() {
@@ -83,6 +89,10 @@ public class MockedServices {
 
     public IssueColorServiceMocker issueColor() {
         return colorService;
+    }
+    
+    public FollowupSnapshotServiceMocker followupSnapshot() {
+        return snapshotService;
     }
 
     public KpiEnvironment eoS() {
@@ -340,5 +350,29 @@ public class MockedServices {
                 });
             });
         }
+    }
+    
+    public class FollowupSnapshotServiceMocker {
+        
+        private FollowUpSnapshotService service;
+        
+        public FollowUpSnapshotService getService() {
+            if (service == null)
+                mock();
+            
+            return service;
+            
+        }
+
+        private void mock() {
+            service = Mockito.mock(FollowUpSnapshotService.class);
+        }
+
+        public void prepareForFactory(GenerateSnapshot datasetFactory, String projectKey, ZoneId timezone) {
+            FollowUpSnapshotService mockedService = getService();
+            FollowUpSnapshot snapshot = datasetFactory.buildSnapshot();
+            Mockito.when(mockedService.getFromCurrentState(timezone, projectKey)).thenReturn(snapshot);
+        }
+        
     }
 }

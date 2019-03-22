@@ -1,9 +1,13 @@
-package objective.taskboard.followup.kpi.enviroment;
+package objective.taskboard.followup.kpi.enviroment.snapshot;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
+import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
+import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
+import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
+import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,10 +18,10 @@ import java.util.stream.Stream;
 
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
-import objective.taskboard.followup.FollowUpData;
-import objective.taskboard.followup.FromJiraDataSet;
-import objective.taskboard.followup.SyntheticTransitionsDataSet;
+import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.enviroment.IssueKpiMocker;
+import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.jira.properties.JiraProperties;
 
 public class GenerateAnalyticsDataSets {
@@ -34,11 +38,12 @@ public class GenerateAnalyticsDataSets {
         return Optional.ofNullable(datasets.get(level));
     }
 
-    public FollowUpData buildFollowupData() {
-        FromJiraDataSet fromJiraDS = new FromJiraDataSet(emptyList(), emptyList());
-        List<SyntheticTransitionsDataSet> syntheticTransitionsDataSets = emptyList();
-        LinkedList<AnalyticsTransitionsDataSet> analyticTransitionsDataSets = new LinkedList<>(datasets.values());
-        return new FollowUpData(fromJiraDS, analyticTransitionsDataSets, syntheticTransitionsDataSets);
+    public List<AnalyticsTransitionsDataSet> getAnalyticDataSets() {
+        return Arrays.asList(getDs(DEMAND), getDs(FEATURES), getDs(SUBTASKS),getDs(UNMAPPED));
+    }
+
+    private AnalyticsTransitionsDataSet getDs(KpiLevel level) {
+        return datasets.get(level);
     }
 
     private void buildsDatasets() {
@@ -55,7 +60,7 @@ public class GenerateAnalyticsDataSets {
         headers.add("ISSUE_TYPE");
         headers.addAll(getHeaders(level, jiraProperties));
 
-        List<AnalyticsTransitionsDataRow> rows = list.stream().map(i -> buildRow(i)).collect(Collectors.toList()); 
+        List<AnalyticsTransitionsDataRow> rows = list.stream().map(this::buildRow).collect(Collectors.toList()); 
 
         AnalyticsTransitionsDataSet ds = new AnalyticsTransitionsDataSet(level.getName(),headers,rows);
         datasets.put(level, ds);
@@ -67,7 +72,7 @@ public class GenerateAnalyticsDataSets {
 
     private AnalyticsTransitionsDataRow buildRow(IssueKpiMocker issue) {
         String issueKey = issue.getIssueKey();
-        String issueType = issue.getIssueTypeKpi().map(t -> t.getType()).orElse("UNMAPPED");
+        String issueType = issue.getIssueTypeKpi().map(IssueTypeKpi::getType).orElse("UNMAPPED");
         List<ZonedDateTime> lastTransitionDate = new LinkedList<>(issue.getReversedTransitions().values());
 
         return new AnalyticsTransitionsDataRow(issueKey,issueType,lastTransitionDate);

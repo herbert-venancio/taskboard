@@ -15,8 +15,8 @@ import org.junit.Test;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
 
 public class ThroughputKPIServiceTest {
 
@@ -124,9 +124,9 @@ public class ThroughputKPIServiceTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            GenerateSnapshot datasetFactory = new GenerateSnapshot(environment);
             
-            environment.services().issueKpi().prepareFromDataSet(datasetFactory);
+            environment.services().issueKpi().prepareFromDataSet(datasetFactory.analyticBuilder());
             
             ThroughputKPIService subject = new ThroughputKPIService(environment.getJiraProperties(), environment.services().issueKpi().getService());
             

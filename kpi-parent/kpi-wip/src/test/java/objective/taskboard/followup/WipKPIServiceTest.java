@@ -15,8 +15,8 @@ import org.junit.Test;
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
 
 public class WipKPIServiceTest {
 
@@ -124,9 +124,9 @@ public class WipKPIServiceTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            GenerateSnapshot datasetFactory = new GenerateSnapshot(environment);
             
-            environment.services().issueKpi().prepareFromDataSet(datasetFactory);
+            environment.services().issueKpi().prepareFromDataSet(datasetFactory.analyticBuilder());
             
             WipKPIService subject = new WipKPIService(environment.getJiraProperties(), environment.services().issueKpi().getService());
             
