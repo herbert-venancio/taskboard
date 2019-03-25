@@ -38,7 +38,7 @@ public class DSLKpi {
 
     private void initializeIssuesIfNeeded() {
         if(this.issues == null)
-            this.issues = environment.services().issueKpi().getIssues();
+            this.issues = environment.services().issueKpi().getIssuesKpiByKey();
     }
 
     public BehaviorFactory when() {

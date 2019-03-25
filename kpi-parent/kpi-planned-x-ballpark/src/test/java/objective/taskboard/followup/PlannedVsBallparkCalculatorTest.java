@@ -14,22 +14,21 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import objective.taskboard.followup.PlannedVsBallparkCalculator;
-import objective.taskboard.followup.PlannedVsBallparkChartData;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
+import objective.taskboard.followup.kpi.KpiDataService;
 
 public class PlannedVsBallparkCalculatorTest {
     
     private FollowUpSnapshot snapshot = mock(FollowUpSnapshot.class);
-    private FollowUpSnapshotService snapshotService = mock(FollowUpSnapshotService.class);
-    private PlannedVsBallparkCalculator subject = new PlannedVsBallparkCalculator(snapshotService);
+    private KpiDataService kpiService = mock(KpiDataService.class);
+    private PlannedVsBallparkCalculator subject = new PlannedVsBallparkCalculator(kpiService);
     
     @Before
     public void setup() {
         when(snapshot.getFromJiraRowCalculations()).thenReturn(emptyList());
         when(snapshot.hasClusterConfiguration()).thenReturn(true);
         
-        when(snapshotService.getFromCurrentState(any(), any())).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(any(), any())).thenReturn(snapshot);
     }
 
     @Test

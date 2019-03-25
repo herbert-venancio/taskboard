@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +21,7 @@ import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiService;
+import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.StatusDto;
 import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateAnalyticsDataSets;
@@ -39,6 +39,7 @@ import objective.taskboard.utils.Clock;
 public class MockedServices {
 
     private KpiEnvironment environment;
+    private IssueKpiTestRepository issuesRepository;
     private ProjectServiceMocker projects = new ProjectServiceMocker(this);
     private IssueKpiServiceMocker issueKpiServices = new IssueKpiServiceMocker();
     private IssueBufferServiceMocker issueBufferService = new IssueBufferServiceMocker();
@@ -47,9 +48,11 @@ public class MockedServices {
     private TransitionServiceMocker transitionsService = new TransitionServiceMocker();
     private IssueColorServiceMocker colorService = new IssueColorServiceMocker();
     private FollowupSnapshotServiceMocker snapshotService = new FollowupSnapshotServiceMocker();
+    private KpiDataServiceMocker kpiDataServiceMocker = new KpiDataServiceMocker();
 
-    public MockedServices(KpiEnvironment fatherEnvironment) {
-        this.environment = fatherEnvironment;
+    public MockedServices(KpiEnvironment environment) {
+        this.environment = environment;
+        this.issuesRepository = new IssueKpiTestRepository(environment);
     }
 
     public void mockAll() {
@@ -61,6 +64,7 @@ public class MockedServices {
         transitionsService.mockService();
         colorService.mock();
         snapshotService.mock();
+        kpiDataServiceMocker.mock();
     }
 
     public ProjectServiceMocker projects() {
@@ -69,6 +73,10 @@ public class MockedServices {
 
     public IssueKpiServiceMocker issueKpi() {
         return issueKpiServices;
+    }
+    
+    public KpiDataServiceMocker kpiDataService() {
+        return kpiDataServiceMocker;
     }
 
     public IssueBufferServiceMocker issuesBuffer() {
@@ -100,77 +108,43 @@ public class MockedServices {
     }
 
     public class IssueKpiServiceMocker {
+        
         private IssueKpiService service = Mockito.mock(IssueKpiService.class);
-        private Map<String,IssueKpi> issues;
 
         public IssueKpiService getService() {
             if(service == null)
                 mockService();
             return service;
         }
-
-        public Map<String,IssueKpi> getIssues(){
-            if(issues == null)
-                mockService();
-            return issues;
+        
+        public Map<String, IssueKpi> getIssuesKpiByKey() {
+            return issuesRepository.getIssuesKpi();
         }
 
         public void prepareFromDataSet(GenerateAnalyticsDataSets factory) {
             Stream.of(KpiLevel.values()).forEach(level ->
                 when(getService().getIssues(factory.getOptionalDataSetForLevel(level)))
-                    .thenReturn(getIssuesByLevel(level))
+                    .thenReturn(issuesRepository.getIssuesByLevel(level))
             );
         }
 
         public Map<KpiLevel, List<IssueKpi>> getIssuesByLevel() {
-            return getIssues().values().stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
+            return getIssuesKpiByKey().values().stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
         }
 
         private void mockService() {
-            List<IssueKpiMocker> allIssues = environment.getAllIssueMockers();
-            issues = new LinkedHashMap<>();
-
-            Stream.of(KpiLevel.values())
-                .forEach(level -> {
-                    List<IssueKpiMocker> leveledIssues = allIssues.stream().filter(i -> level.equals(i.level())).collect(Collectors.toList());
-                    mockIssues(level, leveledIssues);
-                });
-
-        }
-
-        private void mockIssues(KpiLevel level, List<IssueKpiMocker> issuesByLevel) {
-
-            checkProjectConfigured(issuesByLevel);
-
-            Map<String,List<IssueKpiMocker>> byProject = issuesByLevel.stream().collect(Collectors.groupingBy(IssueKpiMocker::project));
-
+            Map<String, Map<KpiLevel, List<IssueKpi>>> byProject = issuesRepository.getIssuesByProject();
             byProject.entrySet().stream().forEach(entry -> {
                 String projectKey = entry.getKey();
-                List<IssueKpi> issuesByProject = entry.getValue().stream()
-                                                        .map(IssueKpiMocker::buildIssueKpi)
-                                                        .collect(Collectors.toList());
-                saveIssues(issuesByProject);
-                Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
-                    .thenReturn(issuesByProject);
+                Map<KpiLevel, List<IssueKpi>> issuesByProject = entry.getValue();
+                issuesByProject.entrySet().forEach(levelIssues -> mockIssuesByLevel(projectKey,levelIssues.getKey(),levelIssues.getValue()));
             });
 
         }
 
-        private void saveIssues(List<IssueKpi> issuesByProject) {
-            issuesByProject.stream().forEach(issue -> issues.put(issue.getIssueKey(),issue));
-        }
-
-        private List<IssueKpi> getIssuesByLevel(KpiLevel level){
-            return Optional.ofNullable(getIssuesByLevel().get(level)).orElse(emptyList());
-        }
-
-        private void checkProjectConfigured(List<IssueKpiMocker> issuesToCheck) {
-            List<String> issuesWithoutProject = issuesToCheck.stream()
-                                                    .filter(i -> i.noProjectConfigured())
-                                                    .map(i -> i.getIssueKey())
-                                                    .collect(Collectors.toList());
-            if(issuesWithoutProject.size() > 0)
-                throw new AssertionError(String.format("Issues without project configured: %s", issuesToCheck));
+        void mockIssuesByLevel(String projectKey, KpiLevel level, List<IssueKpi> issuesByProjectAndLevel) {
+            Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
+                    .thenReturn(issuesByProjectAndLevel);
         }
 
         public KpiEnvironment eoIks() {
@@ -183,11 +157,11 @@ public class MockedServices {
             KPIProperties kpiProperties = environment.getKPIProperties();
             Clock clock = environment.getClock();
 
-            IssueBufferService issueBufferService = issuesBuffer().getService();
+            IssueBufferService issuesBufferService = issuesBuffer().getService();
             ProjectService projectService = projects().getService();
-            IssueKpiDataItemAdapterFactory factory = itemAdapterFactory().getComponent();
+            IssueKpiDataItemAdapterFactory itemFactory = itemAdapterFactory().getComponent();
 
-            return new IssueKpiService(issueBufferService, projectService, jiraProperties, kpiProperties, clock, factory);
+            return new IssueKpiService(issuesBufferService, projectService, jiraProperties, kpiProperties, clock, itemFactory);
         }
 
     }
@@ -195,7 +169,6 @@ public class MockedServices {
     public class IssueBufferServiceMocker {
 
         private IssueBufferService service;
-        private List<Issue> allIssues;
 
         public IssueBufferService getService() {
             if(service == null)
@@ -205,27 +178,13 @@ public class MockedServices {
 
         private void mockService() {
             service = Mockito.mock(IssueBufferService.class);
-            prepareService();
+            Mockito.when(service.getAllIssues()).thenReturn(issuesRepository.getIssues());
+        }
+        
+        public List<Issue> getIssues(){
+            return issuesRepository.getIssues();
         }
 
-        private void prepareService() {
-            List<Issue> allIssues = getIssues();
-            Mockito.when(service.getAllIssues()).thenReturn(allIssues);
-        }
-
-        public List<Issue> getIssues() {
-            if (allIssues == null)
-                allIssues = mockIssues();
-
-            return allIssues;
-
-        }
-
-        private List<Issue> mockIssues() {
-            return environment.getAllIssueMockers().stream()
-                    .map(i -> i.mock())
-                    .collect(Collectors.toList());
-        }
     }
 
     public class IssueKpiDataItemAdapterFactoryMocker {
@@ -239,19 +198,15 @@ public class MockedServices {
 
         private void mockComponent() {
             factory = Mockito.mock(IssueKpiDataItemAdapterFactory.class);
-            List<Issue> issues = issueBufferService.getIssues();
+            List<Issue> issues = issuesRepository.getIssues();
             Mockito.when(factory.getItems(issues, environment.getTimezone())).thenReturn(getMappedItemAdapters());
         }
 
         private List<IssueKpiDataItemAdapter> getMappedItemAdapters() {
             return environment.getAllIssueMockers().stream()
-                    .filter(m -> filterUnmapped(m))
+                    .filter(m -> m.level() != KpiLevel.UNMAPPED)
                     .map(IssueKpiMocker::buildAsAdapter)
                     .collect(Collectors.toList());
-        }
-
-        private boolean filterUnmapped(IssueKpiMocker m) {
-            return m.level() != KpiLevel.UNMAPPED;
         }
 
         public IssueKpiDataItemAdapterFactoryMocker configureForDataSet(Optional<AnalyticsTransitionsDataSet> analyticsDs) {
@@ -282,15 +237,11 @@ public class MockedServices {
 
             ZoneId timezone = environment.getTimezone();
             JiraProperties jiraProperties = environment.getJiraProperties();
-            ensureIssuesAreMocked();
-            environment.getAllIssueMockers().forEach(i -> {
-                Mockito.when(transitionService.getTransitions(i.mockedIssue(), timezone, i.level().getStatusPriorityOrder(jiraProperties))).thenReturn(i.getReversedTransitions());
-            });
+            environment.getAllIssueMockers().forEach(i -> 
+                Mockito.when(transitionService.getTransitions(i.mockedIssue(), timezone, i.level().getStatusPriorityOrder(jiraProperties))).thenReturn(i.getReversedTransitions())
+            );
         }
 
-        private void ensureIssuesAreMocked() {
-            issueBufferService.getIssues();
-        }
     }
 
     public class MetadataServiceMocker {
@@ -311,7 +262,34 @@ public class MockedServices {
                 Mockito.when(metadataService.getIssueTypeById(typeDto.id())).thenReturn(jiraDto);
             });
         }
+    }
+    
+    public class KpiDataServiceMocker {
 
+        private KpiDataService service;
+        
+        public KpiDataService getService() {
+            if(service == null)
+                mock();
+            return service;
+        }
+        
+        private void mock() {
+            service = Mockito.mock(KpiDataService.class);
+            Map<String, Map<KpiLevel, List<IssueKpi>>> byProject = issuesRepository.getIssuesByProject();
+            byProject.entrySet().stream().forEach(entry -> {
+                String projectKey = entry.getKey();
+                Map<KpiLevel, List<IssueKpi>> issuesByProject = entry.getValue();
+                issuesByProject.entrySet().forEach(levelIssues -> mockIssuesByLevel(projectKey,levelIssues.getKey(),levelIssues.getValue()));
+            });
+            
+        }
+
+        void mockIssuesByLevel(String projectKey, KpiLevel level, List<IssueKpi> issuesByProjectAndLevel) {
+            Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
+                    .thenReturn(issuesByProjectAndLevel);
+        }
+        
     }
 
     public class IssueColorServiceMocker {
@@ -375,4 +353,6 @@ public class MockedServices {
         }
         
     }
+
+    
 }

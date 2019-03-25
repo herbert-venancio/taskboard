@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiAsserter;
 import objective.taskboard.followup.kpi.KpiLevel;
@@ -49,7 +47,7 @@ public class IssuesAsserter {
         }
 
         public InnerKpiAsserter hasType(String type) {
-            Assert.assertThat(subject.getIssueTypeName(), is(type));
+            super.hasType(type);
             return this;
         }
 

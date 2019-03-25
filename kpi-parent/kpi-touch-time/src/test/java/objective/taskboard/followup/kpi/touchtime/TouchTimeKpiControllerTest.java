@@ -10,7 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
-import objective.taskboard.followup.kpi.IssueKpiService;
+import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
@@ -433,11 +433,11 @@ public class TouchTimeKpiControllerTest {
         @Override
         protected TouchTimeKpiProvider mockProvider(KpiEnvironment environment) {
             KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
-            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
+            KpiDataService kpiDataService= environment.services().kpiDataService().getService();
             JiraProperties jiraProperties = environment.getJiraProperties();
             MetadataService metadataService = environment.services().metadata().getService();
-            TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties, metadataService);
+            TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties);
+            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties, metadataService);
             ProjectService projectService = environment.services().projects().getService();
             return new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         }

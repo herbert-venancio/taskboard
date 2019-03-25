@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
+import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.jira.MetadataService;
@@ -23,25 +23,25 @@ import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDet
 public class TouchTimeByIssueKpiStrategyFactory implements TouchTimeKpiStrategyFactory<TouchTimeByIssueKpiDataPoint> {
 
     private KpiTouchTimeProperties touchTimeProperties;
-    private IssueKpiService issueKpiService;
+    private KpiDataService kpiDataService;
     private JiraProperties jiraProperties;
     private MetadataService metadataService;
 
     @Autowired
     public TouchTimeByIssueKpiStrategyFactory(
             KpiTouchTimeProperties touchTimeProperties,
-            IssueKpiService issueKpiService,
+            KpiDataService kpiDataService,
             JiraProperties jiraProperties,
             MetadataService metadataService) {
         this.touchTimeProperties = touchTimeProperties;
-        this.issueKpiService = issueKpiService;
+        this.kpiDataService = kpiDataService;
         this.jiraProperties = jiraProperties;
         this.metadataService = metadataService;
     }
 
     @Override
     public TouchTimeByIssueKpiStrategy getStrategy(KpiLevel level, ProjectFilterConfiguration projectConfiguration, ZoneId timezone) {
-        List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(
+        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentState(
                 projectConfiguration.getProjectKey(), timezone, level);
 
         Set<JiraIssueTypeDto> subtaskTypes = jiraProperties.getIssuetype().getSubtasks().stream()

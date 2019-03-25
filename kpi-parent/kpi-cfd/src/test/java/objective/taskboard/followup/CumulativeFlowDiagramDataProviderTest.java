@@ -36,6 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.Constants;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
+import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.properties.KpiCfdProperties;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
@@ -51,7 +52,7 @@ public class CumulativeFlowDiagramDataProviderTest {
     private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Mock
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
 
     @Spy
     private KpiCfdProperties properties = new KpiCfdProperties();
@@ -69,12 +70,12 @@ public class CumulativeFlowDiagramDataProviderTest {
         followupData = KpiHelper.getBiggerFollowupData();
         FollowUpTimeline timeline = new FollowUpTimeline(TODAY_DATE);
         FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, followupData, new EmptyFollowupCluster(), emptyValuesProvider());
-        doReturn(snapshot).when(snapshotService).getFromCurrentState(any(), eq("TASKB"));
+        doReturn(snapshot).when(kpiService).getSnapshotFromCurrentState(any(), eq("TASKB"));
         doReturn(true).when(projectRepository).exists(eq("TASKB"));
 
         FollowUpData emptyFollowupData = new FollowUpData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, emptyList()), emptyList(), emptySynthetics());
         FollowUpSnapshot emptySnapshot = new FollowUpSnapshot(timeline, emptyFollowupData, new EmptyFollowupCluster(), emptyValuesProvider());
-        doReturn(emptySnapshot).when(snapshotService).getFromCurrentState(any(), eq("EMPTY"));
+        doReturn(emptySnapshot).when(kpiService).getSnapshotFromCurrentState(any(), eq("EMPTY"));
         doReturn(true).when(projectRepository).exists(eq("EMPTY"));
 
         doReturn(Optional.of(new JiraIssueTypeDto(-1L, "Any", false))).when(metaDataService).getIssueTypeByName(any());
@@ -250,7 +251,7 @@ public class CumulativeFlowDiagramDataProviderTest {
                 Optional.empty());
 
         FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, followupData, new EmptyFollowupCluster(), emptyValuesProvider());
-        doReturn(snapshot).when(snapshotService).getFromCurrentState(any(), eq(projectKey));
+        doReturn(snapshot).when(kpiService).getSnapshotFromCurrentState(any(), eq(projectKey));
 
         doReturn(true).when(projectRepository).exists(eq(projectKey));
         return new AssertionContext(snapshot);

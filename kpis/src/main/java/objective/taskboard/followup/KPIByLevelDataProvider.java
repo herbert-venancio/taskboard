@@ -6,14 +6,16 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import objective.taskboard.followup.kpi.KpiDataService;
+
 public abstract class KPIByLevelDataProvider<C,D> {
 
     @Autowired
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
     
     public C getDataSet(String projectKey, String level, ZoneId timezone) {
 
-        FollowUpSnapshot followupSnapshot = snapshotService.getFromCurrentState(ZoneId.systemDefault(), projectKey);
+        FollowUpSnapshot followupSnapshot = kpiService.getSnapshotFromCurrentState(ZoneId.systemDefault(), projectKey);
         final FollowUpTimeline timeline = followupSnapshot.getTimeline();
         
         FollowUpData followupData = followupSnapshot.getData();

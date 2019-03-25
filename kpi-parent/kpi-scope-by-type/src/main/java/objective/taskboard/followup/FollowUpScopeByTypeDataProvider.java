@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
+import objective.taskboard.followup.kpi.KpiDataService;
 
 @Service
 public class FollowUpScopeByTypeDataProvider {
@@ -24,19 +25,19 @@ public class FollowUpScopeByTypeDataProvider {
     public static final String BASELINE_DONE = "Baseline Done";
     public static final String BASELINE_BACKLOG = "Baseline Backlog";
 
-    private final FollowUpSnapshotService snapshotService;
+    private final KpiDataService kpiService;
     private final FromJiraRowService rowService;
     
     @Autowired
-    public FollowUpScopeByTypeDataProvider(FollowUpSnapshotService snapshotService, FromJiraRowService rowService) {
-        this.snapshotService = snapshotService;
+    public FollowUpScopeByTypeDataProvider(KpiDataService kpiService, FromJiraRowService rowService) {
+        this.kpiService = kpiService;
         this.rowService = rowService;
     }
 
     public FollowUpScopeByTypeDataSet getScopeByTypeData(String projectKey, ZoneId zoneId)
             throws ClusterNotConfiguredException {
 
-        final FollowUpSnapshot snapshot = snapshotService.getFromCurrentState(zoneId, projectKey);
+        final FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(zoneId, projectKey);
         final Map<String, Double> map = initTypes();
 
         if (!snapshot.hasClusterConfiguration())

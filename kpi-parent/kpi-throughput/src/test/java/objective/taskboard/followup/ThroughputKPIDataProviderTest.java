@@ -28,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
+import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.ThroughputChartDataSet;
 import objective.taskboard.followup.kpi.ThroughputDataPoint;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
@@ -45,7 +46,7 @@ public class ThroughputKPIDataProviderTest {
     private FollowUpDataRepository dataRepository;
 
     @Mock
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
 
     @Mock
     private ThroughputKPIService throughputKpiService;
@@ -664,7 +665,7 @@ public class ThroughputKPIDataProviderTest {
             final FollowUpData biggerFollowupData = KpiHelper.getBiggerFollowupData();
             FollowUpTimeline timeline = createCustomTimeline(projectFilter);
             FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, biggerFollowupData, new EmptyFollowupCluster(), emptyValuesProvider());
-            when(snapshotService.getFromCurrentState(ZONE_ID, projectKey)).thenReturn(snapshot);
+            when(kpiService.getSnapshotFromCurrentState(ZONE_ID, projectKey)).thenReturn(snapshot);
             return snapshot;
         }
     

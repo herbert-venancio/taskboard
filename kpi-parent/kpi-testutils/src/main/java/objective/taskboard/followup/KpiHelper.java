@@ -413,6 +413,4 @@ public class KpiHelper {
                 .map(DateTimeUtils::parseDateTime)
                 .collect(Collectors.toList());
     }
-
-    
 }
