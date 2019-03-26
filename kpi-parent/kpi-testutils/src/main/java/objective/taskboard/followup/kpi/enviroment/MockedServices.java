@@ -31,7 +31,6 @@ import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.Clock;
@@ -158,10 +157,9 @@ public class MockedServices {
             Clock clock = environment.getClock();
 
             IssueBufferService issuesBufferService = issuesBuffer().getService();
-            ProjectService projectService = projects().getService();
             IssueKpiDataItemAdapterFactory itemFactory = itemAdapterFactory().getComponent();
 
-            return new IssueKpiService(issuesBufferService, projectService, jiraProperties, kpiProperties, clock, itemFactory);
+            return new IssueKpiService(issuesBufferService, jiraProperties, kpiProperties, clock, itemFactory);
         }
 
     }
@@ -287,6 +285,8 @@ public class MockedServices {
 
         void mockIssuesByLevel(String projectKey, KpiLevel level, List<IssueKpi> issuesByProjectAndLevel) {
             Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
+                    .thenReturn(issuesByProjectAndLevel);
+            Mockito.when(service.getIssuesFromCurrentProjectRange(projectKey, environment.getTimezone(), level))
                     .thenReturn(issuesByProjectAndLevel);
         }
         

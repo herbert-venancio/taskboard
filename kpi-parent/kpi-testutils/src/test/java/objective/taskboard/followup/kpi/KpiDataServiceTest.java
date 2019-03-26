@@ -25,6 +25,7 @@ import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter
 import objective.taskboard.followup.kpi.enviroment.IssuesAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
+import objective.taskboard.jira.ProjectService;
 
 public class KpiDataServiceTest {
 
@@ -103,13 +104,13 @@ public class KpiDataServiceTest {
         .eoE();
         context
             .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", DEMAND))
+                .appliesBehavior(getIssuesFromCurrentState("PROJ", DEMAND))
             .then()
                 .amountOfIssueIs(0);
         
         context
             .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", FEATURES))
+                .appliesBehavior(getIssuesFromCurrentState("PROJ", FEATURES))
             .then()
                 .amountOfIssueIs(1)
                 .givenIssue("I-1")
@@ -121,7 +122,7 @@ public class KpiDataServiceTest {
                 .eoIA();
         context
             .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", SUBTASKS))
+                .appliesBehavior(getIssuesFromCurrentState("PROJ", SUBTASKS))
             .then()
                 .amountOfIssueIs(1)
                 .givenIssue("I-2")
@@ -133,22 +134,215 @@ public class KpiDataServiceTest {
                     .atStatus("Done").hasNoEffort().eoSa();
         context
             .when()
-            .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", UNMAPPED))
+            .appliesBehavior(getIssuesFromCurrentState("PROJ", UNMAPPED))
             .then()
                 .amountOfIssueIs(0);
+    }
+    
+
+    @Test
+    public void getIssuesFromCurrentState_filteringClosedIssues() {
+        KpiEnvironment context = dsl().environment()
+                .services()
+                    .projects()
+                        .withKey("PROJ")
+                            .startAt("2020-01-06")
+                            .deliveredAt("2020-01-10")
+                        .eoP()
+                    .eoPs()
+                .eoS()
+                .todayIs("2020-01-12")
+                .givenFeature("I-1")
+                    .project("PROJ")
+                    .type("Task")
+                    .withTransitions()
+                        .status("Open").date("2020-01-01")
+                        .status("To Do").date("2020-01-02")
+                        .status("Doing").date("2020-01-03")
+                        .status("Done").noDate()
+                    .eoT()
+                    .subtask("I-2")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").date("2020-01-03")
+                            .status("Done").date("2020-01-04")
+                        .eoT()
+                        .worklogs()
+                            .at("2020-01-03").timeSpentInHours(3.0)
+                        .eoW()
+                    .endOfSubtask()
+                    .subtask("I-3")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").date("2020-01-07")
+                            .status("Done").noDate()
+                        .eoT()
+                    .endOfSubtask()
+                    .subtask("I-4")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                        .worklogs()
+                            .at("2020-01-09").timeSpentInHours(5.0)
+                        .eoW()
+                    .endOfSubtask()
+                .eoI();
+            context
+                .when()
+                    .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", FEATURES))
+                .then()
+                    .amountOfIssueIs(1)
+                    .givenIssue("I-1")
+                        .hasLevel(FEATURES)
+                        .hasType("Task")
+                        .atDate("2020-01-12").isOnStatus("Doing").eoDc()
+                        .atStatus("Doing").hasTotalEffortInHours(8.0).eoSa()
+                        .hasChild("I-2")
+                        .hasChild("I-3")
+                        .hasChild("I-4");
+            context
+                .when()
+                    .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", SUBTASKS))
+                .then()
+                    .amountOfIssueIs(2)
+                    .givenIssue("I-3")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .atDate("2020-01-12").isOnStatus("Doing").eoDc()
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasNoEffort().eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA()
+                    .givenIssue("I-4")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .atDate("2020-01-12").isOnStatus("To Do").eoDc()
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasTotalEffortInHours(5.0).eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA();
+    }
+    
+    @Test
+    public void getIssuesFromCurrentState_filteringOpen() {
+        KpiEnvironment context = dsl().environment()
+                .services()
+                    .projects()
+                        .withKey("PROJ")
+                            .startAt("2020-01-04")
+                            .deliveredAt("2020-01-10")
+                        .eoP()
+                    .eoPs()
+                .eoS()
+                .todayIs("2020-01-12")
+                .givenFeature("I-1")
+                    .project("PROJ")
+                    .type("Task")
+                    .withTransitions()
+                        .status("Open").date("2020-01-01")
+                        .status("To Do").date("2020-01-02")
+                        .status("Doing").date("2020-01-03")
+                        .status("Done").noDate()
+                    .eoT()
+                    .subtask("I-2")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").date("2020-01-03")
+                            .status("Done").date("2020-01-04")
+                        .eoT()
+                        .worklogs()
+                            .at("2020-01-03").timeSpentInHours(3.0)
+                        .eoW()
+                    .endOfSubtask()
+                    .subtask("I-3")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                    .endOfSubtask()
+                    .subtask("I-4")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                        .worklogs()
+                            .at("2020-01-03").timeSpentInHours(5.0)
+                        .eoW()
+                    .endOfSubtask()
+                .eoI();
+            context
+                .when()
+                    .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", FEATURES))
+                .then()
+                    .amountOfIssueIs(1)
+                    .givenIssue("I-1")
+                        .hasLevel(FEATURES)
+                        .hasType("Task")
+                        .atDate("2020-01-12").isOnStatus("Doing").eoDc()
+                        .atStatus("Doing").hasTotalEffortInHours(8.0).eoSa()
+                        .hasChild("I-2")
+                        .hasChild("I-3")
+                        .hasChild("I-4");
+            context
+                .when()
+                    .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", SUBTASKS))
+                .then()
+                    .amountOfIssueIs(2)
+                    .givenIssue("I-2")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .atDate("2020-01-12").isOnStatus("Done").eoDc()
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA()
+                    .givenIssue("I-4")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .atDate("2020-01-12").isOnStatus("To Do").eoDc()
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasTotalEffortInHours(5.0).eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA();
     }
     
     private FollowupSnapshotBehavior getSnapshot(String projectKey) {
         return new FollowupSnapshotBehavior(projectKey);
     }
 
-    private ServeIssuesFromCurrentState getIssuesFromCurrentStateForProjectAndLevel(String projectKey, KpiLevel level) {
-        return new ServeIssuesFromCurrentState(projectKey, level);
+    private ServeIssuesFromCurrentState getIssuesFromCurrentState(String projectKey, KpiLevel level) {
+        return new ServeIssuesWithoutFilter(projectKey, level);
+    }
+    
+    private ServeIssuesFromCurrentState getIssuesFromCurrentStateFilteringByProjectRange(String projectKey, KpiLevel level) {
+        return new ServeIssuesFilteringByProject(projectKey, level);
     }
 
-    private class ServeIssuesFromCurrentState implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
-        private String projectKey;
-        private KpiLevel level;
+    private abstract class ServeIssuesFromCurrentState implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
+        protected String projectKey;
+        protected KpiLevel level;
         private IssuesAsserter asserter;
         
         public ServeIssuesFromCurrentState(String projectKey, KpiLevel level) {
@@ -160,13 +354,15 @@ public class KpiDataServiceTest {
         public void behave(KpiEnvironment environment) {
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
-            
-            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService);
+            ProjectService projectService = environment.services().projects().getService();
+            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService);
             ZoneId timezone = environment.getTimezone();
             
-            List<IssueKpi> issues = subject.getIssuesFromCurrentState(projectKey, timezone , level);
+            List<IssueKpi> issues = getIssues(subject, timezone);
             this.asserter = new IssuesAsserter(issues, environment);
         }
+
+        protected abstract List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone);
 
         @Override
         public IssuesAsserter then() {
@@ -174,6 +370,32 @@ public class KpiDataServiceTest {
         }
     }
     
+    private class ServeIssuesWithoutFilter extends ServeIssuesFromCurrentState {
+
+        private ServeIssuesWithoutFilter(String projectKey, KpiLevel level) {
+            super(projectKey, level);
+        }
+
+        @Override
+        protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
+            return subject.getIssuesFromCurrentState(projectKey, timezone, level);
+        }
+        
+    }
+    
+    private class ServeIssuesFilteringByProject extends ServeIssuesFromCurrentState {
+    
+    private ServeIssuesFilteringByProject(String projectKey, KpiLevel level) {
+            super(projectKey, level);
+        }
+
+    @Override
+    protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
+        return subject.getIssuesFromCurrentProjectRange(projectKey, timezone, level);
+    }
+    
+    }
+
     private class FollowupSnapshotBehavior implements DSLSimpleBehaviorWithAsserter<SnahpsotAsserter> {
         private SnahpsotAsserter asserter;
         private String projectKey;
@@ -192,7 +414,9 @@ public class KpiDataServiceTest {
 
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
-            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService); 
+            ProjectService projectService = environment.services().projects().getService();
+            
+            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService); 
             this.asserter = new SnahpsotAsserter(subject.getSnapshotFromCurrentState(timezone,projectKey));
         }
 

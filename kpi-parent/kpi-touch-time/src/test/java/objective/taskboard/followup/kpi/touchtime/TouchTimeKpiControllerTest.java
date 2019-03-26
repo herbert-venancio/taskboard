@@ -433,7 +433,9 @@ public class TouchTimeKpiControllerTest {
         @Override
         protected TouchTimeKpiProvider mockProvider(KpiEnvironment environment) {
             KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
-            KpiDataService kpiDataService= environment.services().kpiDataService().getService();
+                        
+            KpiDataService kpiDataService = environment.services().kpiDataService().getService();
+            
             JiraProperties jiraProperties = environment.getJiraProperties();
             MetadataService metadataService = environment.services().metadata().getService();
             TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties);

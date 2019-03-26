@@ -41,7 +41,7 @@ public class TouchTimeByIssueKpiStrategyFactory implements TouchTimeKpiStrategyF
 
     @Override
     public TouchTimeByIssueKpiStrategy getStrategy(KpiLevel level, ProjectFilterConfiguration projectConfiguration, ZoneId timezone) {
-        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentState(
+        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentProjectRange(
                 projectConfiguration.getProjectKey(), timezone, level);
 
         Set<JiraIssueTypeDto> subtaskTypes = jiraProperties.getIssuetype().getSubtasks().stream()

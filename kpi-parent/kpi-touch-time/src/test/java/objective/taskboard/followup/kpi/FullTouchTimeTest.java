@@ -21,7 +21,6 @@ import objective.taskboard.followup.kpi.enviroment.MockedServices;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.DateTimeUtils;
@@ -642,10 +641,9 @@ public class FullTouchTimeTest {
             MockedServices services = environment.services();
 
             IssueBufferService issueBufferService = services.issuesBuffer().getService();
-            ProjectService projectService = services.projects().getService();
             IssueKpiDataItemAdapterFactory factory = services.itemAdapterFactory().getComponent();
 
-            IssueKpiService subject = new IssueKpiService(issueBufferService, projectService, jiraProperties, kpiProperties, clock, factory);
+            IssueKpiService subject = new IssueKpiService(issueBufferService, jiraProperties, kpiProperties, clock, factory);
 
             for (KpiLevel level : KpiLevel.values()) {
                 allIssues.put(level, subject.getIssuesFromCurrentState(project, zoneId, level));

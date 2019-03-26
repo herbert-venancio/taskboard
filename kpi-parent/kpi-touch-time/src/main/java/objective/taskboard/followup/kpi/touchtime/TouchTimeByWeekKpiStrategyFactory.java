@@ -35,7 +35,7 @@ public class TouchTimeByWeekKpiStrategyFactory implements TouchTimeKpiStrategyFa
 
     @Override
     public TouchTimeByWeekKpiStrategy getStrategy(KpiLevel level, ProjectFilterConfiguration projectConfiguration, ZoneId timezone) {
-        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentState(
+        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentProjectRange(
                 projectConfiguration.getProjectKey(), timezone, level);
         Range<LocalDate> projectRange = getRangeOrCry(projectConfiguration);
 

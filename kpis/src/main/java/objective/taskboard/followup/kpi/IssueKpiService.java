@@ -9,14 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.followup.kpi.transformer.IssueKpiTransformer;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.Clock;
 
@@ -24,7 +22,6 @@ import objective.taskboard.utils.Clock;
 public class IssueKpiService {
 
     private IssueBufferService issueBufferService;
-    private ProjectService projectService;
     private JiraProperties jiraProperties;
     private KPIProperties kpiProperties;
     private Clock clock;
@@ -33,22 +30,18 @@ public class IssueKpiService {
     @Autowired
     public IssueKpiService(
             IssueBufferService issueBufferService,
-            ProjectService projectService,
             JiraProperties jiraProperties,
             KPIProperties kpiProperties,
             Clock clock,
             IssueKpiDataItemAdapterFactory factory) {
         this.issueBufferService = issueBufferService;
-        this.projectService = projectService;
         this.jiraProperties = jiraProperties;
         this.kpiProperties = kpiProperties;
         this.clock = clock;
         this.factory = factory;
     }
 
-    public List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone, KpiLevel kpiLevel) throws IllegalArgumentException {
-        ProjectFilterConfiguration project =  projectService.getTaskboardProjectOrCry(projectKey);
-        ProjectTimelineRange range = new ProjectRangeByConfiguration(project);
+    public List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone, KpiLevel kpiLevel){
 
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
                 .filter(new FollowupIssueFilter(jiraProperties, projectKey))
@@ -60,7 +53,6 @@ public class IssueKpiService {
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()
                                         .settingWorklogWithTimezone(timezone)
-                                        .filter(new WithinRangeFilter(timezone, range))
                                         .transform();
 
         return issuesKpi.stream().filter(i -> i.getLevel() == kpiLevel).collect(Collectors.toList());

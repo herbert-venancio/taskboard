@@ -23,7 +23,7 @@ public class GenerateTTByWeekDataSetStrategyBehavior extends GenerateTTDataSetSt
     public TTByWeekKpiDataSetAsserter doBehave(KpiEnvironment environment) {
         KpiTouchTimeProperties kpiProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
         JiraProperties jiraProperties = environment.getJiraProperties();
-        KpiDataService kpiDataService= environment.services().kpiDataService().getService();
+        KpiDataService kpiDataService = environment.services().kpiDataService().getService();
         ProjectFilterConfiguration projectConfiguration = environment.services().projects().getProject(getProjectKey());
 
         TouchTimeByWeekKpiStrategyFactory factory = new TouchTimeByWeekKpiStrategyFactory(kpiProperties, kpiDataService, jiraProperties);
