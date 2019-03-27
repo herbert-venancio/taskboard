@@ -350,6 +350,7 @@ public class MockedServices {
             FollowUpSnapshotService mockedService = getService();
             FollowUpSnapshot snapshot = datasetFactory.buildSnapshot();
             Mockito.when(mockedService.getFromCurrentState(timezone, projectKey)).thenReturn(snapshot);
+            Mockito.when(mockedService.get(Mockito.any(),Mockito.eq(timezone), Mockito.eq(projectKey))).thenReturn(snapshot);
         }
         
     }

@@ -40,6 +40,7 @@ import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.Project;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.jira.FieldMetadataService;
@@ -56,7 +57,7 @@ public class FollowUpFacade {
     private FollowUpTemplateStorageInterface followUpTemplateStorage;
 
     @Autowired
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
 
     @Autowired
     private TemplateService templateService;
@@ -87,7 +88,7 @@ public class FollowUpFacade {
 
         FollowUpTemplate template = getTemplate(templateName);
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
-        FollowUpSnapshot snapshot = snapshotService.get(date, timezone, projectKey);
+        FollowUpSnapshot snapshot = kpiService.getSnapshot(date, timezone, projectKey);
 
         return new FollowUpReportGenerator(spreadsheetEditor, fieldMetadataService, wipKpiService, tpKpiService).generate(snapshot, timezone);
     }
@@ -171,9 +172,5 @@ public class FollowUpFacade {
 
     public Resource getTemplateResource(String templateName) {
         return getTemplate(templateName).getPathFollowupTemplateXLSM();
-    }
-
-    public List<LocalDate> getHistoryGivenProject(String projectKey) {
-        return snapshotService.getAvailableHistory(projectKey);
     }
 }

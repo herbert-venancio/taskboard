@@ -118,6 +118,32 @@ public class CycleTimeDataProviderTest {
         .then()
             .emptyDataSet();
     }
+    
+    @Test
+    public void getDataSet_whenIssuesJumpCycleStatus_thenEmptyDataSet(){
+        dsl()
+        .environment()
+            .givenDemand("I-1")
+                .type("Demand")
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2019-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                    .status("Cancelled").date("2019-01-10")
+                .eoT()
+            .eoI()
+            .withKpiProperties(
+                withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+            )
+        .when()
+            .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
+        .then()
+            .emptyDataSet();
+    }
 
     @Test
     public void getDataSet_whenAllIssuesAreInProgress_thenEmptyDataSet(){

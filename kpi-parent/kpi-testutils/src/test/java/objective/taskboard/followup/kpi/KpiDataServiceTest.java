@@ -5,7 +5,10 @@ import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
 import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
 import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
 import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.EnumMap;
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
@@ -59,6 +63,7 @@ public class KpiDataServiceTest {
             .when()
                 .appliesBehavior(getSnapshot("PROJ"))
             .then()
+                .calledSnapshotFromCurrentState()
                 .analyticLevel(DEMAND)
                     .hasSize(1)
                     .hasIssue("I-1")
@@ -73,6 +78,50 @@ public class KpiDataServiceTest {
                 .eoA();
     }
 
+    @Test
+    public void getFollowupSnapshot_passingDate() {
+        dsl()
+            .environment()
+                .givenDemand("I-1")
+                    .project("PROJ")
+                    .type("Demand")
+                    .withTransitions()
+                        .status("To Do").date("2017-09-25")
+                        .status("Doing").noDate()
+                        .status("Done").noDate()
+                    .eoT()
+                    .feature("I-2")
+                        .type("Feature")
+                        .withTransitions()
+                            .status("To Do").date("2017-09-25")
+                            .status("Doing").date("2017-09-26")
+                            .status("Done").noDate()
+                        .eoT()
+                        .subtask("I-3")
+                        .type("Subtask")
+                        .withTransitions()
+                            .status("To Do").date("2017-09-25")
+                            .status("Doing").date("2017-09-26")
+                            .status("Done").date("2017-09-27")
+                        .eoT()
+                .eoI()
+            .when()
+                .appliesBehavior(getSnapshot("PROJ").withDate("2017-09-25"))
+            .then()
+                .calledSnapshotWithDate("2017-09-25")
+                .analyticLevel(DEMAND)
+                    .hasSize(1)
+                    .hasIssue("I-1")
+                .eoA()
+                .analyticLevel(FEATURES)
+                    .hasSize(1)
+                    .hasIssue("I-2")
+                .eoA()
+                .analyticLevel(SUBTASKS)
+                    .hasSize(1)
+                    .hasIssue("I-3")
+                .eoA();
+    }
 
     @Test
     public void getIssues_currentState() {
@@ -380,28 +429,34 @@ public class KpiDataServiceTest {
         protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
             return subject.getIssuesFromCurrentState(projectKey, timezone, level);
         }
-        
+
     }
     
     private class ServeIssuesFilteringByProject extends ServeIssuesFromCurrentState {
     
-    private ServeIssuesFilteringByProject(String projectKey, KpiLevel level) {
-            super(projectKey, level);
-        }
-
-    @Override
-    protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
-        return subject.getIssuesFromCurrentProjectRange(projectKey, timezone, level);
-    }
+        private ServeIssuesFilteringByProject(String projectKey, KpiLevel level) {
+                super(projectKey, level);
+            }
     
+        @Override
+        protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
+            return subject.getIssuesFromCurrentProjectRange(projectKey, timezone, level);
+        }
+        
     }
 
     private class FollowupSnapshotBehavior implements DSLSimpleBehaviorWithAsserter<SnahpsotAsserter> {
         private SnahpsotAsserter asserter;
         private String projectKey;
+        private Optional<LocalDate> date = Optional.empty();
 
         public FollowupSnapshotBehavior(String projectKey) {
             this.projectKey = projectKey;
+        }
+        
+        private FollowupSnapshotBehavior withDate(String date) {
+            this.date = Optional.of(LocalDate.parse(date));
+            return this;
         }
 
         @Override
@@ -415,9 +470,15 @@ public class KpiDataServiceTest {
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             ProjectService projectService = environment.services().projects().getService();
-            
+
             KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService); 
-            this.asserter = new SnahpsotAsserter(subject.getSnapshotFromCurrentState(timezone,projectKey));
+            this.asserter = new SnahpsotAsserter(projectKey,timezone, environment, getSnapshot(timezone, subject));
+        }
+
+        private FollowUpSnapshot getSnapshot(ZoneId timezone, KpiDataService subject) {
+            if(date.isPresent())
+                return subject.getSnapshot(date, timezone, projectKey);
+            return subject.getSnapshotFromCurrentState(timezone,projectKey);
         }
 
         @Override
@@ -430,10 +491,30 @@ public class KpiDataServiceTest {
 
         private Map<KpiLevel, AnalyticsTransitionsDataSet> analyticSets = new EnumMap<>(KpiLevel.class);
         private FollowUpData data;
+        private KpiEnvironment environment;
+        private String projectKey;
+        private ZoneId timezone;
 
-        public SnahpsotAsserter(FollowUpSnapshot snapshot) {
+        public SnahpsotAsserter(String projectKey, ZoneId timezone, KpiEnvironment environment,FollowUpSnapshot snapshot) {
+            this.projectKey = projectKey;
+            this.timezone = timezone;
+            this.environment = environment;
             this.data = snapshot.getData();
             fillAnalyticsSets();
+        }
+
+        public SnahpsotAsserter calledSnapshotWithDate(String date) {
+            FollowUpSnapshotService service = environment.services().followupSnapshot().getService();
+            Mockito.verify(service,times(1)).get(eq(Optional.of(LocalDate.parse(date))), eq(timezone), eq(projectKey));
+            Mockito.verify(service,times(0)).getFromCurrentState(timezone,projectKey);
+            return this;
+        }
+        
+        public SnahpsotAsserter calledSnapshotFromCurrentState() {
+            FollowUpSnapshotService service = environment.services().followupSnapshot().getService();
+            Mockito.verify(service,times(0)).get(Mockito.any(), Mockito.eq(timezone), Mockito.eq(projectKey));
+            Mockito.verify(service,times(1)).getFromCurrentState(timezone,projectKey);
+            return this;
         }
 
         private void fillAnalyticsSets() {
@@ -445,7 +526,7 @@ public class KpiDataServiceTest {
 
         public AnalyticAsserter analyticLevel(KpiLevel level) {
             return new AnalyticAsserter(analyticSets.get(level));
-            
+
         }
         
         private class AnalyticAsserter {
@@ -460,7 +541,7 @@ public class KpiDataServiceTest {
                 Assertions.assertThat(subject.rows).hasSize(size);
                 return this;
             }
-            
+
             private AnalyticAsserter hasIssue(String issue) {
                 Optional<AnalyticsTransitionsDataRow> issueRow = subject.rows.stream().filter(r -> issue.equalsIgnoreCase(r.issueKey)).findFirst();
                 Assertions.assertThat(issueRow).as("Issue not found: %s",issue).isPresent();
@@ -470,7 +551,6 @@ public class KpiDataServiceTest {
             private SnahpsotAsserter eoA() {
                 return SnahpsotAsserter.this;
             }
-                        
         }
         
     }

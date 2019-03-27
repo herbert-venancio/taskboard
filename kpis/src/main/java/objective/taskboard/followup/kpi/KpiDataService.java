@@ -1,7 +1,9 @@
 package objective.taskboard.followup.kpi;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,10 @@ public class KpiDataService {
 
     public FollowUpSnapshot getSnapshotFromCurrentState(ZoneId timezone,String projectKey) {
         return followupSnapshotService.getFromCurrentState(timezone, projectKey);
+    }
+
+    public FollowUpSnapshot getSnapshot(Optional<LocalDate> date, ZoneId timezone, String projectKey) {
+        return followupSnapshotService.get(date,timezone, projectKey);
     }
     
 }
