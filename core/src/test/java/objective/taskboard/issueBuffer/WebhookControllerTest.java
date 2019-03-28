@@ -15,13 +15,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.controller.WebhookController;
+import objective.taskboard.controller.WebhookHelper;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
-import objective.taskboard.task.IssueTypeEventProcessorFactory;
+import objective.taskboard.task.IssueEventProcessorFactory;
 import objective.taskboard.testUtils.OptionalAutowiredDependenciesInitializer;
 
 @RunWith(SpringRunner.class)
@@ -39,13 +40,18 @@ public class WebhookControllerTest {
         }
 
         @Bean
-        public IssueTypeEventProcessorFactory issueTypeEventProcessorFactory() {
-            return new IssueTypeEventProcessorFactory();
+        public IssueEventProcessorFactory issueTypeEventProcessorFactory() {
+            return new IssueEventProcessorFactory();
         }
 
         @Bean
         public IssueEventProcessScheduler issueEventProcessScheduler() {
             return new IssueEventProcessScheduler();
+        }
+
+        @Bean
+        public WebhookHelper webhookHelper() {
+            return new WebhookHelper();
         }
     }
 
@@ -72,6 +78,7 @@ public class WebhookControllerTest {
     @Before
     public void setup() {
         dsl = new WebhookControllerTestDSL(
+                issueBufferService,
                 projectFilterConfigurationCachedRepository,
                 filterCachedRepository,
                 jiraService,
@@ -127,20 +134,54 @@ public class WebhookControllerTest {
     }
 
     @Test
-    public void whenMoveIssueToAnotherProject_ShouldCallIssueMovedWebhookEvent() {
+    public void whenIssueChangedProject_shouldRemoveIssueFromOldProjectAndAddToNewProject() {
+        givenExistingIssue("TASKB-237");
         givenJiraSend(webHook("TASKB-237_movePayload.json"));
 
         whenProcessItems();
 
+        then(issueBufferService).removeIssueAndAddDeletionEvent()
+                .shouldHaveBeenCalled(withArguments("TASKB-237"));
         then(issueBufferService)
             .updateByEvent()
             .shouldHaveBeenCalled(
-                withArguments(equalTo(WebhookEvent.ISSUE_MOVED), equalTo("PROJ1-066"), anything())
+                withArguments(equalTo(WebhookEvent.ISSUE_UPDATED), equalTo("PROJ1-066"), anything())
             );
-}
+    }
+
+    @Test
+    public void whenIssueChangedToUnknownProject_shouldRemoveIssueFromOldProjectAndNotCallUpdateByEvent() {
+        givenExistingIssue("TASKB-1");
+        givenJiraSend(webHook("update-TASKB-1-changeproject-OTHER-1.json"));
+
+        whenProcessItems();
+
+        then(issueBufferService).removeIssueAndAddDeletionEvent()
+                .shouldHaveBeenCalled(withArguments("TASKB-1"));
+        then(issueBufferService).updateByEvent()
+                .shouldNotHaveBeenCalled();
+    }
+
+    @Test
+    public void whenIssueChangedFromUnknownToKnownProject_shouldNotCallRemoveIssue() {
+        givenJiraSend(webHook("update-OTHER-1-changeproject-TASKB-1.json"));
+
+        whenProcessItems();
+
+        then(issueBufferService).removeIssueAndAddDeletionEvent()
+                .shouldNotHaveBeenCalled();
+        then(issueBufferService).updateByEvent()
+                .shouldHaveBeenCalled(
+                        withArguments(equalTo(WebhookEvent.ISSUE_UPDATED), equalTo("TASKB-1"), anything())
+                );
+    }
 
     private void givenJiraSend(WebhookControllerTestDSL.WebhookPayloadBuilder... builders) {
         dsl.jiraSend(builders);
+    }
+
+    private void givenExistingIssue(String issueKey) {
+        dsl.given(dsl.issue().withKey(issueKey));
     }
 
     private void whenProcessItems() {

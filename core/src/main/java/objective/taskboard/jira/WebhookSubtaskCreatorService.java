@@ -21,11 +21,11 @@
 
 package objective.taskboard.jira;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.jira.client.ChangelogItemDto;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -45,15 +45,15 @@ public class WebhookSubtaskCreatorService {
         if (changelog == null || parent == null)
             return;
         
-        Optional<Map<String, Object>> statusChangeOpt = changelog.items.stream()
-                .filter(i -> i.containsKey("field") && "status".equals(i.get("field")))
+        Optional<ChangelogItemDto> statusChangeOpt = changelog.items.stream()
+                .filter(i -> "status".equals(i.getField()))
                 .findFirst();
         
         if (!statusChangeOpt.isPresent())
             return;
         
-        Long statusIdFrom = Long.parseLong((String) statusChangeOpt.get().get("from"));
-        Long statusIdTo = Long.parseLong((String) statusChangeOpt.get().get("to"));
+        Long statusIdFrom = Long.parseLong(statusChangeOpt.get().getFrom());
+        Long statusIdTo = Long.parseLong(statusChangeOpt.get().getTo());
         Long issueTypeId = parent.getIssueType().getId();
 
         jiraProperties.getSubtaskCreation().stream()

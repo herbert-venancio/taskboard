@@ -7,9 +7,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import objective.taskboard.jira.client.ChangelogItemDto;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.data.WebHookBody;
@@ -40,7 +39,7 @@ public class WebhookSubtaskCreatorServiceTest {
     private SubtaskCreation properties2 = new SubtaskCreation();
     
     private WebHookBody.Changelog changelog = new WebHookBody.Changelog();
-    private List<Map<String, Object>> changelogItems = new ArrayList<>();
+    private List<ChangelogItemDto> changelogItems = new ArrayList<>();
 
     @Before
     public void setup() throws Exception {
@@ -68,7 +67,7 @@ public class WebhookSubtaskCreatorServiceTest {
     public void dontCreateSubtask_ifStatusHaventChanged() {
         service.createSubtaskOnTransition(parent, changelog);
 
-        addChange("other", new Object());
+        addChange("other");
         service.createSubtaskOnTransition(parent, changelog);
         
         verifyZeroInteractions(subtaskCreatorService);
@@ -123,18 +122,12 @@ public class WebhookSubtaskCreatorServiceTest {
         changelogItems.add(addStatusChange(statusFromId.toString(), statusToId.toString()));
     }    
     
-    private void addChange(String field, Object value) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(field, value);
-        changelogItems.add(map);
+    private void addChange(String field) {
+        changelogItems.add(new ChangelogItemDto(field, null, null, null, null));
     }
     
-    private Map<String, Object> addStatusChange(String from, String to) {
-        Map<String, Object> map = new HashMap<>();        
-        map.put("field", "status");
-        map.put("from", from);
-        map.put("to", to);
-        return map;
+    private ChangelogItemDto addStatusChange(String from, String to) {
+        return new ChangelogItemDto("status", from, to, null, null);
     }
 
 }

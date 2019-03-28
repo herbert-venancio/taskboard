@@ -5,19 +5,28 @@ import static java.util.Arrays.stream;
 import static objective.taskboard.issueBuffer.IssueBufferServiceTest.payload;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.mockito.ArgumentCaptor;
 
+import objective.taskboard.MockBuilder;
 import objective.taskboard.controller.WebhookController;
+import objective.taskboard.data.Issue;
 import objective.taskboard.domain.Filter;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.WebHookBody;
@@ -32,8 +41,15 @@ public class WebhookControllerTestDSL {
     private final IssueEventProcessScheduler issueEventProcessScheduler;
     private final WebhookController webhookController;
 
+    private final List<ProjectFilterConfiguration> projects = new ArrayList<>();
+    private final List<Issue> issues = new ArrayList<>();
+
     public static WebhookPayloadBuilder webHook(String payloadFileName) {
         return new WebhookPayloadBuilder().fromFile(payloadFileName);
+    }
+
+    public static <A> CallArgumentsAssert withArguments(A a) {
+        return new CallArgumentsAssert(a);
     }
 
     public static <A, B, C> CallArgumentsAssert withArguments(A a, B b, C c) {
@@ -41,6 +57,7 @@ public class WebhookControllerTestDSL {
     }
 
     public WebhookControllerTestDSL(
+            IssueBufferService issueBufferService,
             ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository,
             FilterCachedRepository filterCachedRepository,
             JiraService jiraService,
@@ -51,9 +68,22 @@ public class WebhookControllerTestDSL {
         this.issueEventProcessScheduler = issueEventProcessScheduler;
         this.webhookController = webhookController;
 
-        willReturn(true).given(projectFilterConfigurationCachedRepository).exists(eq("TASKB"));
-        willReturn(true).given(projectFilterConfigurationCachedRepository).exists(eq("PROJ1"));
+        willReturn(projects).given(projectFilterConfigurationCachedRepository).getProjects();
+        willAnswer(invocation -> {
+            String projectKey = invocation.getArgumentAt(0, String.class);
+            return projects.stream().anyMatch(p -> Objects.equals(p.getProjectKey(), projectKey));
+        }).given(projectFilterConfigurationCachedRepository).exists(any());
+        givenDefaultProjects();
 
+        willReturn(issues).given(issueBufferService)
+                .getAllIssues();
+        willAnswer(invocation -> {
+            String issueKey = invocation.getArgumentAt(0, String.class);
+            return issues.stream()
+                    .filter(i -> Objects.equals(issueKey, i.getIssueKey()))
+                    .findFirst()
+                    .orElse(null);
+        }).given(issueBufferService).getIssueByKey(any());
 
         Filter taskFilter = new Filter();
         taskFilter.setIssueTypeId(10000L);
@@ -71,6 +101,24 @@ public class WebhookControllerTestDSL {
             .given(filterCachedRepository).getCache();
     }
 
+    public ProjectMockBuilder project() {
+        return new ProjectMockBuilder();
+    }
+
+    public IssueMockBuilder issue() {
+        return new IssueMockBuilder();
+    }
+
+    public void given(ProjectMockBuilder... builders) {
+        stream(builders)
+                .forEach(b -> projects.add(b.build()));
+    }
+
+    public void given(IssueMockBuilder... builders) {
+        stream(builders)
+                .forEach(b -> issues.add(b.build()));
+    }
+
     public void jiraSend(WebhookPayloadBuilder... builders) {
         stream(builders)
                 .forEach(b -> b.build(jiraService, webhookController));
@@ -82,6 +130,13 @@ public class WebhookControllerTestDSL {
 
     public IssueBufferServiceAssert then(IssueBufferService issueBufferService) {
         return new IssueBufferServiceAssert(issueBufferService);
+    }
+
+    private void givenDefaultProjects() {
+        given(
+                project().withKey("TASKB"),
+                project().withKey("PROJ1")
+        );
     }
 
     public static class WebhookPayloadBuilder {
@@ -114,6 +169,10 @@ public class WebhookControllerTestDSL {
         public IssueBufferUpdateByEventAssert updateByEvent() {
             return new IssueBufferUpdateByEventAssert(issueBufferService);
         }
+
+        public IssueBufferRemoveIssueAndAddDeletionEventAssert removeIssueAndAddDeletionEvent() {
+            return new IssueBufferRemoveIssueAndAddDeletionEventAssert(issueBufferService);
+        }
     }
 
     public static class IssueBufferUpdateByEventAssert {
@@ -135,6 +194,35 @@ public class WebhookControllerTestDSL {
             for(int i = 0; i < arguments.length; ++i) {
                 arguments[i].matches(event.getAllValues().get(i), issueKey.getAllValues().get(i), issue.getAllValues().get(i));
             }
+            return this;
+        }
+
+        public IssueBufferUpdateByEventAssert shouldNotHaveBeenCalled() {
+            verify(issueBufferService, never()).updateByEvent(any(), any(), any());
+            return this;
+        }
+    }
+
+    public static class IssueBufferRemoveIssueAndAddDeletionEventAssert {
+
+        private IssueBufferService issueBufferService;
+
+        private IssueBufferRemoveIssueAndAddDeletionEventAssert(IssueBufferService issueBufferService) {
+            this.issueBufferService = issueBufferService;
+        }
+
+        public IssueBufferRemoveIssueAndAddDeletionEventAssert shouldHaveBeenCalled(CallArgumentsAssert... arguments) {
+            ArgumentCaptor<String> issueKey = ArgumentCaptor.forClass(String.class);
+
+            verify(issueBufferService, atLeastOnce()).removeIssueAndAddDeletionEvent(issueKey.capture());
+            for(int i = 0; i < arguments.length; ++i) {
+                arguments[i].matches(issueKey.getAllValues().get(i));
+            }
+            return this;
+        }
+
+        public IssueBufferRemoveIssueAndAddDeletionEventAssert shouldNotHaveBeenCalled() {
+            verify(issueBufferService, never()).removeIssueAndAddDeletionEvent(any());
             return this;
         }
     }
@@ -161,6 +249,30 @@ public class WebhookControllerTestDSL {
             for(int i = 0; i < argumentMatchers.length; ++i) {
                 MatcherAssert.assertThat(values[i], argumentMatchers[i]);
             }
+        }
+    }
+
+    public static class ProjectMockBuilder extends MockBuilder<ProjectFilterConfiguration> {
+
+        public ProjectMockBuilder() {
+            super(ProjectFilterConfiguration.class);
+        }
+
+        public ProjectMockBuilder withKey(String key) {
+            config.put(ProjectFilterConfiguration::getProjectKey, key);
+            return this;
+        }
+    }
+
+    public static class IssueMockBuilder extends MockBuilder<Issue> {
+
+        public IssueMockBuilder() {
+            super(Issue.class);
+        }
+
+        public IssueMockBuilder withKey(String key) {
+            config.put(Issue::getIssueKey, key);
+            return this;
         }
     }
 }
