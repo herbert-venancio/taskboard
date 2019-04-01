@@ -225,16 +225,9 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         Issue issueBeforeUpdate = cardsRepo.get(issueKey);
         updateCardFromWebhookEvent(event, issueKey, issue);
         Issue issueAfterUpdate = cardsRepo.get(issueKey);
-        boolean issueDidntExistBefore = issueBeforeUpdate == null;
-        if (issueDidntExistBefore)
-            // created
-            scheduleNotificationsForLinkedIssues(issueAfterUpdate);
-        else if (issueAfterUpdate == null)
-            // removed
-            scheduleNotificationsForLinkedIssues(issueBeforeUpdate);
-        else
-            // updated
-            scheduleNotificationsForLinkedIssues(issueAfterUpdate);
+
+        scheduleNotificationsForLinkedIssues(issueAfterUpdate);
+        scheduleNotificationsForLinkedIssues(issueBeforeUpdate);
     }
 
     private synchronized void updateCardFromWebhookEvent(WebhookEvent event, final String issueKey, Optional<JiraIssueDto> issue) {
@@ -246,11 +239,6 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         if (!issue.isPresent())
             return;
         
-        if (event == WebhookEvent.ISSUE_MOVED) {
-            Issue movedIssue = cardsRepo.getById(issue.get().getId());
-            removeIssueAndAddDeletionEvent(movedIssue.getIssueKey());
-            scheduleNotificationsForLinkedIssues(movedIssue);
-        }
         Issue updated = putJiraIssue(issue.get());
         IssueUpdateType updateType = getIssueType(event);
 
@@ -575,7 +563,7 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
                 .collect(toList());
     }
 
-    private void removeIssueAndAddDeletionEvent(final String issueKey) {
+    public void removeIssueAndAddDeletionEvent(final String issueKey) {
         issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.DELETED));
         cardsRepo.remove(issueKey);
     }

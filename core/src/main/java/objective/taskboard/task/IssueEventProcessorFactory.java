@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.controller.WebhookHelper;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraService;
@@ -16,7 +17,10 @@ import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.repository.FilterCachedRepository;
 
 @Component
-public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory {
+public class IssueEventProcessorFactory implements JiraEventProcessorFactory {
+
+    @Autowired
+    private WebhookHelper webhookHelper;
 
     @Autowired
     private FilterCachedRepository filterCachedRepository;
@@ -38,7 +42,7 @@ public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory
         if(!belongsToAnyIssueTypeFilter(getIssueTypeIdOrNull(body)))
             return Optional.empty();
 
-        return Optional.of(new IssueTypeEventProcessor(body));
+        return Optional.of(new IssueEventProcessor(body));
     }
 
     protected boolean belongsToAnyIssueTypeFilter(Long issueTypeId) {
@@ -55,14 +59,16 @@ public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory
         return body.issue.getIssueType().getId();
     }
 
-    private class IssueTypeEventProcessor implements JiraEventProcessor {
+    private class IssueEventProcessor implements JiraEventProcessor {
 
         private final WebhookEvent webHook;
+        private final String projectKey;
         private final String issueKey;
         public final WebHookBody.Changelog changelog;
 
-        private IssueTypeEventProcessor(WebHookBody webHook) {
+        private IssueEventProcessor(WebHookBody webHook) {
             this.webHook = webHook.webhookEvent;
+            projectKey = webHook.issue.getProject().getKey();
             issueKey = webHook.issue.getKey();
             changelog = webHook.changelog;
         }
@@ -74,6 +80,12 @@ public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory
 
         @Override
         public void processEvent() {
+            webhookHelper.fetchOldIssue(changelog)
+                    .ifPresent(oldIssue -> issueBufferService.removeIssueAndAddDeletionEvent(oldIssue.getIssueKey()));
+
+            if(!webhookHelper.belongsToAnyProject(projectKey))
+                return;
+
             Optional<JiraIssueDto> issue = fetchIssue();
             issue.ifPresent(jiraIssue ->
                     webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, changelog)
