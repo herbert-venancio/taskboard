@@ -28,7 +28,7 @@ import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.IssuesAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
+import objective.taskboard.followup.kpi.enviroment.snapshot.SnapshotGenerator;
 import objective.taskboard.jira.ProjectService;
 
 public class KpiDataServiceTest {
@@ -151,6 +151,7 @@ public class KpiDataServiceTest {
                 .endOfSubtask()
             .eoI()
         .eoE();
+        
         context
             .when()
                 .appliesBehavior(getIssuesFromCurrentState("PROJ", DEMAND))
@@ -169,6 +170,7 @@ public class KpiDataServiceTest {
                     .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
                     .hasChild("I-2")
                 .eoIA();
+        
         context
             .when()
                 .appliesBehavior(getIssuesFromCurrentState("PROJ", SUBTASKS))
@@ -181,6 +183,7 @@ public class KpiDataServiceTest {
                     .atStatus("To Do").hasNoEffort().eoSa()
                     .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
                     .atStatus("Done").hasNoEffort().eoSa();
+        
         context
             .when()
             .appliesBehavior(getIssuesFromCurrentState("PROJ", UNMAPPED))
@@ -247,6 +250,7 @@ public class KpiDataServiceTest {
                         .eoW()
                     .endOfSubtask()
                 .eoI();
+        
             context
                 .when()
                     .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", FEATURES))
@@ -260,6 +264,7 @@ public class KpiDataServiceTest {
                         .hasChild("I-2")
                         .hasChild("I-3")
                         .hasChild("I-4");
+            
             context
                 .when()
                     .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", SUBTASKS))
@@ -341,6 +346,7 @@ public class KpiDataServiceTest {
                         .eoW()
                     .endOfSubtask()
                 .eoI();
+        
             context
                 .when()
                     .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", FEATURES))
@@ -354,6 +360,7 @@ public class KpiDataServiceTest {
                         .hasChild("I-2")
                         .hasChild("I-3")
                         .hasChild("I-4");
+            
             context
                 .when()
                     .appliesBehavior(getIssuesFromCurrentStateFilteringByProjectRange("PROJ", SUBTASKS))
@@ -445,8 +452,8 @@ public class KpiDataServiceTest {
         
     }
 
-    private class FollowupSnapshotBehavior implements DSLSimpleBehaviorWithAsserter<SnahpsotAsserter> {
-        private SnahpsotAsserter asserter;
+    private class FollowupSnapshotBehavior implements DSLSimpleBehaviorWithAsserter<SnapshotAsserter> {
+        private SnapshotAsserter asserter;
         private String projectKey;
         private Optional<LocalDate> date = Optional.empty();
 
@@ -462,32 +469,32 @@ public class KpiDataServiceTest {
         @Override
         public void behave(KpiEnvironment environment) {
 
-            GenerateSnapshot datasetFactory = new GenerateSnapshot(environment);
+            SnapshotGenerator snapshoGenerator = new SnapshotGenerator(environment);
             ZoneId timezone = environment.getTimezone();
             
-            environment.services().followupSnapshot().prepareForFactory(datasetFactory,projectKey, timezone);
+            environment.services().followupSnapshot().prepareForGenerator(snapshoGenerator,projectKey, timezone);
 
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             ProjectService projectService = environment.services().projects().getService();
 
             KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService); 
-            this.asserter = new SnahpsotAsserter(projectKey,timezone, environment, getSnapshot(timezone, subject));
+            this.asserter = new SnapshotAsserter(projectKey,timezone, environment, getSnapshot(timezone, subject));
         }
 
         private FollowUpSnapshot getSnapshot(ZoneId timezone, KpiDataService subject) {
             if(date.isPresent())
-                return subject.getSnapshot(date, timezone, projectKey);
-            return subject.getSnapshotFromCurrentState(timezone,projectKey);
+                return subject.getSnapshot(projectKey, timezone, date);
+            return subject.getSnapshotFromCurrentState(projectKey,timezone);
         }
 
         @Override
-        public SnahpsotAsserter then() {
+        public SnapshotAsserter then() {
             return this.asserter;
         }
     }
     
-    private class SnahpsotAsserter {
+    private class SnapshotAsserter {
 
         private Map<KpiLevel, AnalyticsTransitionsDataSet> analyticSets = new EnumMap<>(KpiLevel.class);
         private FollowUpData data;
@@ -495,7 +502,7 @@ public class KpiDataServiceTest {
         private String projectKey;
         private ZoneId timezone;
 
-        public SnahpsotAsserter(String projectKey, ZoneId timezone, KpiEnvironment environment,FollowUpSnapshot snapshot) {
+        public SnapshotAsserter(String projectKey, ZoneId timezone, KpiEnvironment environment,FollowUpSnapshot snapshot) {
             this.projectKey = projectKey;
             this.timezone = timezone;
             this.environment = environment;
@@ -503,14 +510,14 @@ public class KpiDataServiceTest {
             fillAnalyticsSets();
         }
 
-        public SnahpsotAsserter calledSnapshotWithDate(String date) {
+        public SnapshotAsserter calledSnapshotWithDate(String date) {
             FollowUpSnapshotService service = environment.services().followupSnapshot().getService();
             Mockito.verify(service,times(1)).get(eq(Optional.of(LocalDate.parse(date))), eq(timezone), eq(projectKey));
             Mockito.verify(service,times(0)).getFromCurrentState(timezone,projectKey);
             return this;
         }
         
-        public SnahpsotAsserter calledSnapshotFromCurrentState() {
+        public SnapshotAsserter calledSnapshotFromCurrentState() {
             FollowUpSnapshotService service = environment.services().followupSnapshot().getService();
             Mockito.verify(service,times(0)).get(Mockito.any(), Mockito.eq(timezone), Mockito.eq(projectKey));
             Mockito.verify(service,times(1)).getFromCurrentState(timezone,projectKey);
@@ -548,8 +555,8 @@ public class KpiDataServiceTest {
                 return this;
             }
             
-            private SnahpsotAsserter eoA() {
-                return SnahpsotAsserter.this;
+            private SnapshotAsserter eoA() {
+                return SnapshotAsserter.this;
             }
         }
         

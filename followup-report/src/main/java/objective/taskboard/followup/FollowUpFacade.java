@@ -88,7 +88,7 @@ public class FollowUpFacade {
 
         FollowUpTemplate template = getTemplate(templateName);
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
-        FollowUpSnapshot snapshot = kpiService.getSnapshot(date, timezone, projectKey);
+        FollowUpSnapshot snapshot = kpiService.getSnapshot(projectKey, timezone, date);
 
         return new FollowUpReportGenerator(spreadsheetEditor, fieldMetadataService, wipKpiService, tpKpiService).generate(snapshot, timezone);
     }

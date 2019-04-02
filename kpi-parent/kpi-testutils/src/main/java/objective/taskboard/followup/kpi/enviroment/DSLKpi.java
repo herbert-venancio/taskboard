@@ -42,7 +42,7 @@ public class DSLKpi {
     }
 
     public BehaviorFactory when() {
-        environment.services().mockAll();
+        environment.services().prepareAllMocks();
 
         return behaviorFactory;
     }

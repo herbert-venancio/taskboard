@@ -24,7 +24,7 @@ import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateAnalyticsDataSets;
+import objective.taskboard.followup.kpi.enviroment.snapshot.AnalyticsDataSetsGenerator;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.properties.JiraProperties;
 
@@ -71,7 +71,7 @@ public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpl
 
         @Override
         protected List<IssueKpiDataItemAdapter> getItems(KpiEnvironment environment,IssueKpiDataItemAdapterFactory subject) {
-            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            AnalyticsDataSetsGenerator datasetFactory = new AnalyticsDataSetsGenerator(environment);
             return subject.getItems(datasetFactory.getOptionalDataSetForLevel(level));
         }
     }

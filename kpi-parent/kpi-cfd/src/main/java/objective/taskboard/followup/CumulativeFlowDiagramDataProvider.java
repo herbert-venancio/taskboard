@@ -48,7 +48,7 @@ public class CumulativeFlowDiagramDataProvider {
         if(!belongsToAnyProject(project))
             throw new IllegalArgumentException(String.format("Unknown project <%s>", project));
 
-        FollowUpSnapshot followupData = kpiService.getSnapshotFromCurrentState(ZoneId.systemDefault(), project);
+        FollowUpSnapshot followupData = kpiService.getSnapshotFromCurrentState(project, ZoneId.systemDefault());
         return transform(followupData, Level.valueOf(level.toUpperCase()));
     }
 

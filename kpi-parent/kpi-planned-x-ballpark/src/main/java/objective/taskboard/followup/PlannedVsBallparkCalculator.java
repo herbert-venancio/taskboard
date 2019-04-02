@@ -22,7 +22,7 @@ public class PlannedVsBallparkCalculator {
     }
 
     public List<PlannedVsBallparkChartData> calculate(String projectKey) throws ClusterNotConfiguredException {
-        FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(ZoneId.systemDefault(), projectKey);
+        FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, ZoneId.systemDefault());
 
         if (!snapshot.hasClusterConfiguration())
             throw new ClusterNotConfiguredException();

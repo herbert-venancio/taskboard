@@ -15,7 +15,7 @@ public abstract class KPIByLevelDataProvider<C,D> {
     
     public C getDataSet(String projectKey, String level, ZoneId timezone) {
 
-        FollowUpSnapshot followupSnapshot = kpiService.getSnapshotFromCurrentState(ZoneId.systemDefault(), projectKey);
+        FollowUpSnapshot followupSnapshot = kpiService.getSnapshotFromCurrentState(projectKey, ZoneId.systemDefault());
         final FollowUpTimeline timeline = followupSnapshot.getTimeline();
         
         FollowUpData followupData = followupSnapshot.getData();

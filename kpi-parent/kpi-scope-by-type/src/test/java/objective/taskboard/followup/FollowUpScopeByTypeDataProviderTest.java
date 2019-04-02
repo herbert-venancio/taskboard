@@ -49,7 +49,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(fc.isEmpty()).thenReturn(false);
         
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), asList(row));
-        when(kpiService.getSnapshotFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT_KEY, ZONE_ID)).thenReturn(snapshot);
     }
 
     @Test
@@ -199,7 +199,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         List<FromJiraDataRow> rows = asList(row, row, row);
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), rows);
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
-        when(kpiService.getSnapshotFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT_KEY, ZONE_ID)).thenReturn(snapshot);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
@@ -220,7 +220,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         List<FromJiraDataRow> rows = asList(row, row, row);
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), rows);
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
-        when(kpiService.getSnapshotFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT_KEY, ZONE_ID)).thenReturn(snapshot);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 

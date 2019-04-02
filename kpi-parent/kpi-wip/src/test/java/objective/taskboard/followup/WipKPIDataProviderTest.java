@@ -845,7 +845,7 @@ public class WipKPIDataProviderTest {
             final FollowUpData biggerFollowupData = KpiHelper.getBiggerFollowupData();
             FollowUpTimeline timeline = createCustomTimeline(projectFilter);
             FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, biggerFollowupData, new EmptyFollowupCluster(), emptyValuesProvider());
-            when(kpiService.getSnapshotFromCurrentState(ZONE_ID, projectKey)).thenReturn(snapshot);
+            when(kpiService.getSnapshotFromCurrentState(projectKey, ZONE_ID)).thenReturn(snapshot);
             return snapshot;
         }
 

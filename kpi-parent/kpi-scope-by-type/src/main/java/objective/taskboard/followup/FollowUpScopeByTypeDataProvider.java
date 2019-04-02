@@ -37,7 +37,7 @@ public class FollowUpScopeByTypeDataProvider {
     public FollowUpScopeByTypeDataSet getScopeByTypeData(String projectKey, ZoneId zoneId)
             throws ClusterNotConfiguredException {
 
-        final FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(zoneId, projectKey);
+        final FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, zoneId);
         final Map<String, Double> map = initTypes();
 
         if (!snapshot.hasClusterConfiguration())

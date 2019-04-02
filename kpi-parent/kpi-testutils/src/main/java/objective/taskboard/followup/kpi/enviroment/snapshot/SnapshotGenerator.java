@@ -15,23 +15,23 @@ import objective.taskboard.followup.KpiHelper;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
-public class GenerateSnapshot {
+public class SnapshotGenerator {
     
     private Optional<FromJiraDataSet> fromJiraDs = Optional.empty();
-    private GenerateAnalyticsDataSets analyticBuilder;
+    private AnalyticsDataSetsGenerator analyticGenerator;
     
-    public GenerateSnapshot(KpiEnvironment environment) {
-        this.analyticBuilder = new GenerateAnalyticsDataSets(environment);
+    public SnapshotGenerator(KpiEnvironment environment) {
+        this.analyticGenerator = new AnalyticsDataSetsGenerator(environment);
     }
     
-    public GenerateSnapshot withFromJiraDs(FromJiraDataSet fromJiraDs) {
+    public SnapshotGenerator withFromJiraDs(FromJiraDataSet fromJiraDs) {
         this.fromJiraDs = Optional.of(fromJiraDs);
         return this;
     }
     
     public FollowUpData buildFollowupData() {
         List<SyntheticTransitionsDataSet> syntheticTransitionsDataSets = emptyList();
-        List<AnalyticsTransitionsDataSet> analyticTransitionsDataSets = analyticBuilder.getAnalyticDataSets();
+        List<AnalyticsTransitionsDataSet> analyticTransitionsDataSets = analyticGenerator.getAnalyticDataSets();
         return new FollowUpData(getFromJiraDs(), analyticTransitionsDataSets, syntheticTransitionsDataSets);
     }
 
@@ -39,8 +39,8 @@ public class GenerateSnapshot {
         return fromJiraDs.orElse(KpiHelper.getDefaultFromJiraDs());
     }
 
-    public GenerateAnalyticsDataSets analyticBuilder() {
-        return analyticBuilder;
+    public AnalyticsDataSetsGenerator analyticBuilder() {
+        return analyticGenerator;
     }
 
     public FollowUpSnapshot buildSnapshot() {

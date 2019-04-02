@@ -24,14 +24,14 @@ import objective.taskboard.followup.kpi.enviroment.IssueKpiMocker;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.jira.properties.JiraProperties;
 
-public class GenerateAnalyticsDataSets {
+public class AnalyticsDataSetsGenerator {
     
     private KpiEnvironment environment;
     private Map<KpiLevel,AnalyticsTransitionsDataSet> datasets = new EnumMap<>(KpiLevel.class);
     
-    public GenerateAnalyticsDataSets(KpiEnvironment environment) {
+    public AnalyticsDataSetsGenerator(KpiEnvironment environment) {
         this.environment = environment;
-        buildsDatasets();
+        generateDatasets();
     }
     
     public Optional<AnalyticsTransitionsDataSet> getOptionalDataSetForLevel(KpiLevel level) {
@@ -46,15 +46,15 @@ public class GenerateAnalyticsDataSets {
         return datasets.get(level);
     }
 
-    private void buildsDatasets() {
-        Stream.of(KpiLevel.values()).forEach(level -> buildDataSet(level,environment.getJiraProperties(),allIssuesFrom(level)));
+    private void generateDatasets() {
+        Stream.of(KpiLevel.values()).forEach(level -> generateDataSet(level,environment.getJiraProperties(),allIssuesFrom(level)));
     }
 
     private List<IssueKpiMocker> allIssuesFrom(KpiLevel level){
         return environment.getAllIssueMockers().stream().filter(i -> i.level() == level).collect(Collectors.toList());
     }
 
-    private void buildDataSet(KpiLevel level, JiraProperties jiraProperties, List<IssueKpiMocker> list) {
+    private void generateDataSet(KpiLevel level, JiraProperties jiraProperties, List<IssueKpiMocker> list) {
         List<String> headers = new LinkedList<>();
         headers.add("PKEY");
         headers.add("ISSUE_TYPE");

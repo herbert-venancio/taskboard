@@ -24,8 +24,8 @@ import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.StatusDto;
-import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateAnalyticsDataSets;
-import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
+import objective.taskboard.followup.kpi.enviroment.snapshot.AnalyticsDataSetsGenerator;
+import objective.taskboard.followup.kpi.enviroment.snapshot.SnapshotGenerator;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
@@ -54,16 +54,16 @@ public class MockedServices {
         this.issuesRepository = new IssueKpiTestRepository(environment);
     }
 
-    public void mockAll() {
+    public void prepareAllMocks() {
         projects.mockService();
-        issueKpiServices.mockService();
-        issueBufferService.mockService();
-        factory.mockComponent();
-        metadataService.mockService();
-        transitionsService.mockService();
-        colorService.mock();
-        snapshotService.mock();
-        kpiDataServiceMocker.mock();
+        issueKpiServices.prepareMock();
+        issueBufferService.prepareMock();
+        factory.prepareMock();
+        metadataService.prepareMock();
+        transitionsService.prepareMock();
+        colorService.prepareMock();
+        snapshotService.prepareMock();
+        kpiDataServiceMocker.preapreMock();
     }
 
     public ProjectServiceMocker projects() {
@@ -112,7 +112,7 @@ public class MockedServices {
 
         public IssueKpiService getService() {
             if(service == null)
-                mockService();
+                prepareMock();
             return service;
         }
         
@@ -120,7 +120,7 @@ public class MockedServices {
             return issuesRepository.getIssuesKpi();
         }
 
-        public void prepareFromDataSet(GenerateAnalyticsDataSets factory) {
+        public void prepareFromDataSet(AnalyticsDataSetsGenerator factory) {
             Stream.of(KpiLevel.values()).forEach(level ->
                 when(getService().getIssues(factory.getOptionalDataSetForLevel(level)))
                     .thenReturn(issuesRepository.getIssuesByLevel(level))
@@ -131,7 +131,7 @@ public class MockedServices {
             return getIssuesKpiByKey().values().stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
         }
 
-        private void mockService() {
+        private void prepareMock() {
             Map<String, Map<KpiLevel, List<IssueKpi>>> byProject = issuesRepository.getIssuesByProject();
             byProject.entrySet().stream().forEach(entry -> {
                 String projectKey = entry.getKey();
@@ -170,11 +170,11 @@ public class MockedServices {
 
         public IssueBufferService getService() {
             if(service == null)
-                mockService();
+                prepareMock();
             return service;
         }
 
-        private void mockService() {
+        private void prepareMock() {
             service = Mockito.mock(IssueBufferService.class);
             Mockito.when(service.getAllIssues()).thenReturn(issuesRepository.getIssues());
         }
@@ -190,11 +190,11 @@ public class MockedServices {
 
         public IssueKpiDataItemAdapterFactory getComponent() {
             if(factory == null)
-                mockComponent();
+                prepareMock();
             return factory;
         }
 
-        private void mockComponent() {
+        private void prepareMock() {
             factory = Mockito.mock(IssueKpiDataItemAdapterFactory.class);
             List<Issue> issues = issuesRepository.getIssues();
             Mockito.when(factory.getItems(issues, environment.getTimezone())).thenReturn(getMappedItemAdapters());
@@ -226,11 +226,11 @@ public class MockedServices {
 
         public IssueTransitionService getService() {
             if(transitionService == null)
-                mockService();
+                prepareMock();
             return transitionService;
         }
 
-        private void mockService() {
+        private void prepareMock() {
             transitionService = Mockito.mock(IssueTransitionService.class);
 
             ZoneId timezone = environment.getTimezone();
@@ -247,11 +247,11 @@ public class MockedServices {
 
         public MetadataService getService() {
             if(metadataService == null)
-                mockService();
+                prepareMock();
             return metadataService;
         }
 
-        private void mockService() {
+        private void prepareMock() {
             metadataService = Mockito.mock(MetadataService.class);
 
             environment.types().foreach(typeDto ->{
@@ -268,11 +268,11 @@ public class MockedServices {
         
         public KpiDataService getService() {
             if(service == null)
-                mock();
+                preapreMock();
             return service;
         }
         
-        private void mock() {
+        private void preapreMock() {
             service = Mockito.mock(KpiDataService.class);
             Map<String, Map<KpiLevel, List<IssueKpi>>> byProject = issuesRepository.getIssuesByProject();
             byProject.entrySet().stream().forEach(entry -> {
@@ -299,7 +299,7 @@ public class MockedServices {
 
         public IssueColorService getService() {
             if (service == null) {
-                mock();
+                prepareMock();
             }
             return service;
         }
@@ -318,7 +318,7 @@ public class MockedServices {
             return MockedServices.this;
         }
 
-        private void mock() {
+        private void prepareMock() {
             service =  Mockito.mock(IssueColorService.class);
             Collection<StatusDto> statuses = environment.statuses().getStatuses();
             environment.types().foreach(type -> {
@@ -336,19 +336,19 @@ public class MockedServices {
         
         public FollowUpSnapshotService getService() {
             if (service == null)
-                mock();
+                prepareMock();
             
             return service;
             
         }
 
-        private void mock() {
+        private void prepareMock() {
             service = Mockito.mock(FollowUpSnapshotService.class);
         }
 
-        public void prepareForFactory(GenerateSnapshot datasetFactory, String projectKey, ZoneId timezone) {
+        public void prepareForGenerator(SnapshotGenerator snapshotGenerator, String projectKey, ZoneId timezone) {
             FollowUpSnapshotService mockedService = getService();
-            FollowUpSnapshot snapshot = datasetFactory.buildSnapshot();
+            FollowUpSnapshot snapshot = snapshotGenerator.buildSnapshot();
             Mockito.when(mockedService.getFromCurrentState(timezone, projectKey)).thenReturn(snapshot);
             Mockito.when(mockedService.get(Mockito.any(),Mockito.eq(timezone), Mockito.eq(projectKey))).thenReturn(snapshot);
         }

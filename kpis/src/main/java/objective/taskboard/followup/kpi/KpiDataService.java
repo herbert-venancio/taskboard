@@ -42,11 +42,11 @@ public class KpiDataService {
         return allIssues.stream().filter(new WithinRangeFilter(timezone, range)).collect(Collectors.toList());
     }
 
-    public FollowUpSnapshot getSnapshotFromCurrentState(ZoneId timezone,String projectKey) {
+    public FollowUpSnapshot getSnapshotFromCurrentState(String projectKey,ZoneId timezone) {
         return followupSnapshotService.getFromCurrentState(timezone, projectKey);
     }
 
-    public FollowUpSnapshot getSnapshot(Optional<LocalDate> date, ZoneId timezone, String projectKey) {
+    public FollowUpSnapshot getSnapshot(String projectKey, ZoneId timezone, Optional<LocalDate> date) {
         return followupSnapshotService.get(date,timezone, projectKey);
     }
     

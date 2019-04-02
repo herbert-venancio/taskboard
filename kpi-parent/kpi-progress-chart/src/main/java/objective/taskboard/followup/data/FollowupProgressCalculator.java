@@ -44,7 +44,7 @@ public class FollowupProgressCalculator {
     private ProgressData calculate(ZoneId timezone, String projectKey, int projectionSampleSize, boolean stopOnCompleteProjection) 
             throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
 
-        FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(timezone, projectKey);
+        FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, timezone);
         if (!snapshot.hasClusterConfiguration())
             throw new ClusterNotConfiguredException();
         

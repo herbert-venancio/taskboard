@@ -188,7 +188,7 @@ public class FollowUpFacadeTest {
         FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().timeline(date).data(getDefaultFollowupData()).build();
 
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(kpiService.getSnapshot(any(), any(), Mockito.eq(PROJECT))).willReturn(snapshot);
+        given(kpiService.getSnapshot(Mockito.eq(PROJECT), any(), any())).willReturn(snapshot);
         
         // when
         Resource resource = followUpFacade.generateReport(TEMPLATE_NAME, Optional.of(date), ZoneId.systemDefault(), PROJECT);

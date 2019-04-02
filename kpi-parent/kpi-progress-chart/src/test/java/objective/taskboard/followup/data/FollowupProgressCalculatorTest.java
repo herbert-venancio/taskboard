@@ -230,6 +230,6 @@ public class FollowupProgressCalculatorTest {
         when(snapshot.getEffortHistory()).thenReturn(asList(history));
         when(snapshot.hasClusterConfiguration()).thenReturn(true);
         
-        when(kpiService.getSnapshotFromCurrentState(TIMEZONE, PROJECT)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT, TIMEZONE)).thenReturn(snapshot);
     }
 }

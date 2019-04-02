@@ -16,7 +16,7 @@ import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateSnapshot;
+import objective.taskboard.followup.kpi.enviroment.snapshot.SnapshotGenerator;
 
 public class ThroughputKPIServiceTest {
 
@@ -124,7 +124,7 @@ public class ThroughputKPIServiceTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            GenerateSnapshot datasetFactory = new GenerateSnapshot(environment);
+            SnapshotGenerator datasetFactory = new SnapshotGenerator(environment);
             
             environment.services().issueKpi().prepareFromDataSet(datasetFactory.analyticBuilder());
             

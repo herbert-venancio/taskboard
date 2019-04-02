@@ -16,7 +16,7 @@ import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.enviroment.IssuesAsserter;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.snapshot.GenerateAnalyticsDataSets;
+import objective.taskboard.followup.kpi.enviroment.snapshot.AnalyticsDataSetsGenerator;
 
 public class IssueKpiServiceTest {
 
@@ -158,7 +158,7 @@ public class IssueKpiServiceTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            AnalyticsDataSetsGenerator datasetFactory = new AnalyticsDataSetsGenerator(environment);
             Optional<AnalyticsTransitionsDataSet> dataSet = datasetFactory.getOptionalDataSetForLevel(level);
             environment.services().itemAdapterFactory().configureForDataSet(dataSet);
             

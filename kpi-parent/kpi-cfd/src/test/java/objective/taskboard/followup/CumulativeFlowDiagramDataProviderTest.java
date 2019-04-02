@@ -70,12 +70,12 @@ public class CumulativeFlowDiagramDataProviderTest {
         followupData = KpiHelper.getBiggerFollowupData();
         FollowUpTimeline timeline = new FollowUpTimeline(TODAY_DATE);
         FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, followupData, new EmptyFollowupCluster(), emptyValuesProvider());
-        doReturn(snapshot).when(kpiService).getSnapshotFromCurrentState(any(), eq("TASKB"));
+        doReturn(snapshot).when(kpiService).getSnapshotFromCurrentState(eq("TASKB"), any());
         doReturn(true).when(projectRepository).exists(eq("TASKB"));
 
         FollowUpData emptyFollowupData = new FollowUpData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, emptyList()), emptyList(), emptySynthetics());
         FollowUpSnapshot emptySnapshot = new FollowUpSnapshot(timeline, emptyFollowupData, new EmptyFollowupCluster(), emptyValuesProvider());
-        doReturn(emptySnapshot).when(kpiService).getSnapshotFromCurrentState(any(), eq("EMPTY"));
+        doReturn(emptySnapshot).when(kpiService).getSnapshotFromCurrentState(eq("EMPTY"), any());
         doReturn(true).when(projectRepository).exists(eq("EMPTY"));
 
         doReturn(Optional.of(new JiraIssueTypeDto(-1L, "Any", false))).when(metaDataService).getIssueTypeByName(any());
@@ -251,7 +251,7 @@ public class CumulativeFlowDiagramDataProviderTest {
                 Optional.empty());
 
         FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, followupData, new EmptyFollowupCluster(), emptyValuesProvider());
-        doReturn(snapshot).when(kpiService).getSnapshotFromCurrentState(any(), eq(projectKey));
+        doReturn(snapshot).when(kpiService).getSnapshotFromCurrentState(eq(projectKey), any());
 
         doReturn(true).when(projectRepository).exists(eq(projectKey));
         return new AssertionContext(snapshot);
