@@ -8,11 +8,11 @@ import static objective.taskboard.followup.kpi.properties.KpiLeadTimePropertiesM
 import org.junit.Test;
 
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
 import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class LeadTimeKpiTest {
 

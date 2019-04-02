@@ -29,10 +29,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.WipChartDataSet;
 import objective.taskboard.followup.kpi.WipDataPoint;
 import objective.taskboard.followup.kpi.WipKPIService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WipKPIDataProviderTest {

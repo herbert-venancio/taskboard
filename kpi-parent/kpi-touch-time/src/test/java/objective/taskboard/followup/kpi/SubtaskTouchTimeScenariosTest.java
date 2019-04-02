@@ -12,9 +12,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import objective.taskboard.data.Worklog;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class SubtaskTouchTimeScenariosTest {
 

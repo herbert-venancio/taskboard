@@ -11,7 +11,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLKpi;
 import objective.taskboard.followup.kpi.touchtime.helpers.GenerateTTByWeekDataSetStrategyBehavior;
 import objective.taskboard.followup.kpi.touchtime.helpers.TTByWeekKpiDataPointBuilder;
 

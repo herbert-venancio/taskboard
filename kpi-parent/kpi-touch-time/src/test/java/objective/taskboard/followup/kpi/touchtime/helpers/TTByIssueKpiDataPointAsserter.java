@@ -5,7 +5,7 @@ import java.util.ListIterator;
 
 import org.assertj.core.api.Assertions;
 
-import objective.taskboard.followup.kpi.enviroment.KpiDataPointAsserter;
+import objective.taskboard.followup.kpi.services.KpiDataPointAsserter;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint.Stack;
 

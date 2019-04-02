@@ -4,10 +4,10 @@ import java.time.ZoneId;
 import java.util.List;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataPoint;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategy;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategyFactory;

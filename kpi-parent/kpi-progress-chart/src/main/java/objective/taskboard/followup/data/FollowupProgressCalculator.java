@@ -21,7 +21,7 @@ import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
-import objective.taskboard.followup.kpi.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Component
 public class FollowupProgressCalculator {

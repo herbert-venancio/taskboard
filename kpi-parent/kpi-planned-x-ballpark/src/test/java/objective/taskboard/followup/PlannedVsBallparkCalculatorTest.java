@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
-import objective.taskboard.followup.kpi.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 public class PlannedVsBallparkCalculatorTest {
     

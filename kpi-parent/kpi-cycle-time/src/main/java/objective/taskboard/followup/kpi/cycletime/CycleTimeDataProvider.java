@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Service
 public class CycleTimeDataProvider {

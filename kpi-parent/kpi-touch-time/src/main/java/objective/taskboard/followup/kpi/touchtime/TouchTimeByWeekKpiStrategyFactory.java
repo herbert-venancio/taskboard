@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.RangeUtils;
 

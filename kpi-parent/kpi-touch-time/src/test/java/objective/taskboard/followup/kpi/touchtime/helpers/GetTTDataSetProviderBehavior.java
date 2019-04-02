@@ -3,11 +3,11 @@ package objective.taskboard.followup.kpi.touchtime.helpers;
 import java.time.ZoneId;
 import java.util.List;
 
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiStrategyFactory;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategyFactory;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeKpiProvider;

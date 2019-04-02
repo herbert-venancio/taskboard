@@ -19,11 +19,11 @@ import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationa
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
-import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehaviorBuilder;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.RequestChartDataBehavior;
+import objective.taskboard.followup.kpi.services.RequestChartDataBehaviorBuilder;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 import objective.taskboard.utils.DateTimeUtils;

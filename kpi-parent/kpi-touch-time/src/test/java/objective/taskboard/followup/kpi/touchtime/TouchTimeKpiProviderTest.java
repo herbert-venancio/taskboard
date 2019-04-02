@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker;
+import objective.taskboard.followup.kpi.services.DSLKpi;
 import objective.taskboard.followup.kpi.touchtime.helpers.GetTTByIssueDataSetProviderBehaviorBuilder;
 import objective.taskboard.followup.kpi.touchtime.helpers.GetTTByWeekDataSetProviderBehaviorBuilder;
 import objective.taskboard.followup.kpi.touchtime.helpers.GetTTDataSetThrowsProviderBehaviorBuilder;

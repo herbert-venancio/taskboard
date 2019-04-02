@@ -6,11 +6,11 @@ import java.util.function.BiFunction;
 import org.assertj.core.api.Assertions;
 
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpi;
 import objective.taskboard.followup.kpi.leadtime.LeadTimeKpiFactory;
 import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class LeadTimeKpiAsserter<T> {

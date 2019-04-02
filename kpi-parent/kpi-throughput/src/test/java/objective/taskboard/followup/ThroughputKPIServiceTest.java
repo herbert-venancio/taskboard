@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import objective.taskboard.followup.kpi.ThroughputKPIService;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.snapshot.SnapshotGenerator;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.snapshot.SnapshotGenerator;
 
 public class ThroughputKPIServiceTest {
 
@@ -126,9 +126,9 @@ public class ThroughputKPIServiceTest {
         public void behave(KpiEnvironment environment) {
             SnapshotGenerator datasetFactory = new SnapshotGenerator(environment);
             
-            environment.services().issueKpi().prepareFromDataSet(datasetFactory.analyticBuilder());
+            environment.services().kpiDataService().prepareFromDataSet(datasetFactory.analyticBuilder());
             
-            ThroughputKPIService subject = new ThroughputKPIService(environment.getJiraProperties(), environment.services().issueKpi().getService());
+            ThroughputKPIService subject = new ThroughputKPIService(environment.getJiraProperties(), environment.services().kpiDataService().getService());
             
             this.asserter = new ThroughputAllSetsAsserter(subject.getData(datasetFactory.buildFollowupData()));
         }

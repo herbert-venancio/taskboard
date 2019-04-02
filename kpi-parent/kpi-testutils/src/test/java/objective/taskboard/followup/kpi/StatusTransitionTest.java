@@ -2,7 +2,7 @@ package objective.taskboard.followup.kpi;
 
 import org.junit.Test;
 
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLKpi;
 
 public class StatusTransitionTest {
 

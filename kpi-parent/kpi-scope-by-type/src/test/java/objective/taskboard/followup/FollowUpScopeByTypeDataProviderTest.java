@@ -27,7 +27,7 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
-import objective.taskboard.followup.kpi.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 public class FollowUpScopeByTypeDataProviderTest {
 

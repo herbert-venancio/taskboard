@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import objective.taskboard.followup.kpi.enviroment.KpiExpectedDataPointBuilder;
+import objective.taskboard.followup.kpi.services.KpiExpectedDataPointBuilder;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiDataPoint.Stack;
 

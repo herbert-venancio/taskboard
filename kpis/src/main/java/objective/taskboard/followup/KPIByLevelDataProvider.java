@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import objective.taskboard.followup.kpi.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 public abstract class KPIByLevelDataProvider<C,D> {
 

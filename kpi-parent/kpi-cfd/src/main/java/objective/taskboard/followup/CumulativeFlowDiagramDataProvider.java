@@ -21,8 +21,8 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.properties.KpiCfdProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;

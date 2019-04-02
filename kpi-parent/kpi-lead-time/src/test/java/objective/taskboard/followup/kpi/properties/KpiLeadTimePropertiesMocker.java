@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class KpiLeadTimePropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuilder<KpiLeadTimeProperties> {
 

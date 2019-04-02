@@ -18,7 +18,7 @@ import org.junit.Test;
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
 import objective.taskboard.followup.FollowUpTimeline;
-import objective.taskboard.followup.kpi.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 public class FollowupProgressCalculatorTest {
 

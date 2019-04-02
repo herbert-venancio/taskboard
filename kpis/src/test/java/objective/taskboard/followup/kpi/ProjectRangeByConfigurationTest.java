@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.kpi.filters.ProjectRangeByConfiguration;
 import objective.taskboard.utils.RangeUtils;
 
 public class ProjectRangeByConfigurationTest {

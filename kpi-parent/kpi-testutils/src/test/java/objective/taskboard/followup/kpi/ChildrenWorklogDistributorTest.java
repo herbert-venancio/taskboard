@@ -2,10 +2,10 @@ package objective.taskboard.followup.kpi;
 
 import org.junit.Test;
 
-import objective.taskboard.followup.kpi.enviroment.DSLBehavior;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.IssueKpiMocker;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.DSLBehavior;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.IssueKpiMocker;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class ChildrenWorklogDistributorTest {
 

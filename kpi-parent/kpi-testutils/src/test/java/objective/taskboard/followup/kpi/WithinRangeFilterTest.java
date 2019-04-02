@@ -11,7 +11,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.filters.ProjectRangeByConfiguration;
+import objective.taskboard.followup.kpi.filters.WithinRangeFilter;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.DateTimeUtils;
 

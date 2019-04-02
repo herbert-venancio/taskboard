@@ -5,7 +5,7 @@ import static objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties
 
 import org.junit.Test;
 
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLKpi;
 
 public class CycleTimeKpiTest {
 

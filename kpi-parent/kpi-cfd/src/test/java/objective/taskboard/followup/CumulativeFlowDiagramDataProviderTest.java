@@ -36,8 +36,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.Constants;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
-import objective.taskboard.followup.kpi.KpiDataService;
 import objective.taskboard.followup.kpi.properties.KpiCfdProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;

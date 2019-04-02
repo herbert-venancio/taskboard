@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
-import objective.taskboard.followup.kpi.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Component
 public class PlannedVsBallparkCalculator {

@@ -9,14 +9,16 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.followup.ThroughputDataSet;
 import objective.taskboard.followup.ThroughputRow;
+import objective.taskboard.followup.kpi.services.KPIUsingStatusService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration;
 
 @Service
 public class ThroughputKPIService extends KPIUsingStatusService<ThroughputDataSet,ThroughputRow> {
 
-    public ThroughputKPIService(JiraProperties jiraProperties, IssueKpiService issueKpiService) {
-        super(jiraProperties, issueKpiService);
+    public ThroughputKPIService(JiraProperties jiraProperties, KpiDataService kpiDataService) {
+        super(jiraProperties, kpiDataService);
     }
 
     @Override
