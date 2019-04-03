@@ -27,6 +27,7 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 public class FollowUpScopeByTypeDataProviderTest {
 
@@ -35,8 +36,8 @@ public class FollowUpScopeByTypeDataProviderTest {
     private static final ZoneId ZONE_ID = ZoneId.of("America/Sao_Paulo");
 
     private final FromJiraRowService rowService = mock(FromJiraRowService.class);
-    private final FollowUpSnapshotService snapshotService = mock(FollowUpSnapshotService.class);
-    private final FollowUpScopeByTypeDataProvider subject = new FollowUpScopeByTypeDataProvider(snapshotService, rowService);
+    private final KpiDataService kpiService = mock(KpiDataService.class);
+    private final FollowUpScopeByTypeDataProvider subject = new FollowUpScopeByTypeDataProvider(kpiService, rowService);
     private final FromJiraDataRow row = new FromJiraDataRow();
 
     private FollowUpScopeByTypeDataSet data;
@@ -48,7 +49,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(fc.isEmpty()).thenReturn(false);
         
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), asList(row));
-        when(snapshotService.getFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT_KEY, ZONE_ID)).thenReturn(snapshot);
     }
 
     @Test
@@ -198,7 +199,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         List<FromJiraDataRow> rows = asList(row, row, row);
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), rows);
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
-        when(snapshotService.getFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT_KEY, ZONE_ID)).thenReturn(snapshot);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
@@ -219,7 +220,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         List<FromJiraDataRow> rows = asList(row, row, row);
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), rows);
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
-        when(snapshotService.getFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT_KEY, ZONE_ID)).thenReturn(snapshot);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 

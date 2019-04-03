@@ -3,8 +3,8 @@ package objective.taskboard.followup.kpi.touchtime.helpers;
 import java.time.ZoneId;
 
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 abstract class GenerateTTDataSetStrategyBehavior<DSA> implements DSLSimpleBehaviorWithAsserter<DSA> {
     private String projectKey;

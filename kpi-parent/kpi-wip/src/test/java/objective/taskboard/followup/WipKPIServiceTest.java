@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import objective.taskboard.followup.kpi.WipKPIService;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.snapshot.SnapshotGenerator;
 
 public class WipKPIServiceTest {
 
@@ -124,13 +124,13 @@ public class WipKPIServiceTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            SnapshotGenerator snapshotGenerator = new SnapshotGenerator(environment);
             
-            environment.services().issueKpi().prepareFromDataSet(datasetFactory);
+            environment.services().kpiDataService().prepareFromDataSet(snapshotGenerator.analyticBuilder());
             
-            WipKPIService subject = new WipKPIService(environment.getJiraProperties(), environment.services().issueKpi().getService());
+            WipKPIService subject = new WipKPIService(environment.getJiraProperties(), environment.services().kpiDataService().getService());
             
-            this.asserter = new WipAllSetsAsserter(subject.getData(datasetFactory.buildFollowupData()));
+            this.asserter = new WipAllSetsAsserter(subject.getData(snapshotGenerator.buildFollowupData()));
         }
 
         @Override

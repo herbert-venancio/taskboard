@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.RangeUtils;
 
@@ -22,20 +22,20 @@ import objective.taskboard.utils.RangeUtils;
 public class TouchTimeByWeekKpiStrategyFactory implements TouchTimeKpiStrategyFactory<TouchTimeByWeekKpiDataPoint> {
 
     private KpiTouchTimeProperties touchTimeProperties;
-    private IssueKpiService issueKpiService;
+    private KpiDataService kpiDataService;
     private JiraProperties jiraProperties;
 
     @Autowired
-    public TouchTimeByWeekKpiStrategyFactory(KpiTouchTimeProperties touchTimeProperties, IssueKpiService issueKpiService,
+    public TouchTimeByWeekKpiStrategyFactory(KpiTouchTimeProperties touchTimeProperties, KpiDataService kpiDataService,
             JiraProperties jiraProperties) {
         this.touchTimeProperties = touchTimeProperties;
-        this.issueKpiService = issueKpiService;
+        this.kpiDataService = kpiDataService;
         this.jiraProperties = jiraProperties;
     }
 
     @Override
     public TouchTimeByWeekKpiStrategy getStrategy(KpiLevel level, ProjectFilterConfiguration projectConfiguration, ZoneId timezone) {
-        List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(
+        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentProjectRange(
                 projectConfiguration.getProjectKey(), timezone, level);
         Range<LocalDate> projectRange = getRangeOrCry(projectConfiguration);
 

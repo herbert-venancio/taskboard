@@ -10,13 +10,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
-import objective.taskboard.followup.kpi.IssueKpiService;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehavior;
-import objective.taskboard.followup.kpi.enviroment.RequestChartDataBehaviorBuilder;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimePropertiesMocker;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.RequestChartDataBehavior;
+import objective.taskboard.followup.kpi.services.RequestChartDataBehaviorBuilder;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -433,11 +433,13 @@ public class TouchTimeKpiControllerTest {
         @Override
         protected TouchTimeKpiProvider mockProvider(KpiEnvironment environment) {
             KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
-            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
+                        
+            KpiDataService kpiDataService = environment.services().kpiDataService().getService();
+            
             JiraProperties jiraProperties = environment.getJiraProperties();
             MetadataService metadataService = environment.services().metadata().getService();
-            TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties, metadataService);
+            TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties);
+            TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties, metadataService);
             ProjectService projectService = environment.services().projects().getService();
             return new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         }

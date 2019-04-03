@@ -10,12 +10,12 @@ import java.util.Optional;
 import org.junit.Test;
 
 import objective.taskboard.domain.IssueColorService;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class CycleTimeDataProviderTest {
 
@@ -108,6 +108,32 @@ public class CycleTimeDataProviderTest {
                     .status("Reviewing").noDate()
                     .status("Done").noDate()
                     .status("Cancelled").noDate()
+                .eoT()
+            .eoI()
+            .withKpiProperties(
+                withSubtaskCycleTimeProperties("To Do","Doing","To Review","Reviewing")
+            )
+        .when()
+            .appliesBehavior(generateDataSet("PROJ",KpiLevel.SUBTASKS))
+        .then()
+            .emptyDataSet();
+    }
+    
+    @Test
+    public void getDataSet_whenIssuesJumpCycleStatus_thenEmptyDataSet(){
+        dsl()
+        .environment()
+            .givenDemand("I-1")
+                .type("Demand")
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2019-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                    .status("Cancelled").date("2019-01-10")
                 .eoT()
             .eoI()
             .withKpiProperties(
@@ -275,12 +301,12 @@ public class CycleTimeDataProviderTest {
         @Override
         public void behave(KpiEnvironment environment) {
 
-            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
+            KpiDataService kpiService = environment.services().kpiDataService().getService();
             KpiCycleTimeProperties properties = environment.getKPIProperties(KpiCycleTimeProperties.class);
             IssueColorService colorService = environment.services().issueColor().getService();
             ZoneId timezone = environment.getTimezone();
 
-            CycleTimeDataProvider subject = new CycleTimeDataProvider(issueKpiService, properties, colorService);
+            CycleTimeDataProvider subject = new CycleTimeDataProvider(kpiService, properties, colorService);
             List<CycleTimeKpi> dataSet = subject.getDataSet(projectKey, level, timezone);
             asserter = new CycleTimeKpiDataAsserter(dataSet);
         }

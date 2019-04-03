@@ -14,9 +14,9 @@ import org.assertj.core.api.Assertions;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.cycletime.CycleTimeKpi.SubCycleKpi;
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLKpi;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class CycleTimeKpiAsserter<T> {
 

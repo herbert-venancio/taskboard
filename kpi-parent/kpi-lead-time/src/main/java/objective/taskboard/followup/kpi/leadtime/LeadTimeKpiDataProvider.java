@@ -13,25 +13,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KpiLeadTimeProperties;
 import objective.taskboard.followup.kpi.properties.LeadTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Service
 public class LeadTimeKpiDataProvider {
 
-    private IssueKpiService issueKpiService;
+    private KpiDataService kpiDataService;
     private Map<KpiLevel, Set<String>> leadStatusesByLevel = new EnumMap<>(KpiLevel.class);
 
     @Autowired
-    public LeadTimeKpiDataProvider(IssueKpiService issueKpiService, KpiLeadTimeProperties kpiProperties) {
-        this.issueKpiService = issueKpiService;
+    public LeadTimeKpiDataProvider(KpiDataService kpiDataService, KpiLeadTimeProperties kpiProperties) {
+        this.kpiDataService = kpiDataService;
         mapLeadPropertiesByLevel(kpiProperties.getLeadTime());
     }
 
     public List<LeadTimeKpi> getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
-        List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
+        List<IssueKpi> issues = kpiDataService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
         LeadTimeKpiFactory factory = new LeadTimeKpiFactory(leadStatusesByLevel);
         return issues.stream()
                 .filter(i -> i.hasCompletedCycle(leadStatusesByLevel.get(i.getLevel())))

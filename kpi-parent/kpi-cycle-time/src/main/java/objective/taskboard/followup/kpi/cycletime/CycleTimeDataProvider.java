@@ -11,27 +11,27 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.properties.KpiCycleTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Service
 public class CycleTimeDataProvider {
 
-    private IssueKpiService issueKpiService;
+    private KpiDataService kpiService;
     private KpiCycleTimeProperties cycleTimeProperties;
     private IssueColorService colorService;
 
     @Autowired
-    public CycleTimeDataProvider(IssueKpiService issueKpiService, KpiCycleTimeProperties cycleTimeProperties,
+    public CycleTimeDataProvider(KpiDataService kpiService, KpiCycleTimeProperties cycleTimeProperties,
             IssueColorService colorService) {
-        this.issueKpiService = issueKpiService;
+        this.kpiService = kpiService;
         this.cycleTimeProperties = cycleTimeProperties;
         this.colorService = colorService;
     }
 
     public List<CycleTimeKpi> getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
-        List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
+        List<IssueKpi> issues = kpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
         Map<KpiLevel, Set<String>> cycleStatusesByLevel = cycleTimeProperties.getCycleTime().toMap();
         CycleTimeKpiFactory factory = new CycleTimeKpiFactory(cycleStatusesByLevel, colorService);
         return issues.stream()

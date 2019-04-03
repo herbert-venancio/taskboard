@@ -72,6 +72,7 @@ import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.WipKPIService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -103,7 +104,7 @@ public class FollowUpFacadeTest {
     private FollowupClusterProvider clusterProvider;
     
     @Mock
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
     
     @Mock
     private ReleaseHistoryProvider releaseHistoryProvider;
@@ -187,7 +188,7 @@ public class FollowUpFacadeTest {
         FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().timeline(date).data(getDefaultFollowupData()).build();
 
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(snapshotService.get(any(), any(), Mockito.eq(PROJECT))).willReturn(snapshot);
+        given(kpiService.getSnapshot(Mockito.eq(PROJECT), any(), any())).willReturn(snapshot);
         
         // when
         Resource resource = followUpFacade.generateReport(TEMPLATE_NAME, Optional.of(date), ZoneId.systemDefault(), PROJECT);

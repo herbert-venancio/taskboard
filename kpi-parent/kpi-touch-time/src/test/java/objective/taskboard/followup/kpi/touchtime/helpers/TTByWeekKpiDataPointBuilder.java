@@ -5,7 +5,7 @@ import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import java.time.Instant;
 import java.time.ZoneId;
 
-import objective.taskboard.followup.kpi.enviroment.KpiExpectedDataPointBuilder;
+import objective.taskboard.followup.kpi.services.KpiExpectedDataPointBuilder;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataPoint;
 
 public class TTByWeekKpiDataPointBuilder implements KpiExpectedDataPointBuilder<TouchTimeByWeekKpiDataPoint> {

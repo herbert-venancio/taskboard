@@ -22,6 +22,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
 import objective.taskboard.followup.kpi.properties.KpiCfdProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -35,7 +36,7 @@ public class CumulativeFlowDiagramDataProvider {
     private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Autowired
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
 
     @Autowired
     private KpiCfdProperties properties;
@@ -47,7 +48,7 @@ public class CumulativeFlowDiagramDataProvider {
         if(!belongsToAnyProject(project))
             throw new IllegalArgumentException(String.format("Unknown project <%s>", project));
 
-        FollowUpSnapshot followupData = snapshotService.getFromCurrentState(ZoneId.systemDefault(), project);
+        FollowUpSnapshot followupData = kpiService.getSnapshotFromCurrentState(project, ZoneId.systemDefault());
         return transform(followupData, Level.valueOf(level.toUpperCase()));
     }
 

@@ -32,6 +32,7 @@ import objective.taskboard.followup.cluster.EmptyFollowupCluster;
 import objective.taskboard.followup.kpi.WipChartDataSet;
 import objective.taskboard.followup.kpi.WipDataPoint;
 import objective.taskboard.followup.kpi.WipKPIService;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WipKPIDataProviderTest {
@@ -46,7 +47,7 @@ public class WipKPIDataProviderTest {
     private FollowUpDataRepository dataRepository;
 
     @Mock
-    private FollowUpSnapshotService snapshotService;
+    private KpiDataService kpiService;
 
     @Mock
     private WipKPIService wipKpiService;
@@ -844,7 +845,7 @@ public class WipKPIDataProviderTest {
             final FollowUpData biggerFollowupData = KpiHelper.getBiggerFollowupData();
             FollowUpTimeline timeline = createCustomTimeline(projectFilter);
             FollowUpSnapshot snapshot = new FollowUpSnapshot(timeline, biggerFollowupData, new EmptyFollowupCluster(), emptyValuesProvider());
-            when(snapshotService.getFromCurrentState(ZONE_ID, projectKey)).thenReturn(snapshot);
+            when(kpiService.getSnapshotFromCurrentState(projectKey, ZONE_ID)).thenReturn(snapshot);
             return snapshot;
         }
 

@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 
 public class KpiTouchTimePropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuilder<KpiTouchTimeProperties> {
 

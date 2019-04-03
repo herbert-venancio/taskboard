@@ -39,10 +39,6 @@ import java.util.Set;
 
 import org.springframework.core.io.Resource;
 
-import objective.taskboard.followup.ThroughputDataSet;
-import objective.taskboard.followup.ThroughputRow;
-import objective.taskboard.followup.WipDataSet;
-import objective.taskboard.followup.WipRow;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;

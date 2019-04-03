@@ -147,8 +147,12 @@ public class KpiHelper {
     }
 
     public static FollowUpData getDefaultFollowupData() {
-        return new FollowUpData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()),
+        return new FollowUpData(getDefaultFromJiraDs(),
                 getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
+    }
+    
+    public static FromJiraDataSet getDefaultFromJiraDs() {
+        return new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
     }
 
     public static FollowUpData getBiggerFollowupData() {

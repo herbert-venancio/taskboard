@@ -19,18 +19,18 @@ import org.springframework.stereotype.Component;
 
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
-import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Component
 public class FollowupProgressCalculator {
 
-    private final FollowUpSnapshotService snapshotService;
+    private final KpiDataService kpiService;
     
     @Autowired
-    public FollowupProgressCalculator(FollowUpSnapshotService snapshotService) {
-        this.snapshotService = snapshotService;
+    public FollowupProgressCalculator(KpiDataService kpiService) {
+        this.kpiService = kpiService;
     }
 
     public ProgressData calculateWithCompleteProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
@@ -44,7 +44,7 @@ public class FollowupProgressCalculator {
     private ProgressData calculate(ZoneId timezone, String projectKey, int projectionSampleSize, boolean stopOnCompleteProjection) 
             throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
 
-        FollowUpSnapshot snapshot = snapshotService.getFromCurrentState(timezone, projectKey);
+        FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, timezone);
         if (!snapshot.hasClusterConfiguration())
             throw new ClusterNotConfiguredException();
         

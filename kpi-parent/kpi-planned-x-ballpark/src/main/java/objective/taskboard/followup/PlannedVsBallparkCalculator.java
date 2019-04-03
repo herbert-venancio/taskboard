@@ -9,19 +9,20 @@ import org.springframework.stereotype.Component;
 
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 @Component
 public class PlannedVsBallparkCalculator {
 
-    private final FollowUpSnapshotService snapshotService;
+    private final KpiDataService kpiService;
     
     @Autowired
-    public PlannedVsBallparkCalculator(FollowUpSnapshotService snapshotService) {
-        this.snapshotService = snapshotService;
+    public PlannedVsBallparkCalculator(KpiDataService kpiService) {
+        this.kpiService = kpiService;
     }
 
     public List<PlannedVsBallparkChartData> calculate(String projectKey) throws ClusterNotConfiguredException {
-        FollowUpSnapshot snapshot = snapshotService.getFromCurrentState(ZoneId.systemDefault(), projectKey);
+        FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, ZoneId.systemDefault());
 
         if (!snapshot.hasClusterConfiguration())
             throw new ClusterNotConfiguredException();

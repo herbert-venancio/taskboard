@@ -20,8 +20,8 @@ import java.util.Optional;
 import org.apache.commons.lang3.Range;
 import org.assertj.core.api.Assertions;
 
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
+import objective.taskboard.followup.kpi.services.KpiEnvironment.IssueTypeDTO;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueKpiAsserter<T> {

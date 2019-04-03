@@ -2,7 +2,7 @@ package objective.taskboard.followup.kpi;
 
 import org.junit.Test;
 
-import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.services.DSLKpi;
 
 public class IssueKpiTest {
     @Test
@@ -972,7 +972,7 @@ public class IssueKpiTest {
                         .at("2020-01-05").timeSpentInHours(5.0)
                     .eoW()
                 .endOfSubtask()
-                .subtask("PROJ-03")
+                .subtask("PROJ-04")
                     .type("Another Subtask")
                     .withTransitions()
                         .status("Open").date("2020-01-01")

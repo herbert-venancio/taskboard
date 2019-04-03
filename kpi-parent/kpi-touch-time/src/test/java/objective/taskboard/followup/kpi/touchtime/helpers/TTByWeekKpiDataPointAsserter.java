@@ -2,7 +2,7 @@ package objective.taskboard.followup.kpi.touchtime.helpers;
 
 import org.assertj.core.api.Assertions;
 
-import objective.taskboard.followup.kpi.enviroment.KpiDataPointAsserter;
+import objective.taskboard.followup.kpi.services.KpiDataPointAsserter;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataPoint;
 
 public class TTByWeekKpiDataPointAsserter implements KpiDataPointAsserter<TouchTimeByWeekKpiDataPoint> {

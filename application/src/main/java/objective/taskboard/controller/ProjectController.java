@@ -45,7 +45,7 @@ import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TeamFilterConfiguration;
-import objective.taskboard.followup.FollowUpFacade;
+import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
@@ -60,7 +60,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    private final FollowUpFacade followUpFacade;
+    private final FollowUpSnapshotService followUpSnapshotService;
 
     private final Authorizer authorizer;
 
@@ -69,12 +69,12 @@ public class ProjectController {
         TeamCachedRepository teamRepository,
         TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository,
         ProjectService projectService,
-        FollowUpFacade followUpFacade,
+        FollowUpSnapshotService followUpSnapshotService,
         Authorizer authorizer) {
         this.teamRepository = teamRepository;
         this.teamFilterConfigurationRepository = teamFilterConfigurationRepository;
         this.projectService = projectService;
-        this.followUpFacade = followUpFacade;
+        this.followUpSnapshotService = followUpSnapshotService;
         this.authorizer = authorizer;
     }
 
@@ -156,7 +156,7 @@ public class ProjectController {
         ProjectData projectData = new ProjectData();
         projectData.projectKey = projectKey;
         projectData.projectDisplayName = projectDisplayName;
-        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProject(projectKey);
+        projectData.followUpDataHistory = followUpSnapshotService.getAvailableHistory(projectKey);
         projectData.roles = authorizer.getRolesForProject(projectKey);
 
         return projectData;

@@ -3,11 +3,11 @@ package objective.taskboard.followup.kpi.touchtime.helpers;
 import java.time.ZoneId;
 import java.util.List;
 
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
+import objective.taskboard.followup.kpi.services.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByIssueKpiStrategyFactory;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategyFactory;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeKpiProvider;
@@ -33,11 +33,11 @@ abstract class GetTTDataSetProviderBehavior<DSA> implements DSLSimpleBehaviorWit
     public void behave(KpiEnvironment environment) {
         JiraProperties jiraProperties = environment.getJiraProperties();
         KpiTouchTimeProperties touchTimeProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
-        IssueKpiService issueKpiService = environment.services().issueKpi().getService();
+        KpiDataService kpiDataService = environment.services().kpiDataService().getService();
         ProjectService projectService = environment.services().projects().getService();
         MetadataService metadataService = environment.services().metadata().getService();
-        TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties);
-        TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, issueKpiService, jiraProperties, metadataService);
+        TouchTimeByWeekKpiStrategyFactory byWeek = new TouchTimeByWeekKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties);
+        TouchTimeByIssueKpiStrategyFactory byIssue = new TouchTimeByIssueKpiStrategyFactory(touchTimeProperties, kpiDataService, jiraProperties, metadataService);
         TouchTimeKpiProvider subject = new TouchTimeKpiProvider(byWeek, byIssue, projectService);
         List<?> dataset = subject.getDataSet(methodName, projectKey, kpiLevel, timezone);
         createAsserter(dataset);

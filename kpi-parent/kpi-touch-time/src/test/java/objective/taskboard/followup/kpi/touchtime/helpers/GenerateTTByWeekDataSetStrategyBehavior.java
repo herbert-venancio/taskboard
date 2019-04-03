@@ -4,10 +4,10 @@ import java.time.ZoneId;
 import java.util.List;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.properties.KpiTouchTimeProperties;
+import objective.taskboard.followup.kpi.services.KpiDataService;
+import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiDataPoint;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategy;
 import objective.taskboard.followup.kpi.touchtime.TouchTimeByWeekKpiStrategyFactory;
@@ -23,10 +23,10 @@ public class GenerateTTByWeekDataSetStrategyBehavior extends GenerateTTDataSetSt
     public TTByWeekKpiDataSetAsserter doBehave(KpiEnvironment environment) {
         KpiTouchTimeProperties kpiProperties = environment.getKPIProperties(KpiTouchTimeProperties.class);
         JiraProperties jiraProperties = environment.getJiraProperties();
-        IssueKpiService issueKpiService = environment.services().issueKpi().getService();
+        KpiDataService kpiDataService = environment.services().kpiDataService().getService();
         ProjectFilterConfiguration projectConfiguration = environment.services().projects().getProject(getProjectKey());
 
-        TouchTimeByWeekKpiStrategyFactory factory = new TouchTimeByWeekKpiStrategyFactory(kpiProperties, issueKpiService, jiraProperties);
+        TouchTimeByWeekKpiStrategyFactory factory = new TouchTimeByWeekKpiStrategyFactory(kpiProperties, kpiDataService, jiraProperties);
         TouchTimeByWeekKpiStrategy subject = factory.getStrategy(getIssueLevel(), projectConfiguration, getTimezone());
         List<TouchTimeByWeekKpiDataPoint> dataset = subject.getDataSet();
         return new TTByWeekKpiDataSetAsserter(dataset);

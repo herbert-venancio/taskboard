@@ -17,16 +17,16 @@ import org.junit.Test;
 
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
-import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.FollowUpTimeline;
+import objective.taskboard.followup.kpi.services.KpiDataService;
 
 public class FollowupProgressCalculatorTest {
 
     private static final String PROJECT = "PX";
     private static final ZoneId TIMEZONE = ZoneId.of("UTC");
 
-    private FollowUpSnapshotService snapshotService = mock(FollowUpSnapshotService.class);
-    private FollowupProgressCalculator subject = new FollowupProgressCalculator(snapshotService);
+    private KpiDataService kpiService = mock(KpiDataService.class);
+    private FollowupProgressCalculator subject = new FollowupProgressCalculator(kpiService);
 
     @Test
     public void calculateWithExpectedProjectionWithEmptyHistory_shouldReturnEmptyActualAndProjectionShouldBeEqualToExpected() {
@@ -230,6 +230,6 @@ public class FollowupProgressCalculatorTest {
         when(snapshot.getEffortHistory()).thenReturn(asList(history));
         when(snapshot.hasClusterConfiguration()).thenReturn(true);
         
-        when(snapshotService.getFromCurrentState(TIMEZONE, PROJECT)).thenReturn(snapshot);
+        when(kpiService.getSnapshotFromCurrentState(PROJECT, TIMEZONE)).thenReturn(snapshot);
     }
 }
