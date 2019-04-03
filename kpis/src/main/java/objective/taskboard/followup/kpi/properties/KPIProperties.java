@@ -26,6 +26,8 @@ public class KPIProperties {
     @Valid
     private IssueTypeChildrenStatusHierarchy demandHierarchy;
 
+    private String environmentField;
+    
     @NotEmpty
     @Valid
     private List<String> progressingStatuses;
@@ -54,4 +56,11 @@ public class KPIProperties {
         this.demandHierarchy = demandHierarchy;
     }
 
+    public String getEnvironmentField() {
+        return environmentField;
+    }
+
+    public void setEnvironmentField(String environmentField) {
+        this.environmentField = environmentField;
+    }
 }

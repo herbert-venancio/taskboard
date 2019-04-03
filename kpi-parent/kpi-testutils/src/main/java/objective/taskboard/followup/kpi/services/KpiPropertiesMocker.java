@@ -21,8 +21,9 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
     private Map<String, HierarchyBuilder> demandHierarchyBuilder = new LinkedHashMap<>();
     private boolean shouldCollectProgressingStatuses = true;
     @SuppressWarnings("rawtypes")
-	private Map<Class<?>, KpiEnvironment.KpiPropertiesMockBuilder> mockBuilderMap = new HashMap<>();
+    private Map<Class<?>, KpiEnvironment.KpiPropertiesMockBuilder> mockBuilderMap = new HashMap<>();
     private Map<Class<?>, Object> instanceMap = new HashMap<>();
+    private String environmentField;
 
     public KpiPropertiesMocker(KpiEnvironment environment) {
         this.environment = environment;
@@ -43,6 +44,11 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
 
     public KpiPropertiesMocker withNoProgressingStatusesConfigured() {
         this.shouldCollectProgressingStatuses = false;
+        return this;
+    }
+
+    public KpiPropertiesMocker environmentField(String environmentField) {
+        this.environmentField = environmentField;
         return this;
     }
 
@@ -70,14 +76,11 @@ public class KpiPropertiesMocker implements KpiEnvironment.KpiPropertiesMockBuil
         kpiProperties.setDemandHierarchy(getHierarchy(demandHierarchyBuilder));
         kpiProperties.setFeaturesHierarchy(getHierarchy(featureHierarchyBuilder));
         kpiProperties.setProgressingStatuses(getProgressingStatuses());
+        kpiProperties.setEnvironmentField(environmentField);
         return kpiProperties;
     }
 
     public KpiEnvironment eoKP() {
-        return environment;
-    }
-
-    public KpiEnvironment eoKpi() {
         return environment;
     }
 

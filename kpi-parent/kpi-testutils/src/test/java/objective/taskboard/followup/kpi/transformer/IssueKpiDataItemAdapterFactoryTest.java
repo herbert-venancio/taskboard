@@ -15,6 +15,9 @@ public class IssueKpiDataItemAdapterFactoryTest {
         
         dsl()
             .environment()
+                .withKpiProperties()
+                    .environmentField("customfield_client_environment")
+                .eoKP()
                 .givenSubtask("I-1")
                     .type("Dev")
                     .project("PROJ")
@@ -24,6 +27,9 @@ public class IssueKpiDataItemAdapterFactoryTest {
                         .status("Doing").date("2020-01-03")
                         .status("Done").noDate()
                     .eoT()
+                    .fields()
+                        .field("customfield_client_environment").value("Production")
+                    .eoF()
                 .eoI()
                 .givenSubtask("I-2")
                     .type("Alpha")
@@ -34,6 +40,9 @@ public class IssueKpiDataItemAdapterFactoryTest {
                         .status("Doing").date("2020-01-03")
                         .status("Done").date("2020-01-04")
                     .eoT()
+                    .fields()
+                        .field("customfield_client_environment").value("Alpha")
+                    .eoF()
                 .eoI()
             .when()
                 .appliesBehavior(buildItemAdaptersFromIssues())
@@ -42,6 +51,7 @@ public class IssueKpiDataItemAdapterFactoryTest {
                 .givenItem("I-1")
                     .isSubtask()
                     .hasType("Dev")
+                    .hasField("customfield_client_environment").withValue("Production")
                     .status("Open").hasDate("2020-01-01")
                     .status("To Do").hasDate("2020-01-02")
                     .status("Doing").hasDate("2020-01-03")
@@ -50,13 +60,14 @@ public class IssueKpiDataItemAdapterFactoryTest {
                 .givenItem("I-2")
                     .isSubtask()
                     .hasType("Alpha")
+                    .hasField("customfield_client_environment").withValue("Alpha")
                     .status("Open").hasDate("2020-01-01")
                     .status("To Do").hasDate("2020-01-02")
                     .status("Doing").hasDate("2020-01-03")
                     .status("Done").hasDate("2020-01-04")
                 .eoIA();
     }
-    
+
     @Test
     public void getIssuesFromAnalytic_happyDay() {
         KpiEnvironment context = dslToAnalyticSets()

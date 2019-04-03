@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,10 @@ public class IssueKpiMocker {
     final KpiEnvironment parentEnvironment;
     private TransitionsBuilder transitionBuilder;
     private WorklogsBuilder worklogsBuilder = new WorklogsBuilder();
+    private FieldsBuilder fieldsBuidler = new FieldsBuilder();
     private final String pKey;
-    private Optional<IssueTypeDTO> type;
+    private Optional<IssueTypeDTO> type = Optional.empty();
+    private boolean typeConfigured = false;
     private KpiLevel level = KpiLevel.UNMAPPED;
 
     private List<IssueKpiMocker> children = new LinkedList<>();
@@ -96,11 +99,13 @@ public class IssueKpiMocker {
 
     public IssueKpiMocker type(String type) {
         this.type = parentEnvironment.getOptionalType(type);
+        this.typeConfigured = true;
         return this;
     }
 
     public IssueKpiMocker emptyType() {
         this.type = Optional.empty();
+        this.typeConfigured = true;
         return this;
     }
 
@@ -169,7 +174,11 @@ public class IssueKpiMocker {
     }
 
     public IssueKpiDataItemAdapter buildAsAdapter() {
-        return new FakeIssueKpiAdapter(getReversedTransitions(), getIssueKey(),getIssueTypeKpi(), level());
+        return new FakeIssueKpiAdapter(getReversedTransitions(), getIssueKey(),getIssueTypeKpi(), level,getFields());
+    }
+
+    private Map<String,String> getFields() {
+        return fieldsBuidler.fields;
     }
 
     public IssueKpi buildIssueKpi() {
@@ -177,14 +186,19 @@ public class IssueKpiMocker {
         Optional<IssueTypeKpi> kpiType = getIssueType();
 
         IssueKpi kpi = new IssueKpi(pKey, kpiType, level,firstChain,parentEnvironment.getClock());
-
+        String environmentField = parentEnvironment.getKPIProperties().getEnvironmentField();
+        kpi.setClientEnvironment(getOptionalValueFromField(environmentField));
         this.children.stream()
-            .map(c -> c.buildIssueKpi())
-            .forEach(c -> kpi.addChild(c));
+            .map(IssueKpiMocker::buildIssueKpi)
+            .forEach(kpi::addChild);
 
         distributeWorklogs(kpi);
 
         return kpi;
+    }
+
+    private Optional<String> getOptionalValueFromField(String environmentField) {
+        return Optional.ofNullable(getFields().get(environmentField));
     }
 
     public Issue mockedIssue() {
@@ -231,6 +245,7 @@ public class IssueKpiMocker {
         when(issue.isFeature()).thenReturn(FEATURES == this.level);
         when(issue.isSubTask()).thenReturn(SUBTASKS == this.level);
         when(issue.getWorklogs()).thenReturn(worklogsBuilder.getWorklogs());
+        when(issue.getExtraFields()).thenReturn(getFields());
         if(hasParentIssue())
             when(issue.getParent()).thenReturn(parent.pKey);
         this.mockedIssue = issue;
@@ -268,8 +283,8 @@ public class IssueKpiMocker {
     }
 
     private Optional<IssueTypeKpi> getIssueType() {
-        if(type == null)
-            Assert.fail("Configure a type or explicitly call emptyType(). Issue key:"+pKey);
+        if(!typeConfigured)
+            throw new AssertionError("Configure a type or explicitly call emptyType(). Issue key:"+pKey);
 
         return type.map(dto -> new IssueTypeKpi(dto.id(),dto.name()));
     }
@@ -278,6 +293,43 @@ public class IssueKpiMocker {
     public String toString() {
         String typeName = this.type.map(t -> t.name()).orElse("NOT CONFIGURED");
         return String.format("[%s] %s", typeName, pKey);
+    }
+    
+    public FieldsBuilder fields() {
+        return fieldsBuidler;
+    }
+    
+    public class FieldsBuilder {
+        
+        private Map<String,String> fields = new LinkedHashMap<>();
+        
+        public FieldMapperHelper field(String field) {
+            return new FieldMapperHelper(field);
+        }
+        
+        public FieldsBuilder put(String attribute, String value) {
+            fields.put(attribute, value);
+            return this;
+        }
+        
+        public IssueKpiMocker eoF() {
+            return IssueKpiMocker.this;
+        }
+        
+        public class FieldMapperHelper {
+            private String attribute;
+            
+            public FieldMapperHelper(String field) {
+                this.attribute = field;
+            }
+            
+            public FieldsBuilder value(String value) {
+                return FieldsBuilder.this.put(attribute,value);
+            }
+
+        }
+
+        
     }
 
     public class WorklogsBuilder {
@@ -340,4 +392,6 @@ public class IssueKpiMocker {
             }
         }
     }
+
+    
 }

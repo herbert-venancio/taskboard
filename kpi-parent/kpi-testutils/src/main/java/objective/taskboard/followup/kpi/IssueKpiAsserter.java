@@ -107,6 +107,11 @@ public class IssueKpiAsserter<T> {
         Assertions.assertThat(subject.getLastTransitedStatus()).hasValue(status);
         return this;
     }
+    
+    public IssueKpiAsserter<T> hasClientEnvironment(String clientEnvironment) {
+        Assertions.assertThat(subject.getClientEnvironment()).hasValueSatisfying(clientEnvironment::equalsIgnoreCase);
+        return this;
+    }
 
     public class SubtaskChecker {
         private List<ZonedWorklog> childrenWorklogs;

@@ -2,17 +2,9 @@ package objective.taskboard.followup.kpi.transformer;
 
 import static java.util.Collections.emptyList;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.kpi.IssueKpi;
@@ -24,25 +16,16 @@ import objective.taskboard.followup.kpi.services.IssuesAsserter;
 import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.utils.Clock;
 
-@RunWith(MockitoJUnitRunner.class)
 public class IssueKpiTransformerTest {
-
-    @Mock
-    private KPIProperties kpiProperties;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setup() {
-        Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(Arrays.asList("Doing"));
-    }
 
     @Test
     public void transformIssues_happyDay() {
 
         dsl()
             .environment()
+                .withKpiProperties()
+                    .environmentField("clientEnvironment")
+                .eoKP()
                 .givenSubtask("I-1")
                     .type("Dev")
                     .project("PROJ")
@@ -52,6 +35,9 @@ public class IssueKpiTransformerTest {
                         .status("Doing").date("2020-01-03")
                         .status("Done").noDate()
                     .eoT()
+                    .fields()
+                        .field("clientEnvironment").value("Production")
+                    .eoF()
                 .eoI()
                 .givenSubtask("I-2")
                     .type("Alpha")
@@ -62,6 +48,9 @@ public class IssueKpiTransformerTest {
                         .status("Doing").date("2020-01-03")
                         .status("Done").date("2020-01-04")
                     .eoT()
+                    .fields()
+                        .field("clientEnvironment").value("Alpha")
+                    .eoF()
                 .eoI()
                 .todayIs("2020-01-05")
             .eoE()
@@ -78,6 +67,7 @@ public class IssueKpiTransformerTest {
                         .isNotOnStatus("Doing")
                         .isNotOnStatus("Done")
                     .eoDc()
+                    .hasClientEnvironment("Production")
                 .eoIA()
                 .givenIssue("I-2")
                     .hasType("Alpha")
@@ -86,7 +76,9 @@ public class IssueKpiTransformerTest {
                         .isNotOnStatus("Open")
                         .isNotOnStatus("To Do")
                         .isNotOnStatus("Doing")
-                        .isOnStatus("Done");
+                        .isOnStatus("Done")
+                    .eoDc()
+                    .hasClientEnvironment("Alpha");
     }
 
     @Test

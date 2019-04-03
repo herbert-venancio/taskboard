@@ -27,6 +27,7 @@ public class IssueKpi {
     private List<IssueKpi> children = new LinkedList<>();
     private KpiLevel level;
     private Clock clock;
+    private Optional<String> clientEnvironment = Optional.empty();
 
     public IssueKpi(String pKey, Optional<IssueTypeKpi> issueType, KpiLevel level, Optional<StatusTransition> firstStatus, Clock clock) {
         this.pKey = pKey;
@@ -196,5 +197,13 @@ public class IssueKpi {
     public Optional<String> getLastTransitedStatus() {
         Optional<DatedStatusTransition> lastTransitedStatus = firstStatus.flatMap(StatusTransition::lastTransitedStatus);
         return lastTransitedStatus.map(StatusTransition::getStatusName);
+    }
+
+    public void setClientEnvironment(Optional<String> clientEnvironment) {
+        this.clientEnvironment = clientEnvironment;
+    }
+    
+    public Optional<String> getClientEnvironment() {
+        return clientEnvironment;
     }
 }

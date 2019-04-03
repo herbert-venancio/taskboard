@@ -134,9 +134,19 @@ public class IssueKpiTransformer {
             }
             KpiLevel level = itemProvider.getLevel();
             IssueKpi issue = new IssueKpi(itemProvider.getIssueKey(),itemProvider.getIssueType(), level,next, clock);
-
+            mapCustomFields(issue,itemProvider);
             issuesKpi.put(itemProvider.getIssueKey(), issue);
         }
+    }
+
+    
+
+    private void mapCustomFields(IssueKpi issue, IssueKpiDataItemAdapter itemProvider) {
+        issue.setClientEnvironment(getClientEnvironment(itemProvider));
+    }
+
+    private Optional<String> getClientEnvironment(IssueKpiDataItemAdapter itemProvider) {
+        return itemProvider.getCustomFieldValue(kpiProperties.getEnvironmentField());
     }
 
     private boolean isProgressingStatus(String status) {

@@ -2,13 +2,14 @@ package objective.taskboard.followup.kpi.services;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
-import static org.junit.Assert.fail;
 
 import java.time.ZonedDateTime;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -43,13 +44,14 @@ public class TransitionsBuilder {
 
     private void put(ZonedWorklog worklog, String step) {
         TransitionDto transition = firstTransition;
+        
         while (transition != null) {
             if (step.equals(transition.status.name()))
                 break;
-            transition = transition.next.get();
+            transition = transition.next();
         }
         if (transition == null)
-            fail(step + " not found");
+            throw new AssertionError(step + " not found");
 
         transition.addWorklog(worklog);
     }
@@ -93,9 +95,9 @@ public class TransitionsBuilder {
     public Map<String, ZonedDateTime> getReversedTransitions() {
         LinkedList<TransitionDto> reversedOrder = new LinkedList<>();
         TransitionDto currentIndex = firstTransition;
-        while(currentIndex.next.isPresent()) {
+        while(currentIndex.hasNext()) {
            reversedOrder.push(currentIndex);
-           currentIndex = currentIndex.next.get();
+           currentIndex = currentIndex.next();
         }
         reversedOrder.push(currentIndex);
         Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
@@ -106,7 +108,7 @@ public class TransitionsBuilder {
         return transitions;
     }
 
-    public class TransitionDto {
+    public class TransitionDto implements Iterator<TransitionDto> {
         private StatusDto status;
         private Optional<ZonedDateTime> date = Optional.empty();
         private Optional<TransitionDto> next = Optional.empty();
@@ -167,6 +169,16 @@ public class TransitionsBuilder {
         @Override
         public String toString() {
             return String.format("%s [%s]", this.status, this.date.map(d -> d.toString()).orElse("Not Dated"));
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next.isPresent();
+        }
+
+        @Override
+        public TransitionDto next() {
+            return next.orElseThrow(NoSuchElementException::new);
         }
 
     }

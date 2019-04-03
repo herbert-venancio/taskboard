@@ -34,19 +34,26 @@ public class FieldValueExtractor {
         return issue -> {
             JiraFieldSchemaDto schema = fieldInfo.getSchema();
             try {
-                if (FieldSchemaType.array == schema.getType()
-                        && FieldSchemaType.option == schema.getItems()
-                        && CustomFieldTypes.multiselect == schema.getCustom())
-                    return extract(issue.getField(fieldInfo.getId())
-                            , ofArray(ofProperty("value", asString)))
-                            .map(stream -> stream.collect(joining()))
-                            .orElse("");
+                if (isMultiSelectOptions(schema)) {
+                    return extract(issue.getField(fieldInfo.getId()), ofArray(ofProperty("value", asString)))
+                                .map(stream -> stream.collect(joining())).orElse("");
+                }
+                if(isSimpleOption(schema))
+                    return extract(issue.getField(fieldInfo.getId()),ofProperty("value",asString)).orElse("");
             } catch (Exception e) {
                 log.warn(e.getMessage(), e);
             }
 
             return UNSUPPORTED_EXTRACTION_VALUE;
         };
+    }
+
+    private static boolean isSimpleOption(JiraFieldSchemaDto schema) {
+        return FieldSchemaType.option == schema.getType();
+    }
+
+    private static boolean isMultiSelectOptions(JiraFieldSchemaDto schema) {
+        return FieldSchemaType.array == schema.getType() && FieldSchemaType.option == schema.getItems() && CustomFieldTypes.multiselect == schema.getCustom();
     }
 
     private static <T, R> Optional<R> extract(T fromObject, Function<T, R> transformer) {

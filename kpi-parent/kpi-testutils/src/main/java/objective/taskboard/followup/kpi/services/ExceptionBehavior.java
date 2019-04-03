@@ -16,7 +16,7 @@ public class ExceptionBehavior implements DSLSimpleBehaviorWithAsserter<Exceptio
     @Override
     public void behave(KpiEnvironment environment) {
         exception = assertThatThrownBy(() -> delegateBehavior.behave(environment));
-    };
+    }
     @Override
     public ThrowableAsserter then() {
         return new ThrowableAsserter(exception);

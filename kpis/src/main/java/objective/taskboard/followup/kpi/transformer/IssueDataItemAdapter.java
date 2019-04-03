@@ -42,4 +42,9 @@ public class IssueDataItemAdapter implements IssueKpiDataItemAdapter {
         return level;
     }
 
+    @Override
+    public Optional<String> getCustomFieldValue(String customFieldId) {
+        return Optional.ofNullable(issue.getExtraFields().get(customFieldId));
+    }
+
 }
