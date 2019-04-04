@@ -52,12 +52,12 @@
 
         <div class="tabs-wrapper">
             <paper-tabs selected="{{selected}}" noink no-slide>
-                <template is="dom-if" if="{{_hasSubtasks(item)}}">
+                <template is="dom-if" if="{{_hasSubtasks(item)}}" restamp="true">
                     <paper-tab id="tab-subtask">
                         [[_subtaskHeader(item.type)]] ({{item.subtasks.length}})
                     </paper-tab>
                 </template>
-                <template is="dom-if" if="{{_hasBallparks(item)}}">
+                <template is="dom-if" if="{{_hasBallparks(item)}}" restamp="true">
                     <paper-tab id="tab-ballparks">
                         Ballparks
                     </paper-tab>
@@ -67,7 +67,7 @@
                 </paper-tab>
             </paper-tabs>
             <iron-pages selected="{{selected}}">
-                <template is="dom-if" if="{{_hasSubtasks(item)}}">
+                <template is="dom-if" if="{{_hasSubtasks(item)}}" restamp="true">
                     <div class="tabs-content">
                         <div id="subtasks_content" class="subtasks--panel">
                             <template is="dom-repeat" items="{{item.subtasks}}" as="subtask">
@@ -76,7 +76,7 @@
                                 >
                                 </subtask-item>
                             </template>
-                            <template is="dom-if" if="{{_canAddSubtasks(item)}}">
+                            <template is="dom-if" if="{{_canAddSubtasks(item)}}" restamp="true">
                                 <subtask-add
                                     item="{{item}}"
                                 ></subtask-add>
@@ -84,7 +84,7 @@
                         </div>
                     </div>
                 </template>
-                <template is="dom-if" if="{{_hasBallparks(item)}}">
+                <template is="dom-if" if="{{_hasBallparks(item)}}" restamp="true">
                     <div class="tabs-content">
                         <div id="subtasks_content" class="subtasks--panel">
                             <template is="dom-repeat" items="{{item.ballparks}}" as="ballpark">
