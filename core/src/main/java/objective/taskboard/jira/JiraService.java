@@ -211,13 +211,27 @@ public class JiraService {
     }
 
     public void block(String issueKey, String lastBlockReason) {
-        setBlocked(issueKey, true, lastBlockReason);
+        log.debug("⬣⬣⬣⬣⬣  setBlocked");
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .blocked(true)
+                .lastBlockReason(lastBlockReason)
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during setBlocked: " + result.getStatus());
     }
 
     public void unblock(String issueKey) {
-        setBlocked(issueKey, false, "");
+        log.debug("⬣⬣⬣⬣⬣  setUnblocked");
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .blocked(false)
+                .lastBlockReason("")
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during setBlocked: " + result.getStatus());
     }
-    
+
     public void saveDescription(String issueKey, String value) {
         Response result = updateIssue(issueKey, JiraIssue.Input.builder()
                 .description(value)
@@ -286,17 +300,6 @@ public class JiraService {
         String assignedTeamCfId = properties.getCustomfield().getAssignedTeams().getId();
         
         new SetFieldAction(issueKey, assignedTeamCfId, StringUtils.join(teamsIds,",")).call();
-    }
-
-    private void setBlocked(String issueKey, boolean blocked, String lastBlockReason) {
-        log.debug("⬣⬣⬣⬣⬣  setBlocked");
-        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
-                .blocked(blocked)
-                .lastBlockReason(lastBlockReason)
-                .build());
-
-        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
-            throw new FrontEndMessageException("Unexpected return code during setBlocked: " + result.getStatus());
     }
 
     private Response updateIssue(String issueKey, JiraIssue.Input request) {

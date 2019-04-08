@@ -406,6 +406,12 @@ function Taskboard() {
             data: JSON.stringify(ids)
         })
         .done(function(issues) {
+            var boardTable = document.querySelector("board-table")
+            issues.forEach((issue) => {
+                if(boardTable.localStates.issues[issue.issueKey])
+                    boardTable.localStates.issues[issue.issueKey].isUpdating = false;
+            })
+
             var issueById = {};
             issues.forEach(function(i){
                 issueById[i.id] = i;

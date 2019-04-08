@@ -62,7 +62,6 @@ public class JiraProperties implements JiraClientProperties {
     @NotNull
     @Valid
     private IssueType issuetype;
-
     @NotNull
     @NotEmpty
     private List<Long> statusesCompletedIds;

@@ -1,0 +1,99 @@
+<dom-module id="boolean-confirm-modal">
+
+    <template>
+
+        <style>
+            .confirmText {
+                padding: 18px 24px;
+            }
+
+        </style>
+
+        <modal-wrap id="booleanConfirmPaperDialog"
+                    title="[[title]]"
+                    >
+
+            <modal-wrap-content>
+                <div class="confirmText">[[text]]</div>
+            </modal-wrap-content>
+
+            <modal-wrap-footer>
+                <tb-button button="[[_btNo]]"></tb-button>
+                <tb-button button="[[_btYes]]"></tb-button>
+            </modal-wrap-footer>
+
+        </modal-wrap>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'boolean-confirm-modal',
+
+                properties: {
+                    title: {
+                        type: String,
+                        notify: true
+                    },
+
+                    text: {
+                        type: String,
+                        notify: true
+                    },
+
+                    _btYes: {
+                        type: Object,
+                        value: function () { return {} }
+                    },
+
+                    _btNo: {
+                        type: Object,
+                        value: function () { return {} }
+                    },
+
+                    callbackYes: {
+                        type: Object
+                    },
+
+                    callbackNo: {
+                        type: Object
+                    },
+
+                    close: {
+                        type: Object,
+                        value: function () { this.$.booleanConfirmPaperDialog.close() }
+                    }
+                },
+
+                closeDialog: function () {
+                    this.$.booleanConfirmPaperDialog.close();
+                },
+
+                openDialog: function (title, text, callbackYes, callbackNo) {
+                    this.title = title;
+                    this.text = text;
+
+                    var btYes= ButtonBuilder("Yes")
+                        .id("yes-button")
+                        .onClick(() => {
+                            callbackYes();
+                            this.closeDialog() })
+                        .build();
+                    this.set('_btYes', btYes);
+
+                    var btNo = ButtonBuilder("No")
+                        .id("no-button")
+                        .onClick( () => {
+                            callbackNo();
+                            this.closeDialog() })
+                        .build();
+                    this.set('_btNo', btNo);
+
+                    this.$.booleanConfirmPaperDialog.open();
+
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

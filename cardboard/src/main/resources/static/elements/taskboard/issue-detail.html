@@ -1155,6 +1155,7 @@
         </paper-dialog>
         <confirm-modal id="confirmModal"></confirm-modal>
         <fields-required-modal id="fieldsRequiredDialog" on-close-clicked="blockCancelled"></fields-required-modal>
+        <boolean-confirm-modal id="booleanConfirmModal" on-close-clicked="blockCancelled"></boolean-confirm-modal>
         <alert-modal id="alertModal"></alert-modal>
     </template>
 
@@ -1701,20 +1702,37 @@
                 },
 
                 block: function () {
-                    var self = this;
-                    var callback = function(issue, fieldValuesRequired) {
-                        self._setIssueLocalState(self.item, true, null);
-                        self._issueAction("block-task", "block issue " + issue.issueKey, fieldValuesRequired.lastBlockReason)
+
+                    let callback = (issue, fieldValuesRequired) => {
+
+                        let issues = taskboard.getHierarchyMatch(issue.issueKey);
+
+                        if(fieldValuesRequired.shouldBlockAllSubtasks){
+                            issues.forEach(issue => {
+                                this._setIssueLocalStateAndFireUpdated(taskboard.getIssueByKey(issue), true, null, 'TRANSITION');
+                            })
+                        }
+                        this._setIssueLocalState(this.item, true, null);
+                        this._issueAction("block-task", "block issue " + issue.issueKey, fieldValuesRequired)
                             .fail(function(){
-                                self.blocked = false;
-                            });
-                    };
+                                this.blocked = false;
+                            }
+                        );
+                    }
 
-                    var fields = [{id: "lastBlockReason",
-                        name: taskboard.getFieldName({fieldId: CUSTOMFIELD.LAST_BLOCK_REASON}),
-                        type: TYPE_FIELD.TEXTAREA}];
+                    callback.bind(this);
 
-                    self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
+                    let fields = [{
+                            id: "lastBlockReason",
+                            name: taskboard.getFieldName({fieldId: CUSTOMFIELD.LAST_BLOCK_REASON}),
+                            type: TYPE_FIELD.TEXTAREA
+                        }, {
+                            id: "shouldBlockAllSubtasks",
+                            name: "Block Subtasks",
+                            type: TYPE_FIELD.BOOLEAN_CHECKBOX
+                        }];
+
+                    this.$.fieldsRequiredDialog.openDialog(fields, "Block", this.item, callback);
                 },
 
                 blockCancelled: function() {
@@ -1722,10 +1740,31 @@
                 },
 
                 unblock: function () {
-                    this._issueAction("unblock-task", "unblock issue " + this.item.issueKey, {})
-                        .fail(function(){
-                            self.blocked = true;
-                        });
+                    var callbackBlockTaskAndItsSubtasks = () => {
+                        let issues = taskboard.getHierarchyMatch(this.item.issueKey);
+                        issues.forEach(issue => {
+                            this._setIssueLocalState(taskboard.getIssueByKey(issue), true, null);
+                        })
+                        this._issueAction("unblock-task", "unblock issue " + this.item.issueKey, { shouldUnblockAllSubtasks: true})
+                            .fail(function(){
+                                this.blocked = true;
+                            }
+                        );
+                    }
+
+                    callbackBlockTaskAndItsSubtasks.bind(this);
+
+                    var callbackBlockOnlyTask = () => {
+                        this._issueAction("unblock-task", "unblock issue " + this.item.issueKey, { shouldUnblockAllSubtasks: false})
+                            .fail(function(){
+                                this.blocked = true;
+                            }
+                        );
+                    }
+
+                    callbackBlockOnlyTask.bind(this);
+
+                    this.$.booleanConfirmModal.openDialog("Unblock", "Do you want to unblock all task's substasks?", callbackBlockTaskAndItsSubtasks, callbackBlockOnlyTask);
                 },
 
                 requestTransition: function (e) {
