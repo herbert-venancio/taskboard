@@ -662,6 +662,34 @@ public class IssueKpiTest {
                 .atStatus("Doing").doesNotHaveEffort()
                 .atStatus("Reviewing").hasTotalEffort(100l);
     }
+    
+    @Test
+    public void getRangeByProgressingStatuses_issueClosedNormally_withWorklogOnReviewAfterDone() {
+        dsl().
+        environment()
+            .todayIs("2020-01-10")
+            .givenSubtask("PROJ-01")
+                .type("Subtask")
+                .project("PROJ")
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").date("2020-01-03")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-06")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-07").timeSpentInSeconds(100)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                    .startsOn("2020-01-02").endsOn("2020-01-07")
+                .atStatus("Doing").doesNotHaveEffort()
+                .atStatus("Reviewing").hasTotalEffort(100l);
+    }
 
     @Test
     public void getAllWorklog_untilDate() {
