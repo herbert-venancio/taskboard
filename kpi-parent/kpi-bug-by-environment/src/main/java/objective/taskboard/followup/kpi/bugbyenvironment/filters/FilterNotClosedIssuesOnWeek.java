@@ -22,6 +22,7 @@ public class FilterNotClosedIssuesOnWeek implements Predicate<IssueKpi>{
 
     @Override
     public boolean test(IssueKpi issue) {
+        //TODO alterar para o novo componente
         Optional<Range<LocalDate>> progressingRange = issue.getDateRangeBasedOnProgressingStatuses(timezone);
         
         return progressingRange.map(weekRange::overlaps).orElse(openedDuringWeekOrBefore(issue));

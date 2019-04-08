@@ -206,4 +206,8 @@ public class IssueKpi {
     public Optional<String> getClientEnvironment() {
         return clientEnvironment;
     }
+    
+    public boolean isFromClientEnvironment(String environment) {
+        return this.clientEnvironment.map(e -> e.equalsIgnoreCase(environment)).orElse(false);
+    }
 }
