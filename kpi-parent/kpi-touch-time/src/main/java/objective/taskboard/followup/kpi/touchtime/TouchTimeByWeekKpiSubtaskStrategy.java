@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
+import objective.taskboard.followup.kpi.filters.KpiWeekRange;
 import objective.taskboard.followup.kpi.properties.TouchTimeSubtaskConfiguration;
 import objective.taskboard.utils.DateTimeUtils;
 
@@ -49,7 +50,7 @@ class TouchTimeByWeekKpiSubtaskStrategy extends TouchTimeByWeekKpiStrategy {
 
     private class StackAggregator {
         private Map<String, Stack> stackByName = new HashMap<>();
-        private StackAggregator(TouchTimeKpiWeekRange week) {
+        private StackAggregator(KpiWeekRange week) {
             touchTimeSubtaskConfigs.forEach(conf ->
                 stackByName.put(conf.getStackName(), new Stack(week, conf.getStackName()))
             );
@@ -70,11 +71,11 @@ class TouchTimeByWeekKpiSubtaskStrategy extends TouchTimeByWeekKpiStrategy {
     }
 
     private class Stack {
-        private TouchTimeKpiWeekRange week;
+        private KpiWeekRange week;
         private String name;
         private Collection<IssueKpi> issuesFromTypes = new LinkedList<>();
         private Collection<IssueKpi> issuesFromStatuses = new LinkedList<>();
-        private Stack(TouchTimeKpiWeekRange week, String stackName) {
+        private Stack(KpiWeekRange week, String stackName) {
             this.week = week;
             this.name = stackName;
         }

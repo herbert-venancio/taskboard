@@ -797,7 +797,7 @@ public class IssueKpiTest {
         .environment()
             .todayIs("2020-01-10")
             .givenFeature("I-1")
-                .type("Task")
+                .type("Feature")
                 .project("PROJ")
                 .withTransitions()
                     .status("To Do").date("2020-01-01")

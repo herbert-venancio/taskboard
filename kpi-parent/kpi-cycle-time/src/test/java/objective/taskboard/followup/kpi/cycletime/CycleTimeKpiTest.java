@@ -780,7 +780,8 @@ public class CycleTimeKpiTest {
                 .withProgressingStatuses("Doing","Reviewing")
                 .withNotProgressingStatuses("Open","To Do","To Review","Cancelled","Done")
             .eoS()
-            .withSubtaskType("Development");
+            .withSubtaskType("Development")
+            .withSubtaskType("Subtask");
         return dsl;
     }
 }

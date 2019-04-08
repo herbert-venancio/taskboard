@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
+import objective.taskboard.followup.kpi.filters.KpiWeekRange;
 import objective.taskboard.utils.DateTimeUtils;
 
 class TouchTimeByWeekKpiProgressingStatusesStrategy extends TouchTimeByWeekKpiStrategy {
@@ -31,8 +32,8 @@ class TouchTimeByWeekKpiProgressingStatusesStrategy extends TouchTimeByWeekKpiSt
                 .collect(Collectors.toList());
     }
 
-    private List<TouchTimeByWeekKpiDataPoint> transformToDataPoints(Entry<TouchTimeKpiWeekRange, List<IssueKpi>> entry) {
-        TouchTimeKpiWeekRange week = entry.getKey();
+    private List<TouchTimeByWeekKpiDataPoint> transformToDataPoints(Entry<KpiWeekRange, List<IssueKpi>> entry) {
+        KpiWeekRange week = entry.getKey();
         List<IssueKpi> issues = entry.getValue();
         return progressingStatuses.stream()
             .map(status -> new TouchTimeByWeekKpiDataPoint(
@@ -42,7 +43,7 @@ class TouchTimeByWeekKpiProgressingStatusesStrategy extends TouchTimeByWeekKpiSt
             .collect(Collectors.toList());
     }
 
-    private double getWeekAvgEffortForStatusFromIssues(TouchTimeKpiWeekRange week, String status, List<IssueKpi> issues) {
+    private double getWeekAvgEffortForStatusFromIssues(KpiWeekRange week, String status, List<IssueKpi> issues) {
         return issues.stream()
             .map(i -> i.getEffortFromStatusUntilDate(status, week.getLastDay()))
             .mapToDouble(DateTimeUtils::secondsToHours)
