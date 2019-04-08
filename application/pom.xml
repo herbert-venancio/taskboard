@@ -48,7 +48,6 @@
 			<version>${project.version}</version>
 			<artifactId>sizing-importer</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>br.com.objective</groupId>
 			<artifactId>kpi-budget-chart</artifactId>
@@ -97,6 +96,11 @@
 		<dependency>
 			<groupId>br.com.objective</groupId>
 			<artifactId>kpi-wip</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>br.com.objective</groupId>
+			<artifactId>kpi-bug-by-environment</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -188,7 +192,6 @@
 							</arguments>
 						</configuration>
 					</execution>
-
 					<execution>
 						<id>javascript-coverage-report</id>
 						<phase>post-integration-test</phase>
