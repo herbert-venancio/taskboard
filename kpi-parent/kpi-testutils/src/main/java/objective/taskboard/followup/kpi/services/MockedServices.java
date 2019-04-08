@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -125,6 +126,10 @@ public class MockedServices {
         
         public Map<String, IssueKpi> getIssuesKpiByKey() {
             return issuesRepository.getIssuesKpi();
+        }
+        
+        public List<IssueKpi> getAllIssues() {
+            return new LinkedList<>(getIssuesKpiByKey().values());
         }
 
         public Map<KpiLevel, List<IssueKpi>> getIssuesByLevel() {

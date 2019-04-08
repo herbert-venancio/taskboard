@@ -48,7 +48,7 @@ public class IssueKpiMocker {
     private String projectKey;
     private Issue mockedIssue;
     private boolean shouldDistributeWorklog = true;
-
+    
     IssueKpiMocker(KpiEnvironment fatherEnvironment, String pKey) {
         this.parentEnvironment = fatherEnvironment;
         this.transitionBuilder = new TransitionsBuilder(this);
@@ -98,7 +98,7 @@ public class IssueKpiMocker {
     }
 
     public IssueKpiMocker type(String type) {
-        this.type = parentEnvironment.getOptionalType(type);
+        this.type = parentEnvironment.getOptionalFromExistentType(type);
         this.typeConfigured = true;
         return this;
     }
@@ -157,7 +157,12 @@ public class IssueKpiMocker {
     public TransitionsBuilder withTransitions() {
         return transitionBuilder;
     }
-
+    
+    public IssueKpiMocker withPreconfiguredTransition(String name) {
+        this.transitionBuilder = parentEnvironment.getPreconfiguredTransition(name);
+        return this;
+    }
+    
     public WorklogsBuilder worklogs() {
         return worklogsBuilder;
     }
