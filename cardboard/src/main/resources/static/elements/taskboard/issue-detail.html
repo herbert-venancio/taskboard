@@ -1000,7 +1000,7 @@
                                 </template>
 
                                 <template is="dom-if" if="{{descriptionIsEditable}}">
-                                    <textarea class="description-box__field" name="description" id="description" value={{editableDescription::input}}></textarea>
+                                    <textarea class="description-box__field" name="description" id="description"  value="{{editableDescription::input}}" on-keyup="_keyEventDescription"></textarea>
                                     <div class="description-box__footer">
                                         <paper-button class="tb-button tb-button__default" on-tap="_closeDescriptionEditMode">Cancel</paper-button>
                                         <paper-button class="tb-button tb-button--type_button description--save-button" on-tap="_saveIssueDescription">Save</paper-button>
@@ -2228,6 +2228,20 @@
                     
                     if (key === "Enter") {
                         this._updateIssueSummary();
+                    }
+                },
+
+                _keyEventDescription: function(event) {
+                    var key = event.key;
+
+                    if (key === "Escape") {
+                        this._closeDescriptionEditMode();
+                        this.querySelector('#modal').focus();
+                        event.stopPropagation();
+                    }
+
+                    if (key === "Enter") {
+                        this._saveIssueDescription();
                     }
                 },
 
