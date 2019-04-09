@@ -244,6 +244,28 @@ public class StatusTransitionTest {
             .statusTransition()
                 .dateAterLeavingLastProgressingStatus().is("2020-01-06");
     }
+    
+    @Test
+    public void getDateAfterLeavingLastProgressingStatus_withWorklogAfterClosed_thenWorklogDate(){
+        dsl()
+        .environment()
+            .statusTransition()
+                .status("To Do").date("2020-01-02")
+                .status("Doing").date("2020-01-03")
+                .status("To Review").date("2020-01-04")
+                .status("Reviewing").date("2020-01-05")
+                .status("Done").date("2020-01-06")
+                .withWorklogs()
+                    .timeSpent(300)
+                    .withDate("2020-01-07")
+                    .on("Reviewing")
+                .eoW()
+            .eoSt()
+        .then()
+        .assertThat()
+            .statusTransition()
+                .dateAterLeavingLastProgressingStatus().is("2020-01-07");
+    }
 
     @Test
     public void getDateAfterLeavingLastProgressingStatus_skippingProgress(){
