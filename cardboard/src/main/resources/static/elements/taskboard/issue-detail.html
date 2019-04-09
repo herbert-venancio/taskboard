@@ -785,6 +785,7 @@
                       entry-animation="scale-up-animation"
                       exit-animation="fade-out-animation"
                       on-iron-overlay-opened="_afterOpen"
+                      on-keyup="_onKeyUp"
                       data-status$="{{_modalStatus}}">
 
             <div id="glasspane-updated" class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
@@ -2221,10 +2222,23 @@
 
                     if (key === "Escape") {
                         this._toggleSummaryEditMode();
+                        this.querySelector('#modal').focus();
+                        event.stopPropagation();
                     }
                     
                     if (key === "Enter") {
                         this._updateIssueSummary();
+                    }
+                },
+
+                _onKeyUp: function(event) {
+                    var key = event.key;
+                    if (key === "Escape") {
+                        if (this.editSummaryIsOpen || this.descriptionIsEditable) {
+                            event.preventDefault();
+                            return;
+                        }
+                        this.close();
                     }
                 }
             });
