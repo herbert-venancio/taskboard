@@ -1,0 +1,120 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2019-03-25T17:45:11Z"
+  generation: 1
+  labels:
+    run: taskboard
+  name: taskboard
+  
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  minReadySeconds: 10
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      run: taskboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: taskboard
+    spec:
+      containers:
+      - image: repo:5000/objective-taskboard:snapshot-master
+        imagePullPolicy: Always
+        name: taskboard
+        ports:
+        - containerPort: 8082
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+              - mountPath: /opt/taskboard_properties
+                name: properties
+              - mountPath: /opt/taskboard_config
+                name: data-config
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: 8082
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      initContainers:
+        - name: init-myservice
+          image: busybox:1.28
+          command: ["sh", "-c", "find /opt/taskboard_properties -type f | xargs -I {} cp -v {} /opt/taskboard_config && mkdir -v -p /opt/taskboard_config/data"]
+          volumeMounts:
+            - mountPath: /opt/taskboard_properties
+              name: properties
+            - mountPath: /opt/taskboard_config
+              name: data-config
+      volumes:
+        - name: properties
+          configMap:
+            name: config-files
+        - name: data-config
+          persistentVolumeClaim:
+            claimName: data-config-claim
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-config-vol
+spec:
+  storageClassName: local-storage
+  volumeMode: Filesystem
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /opt/taskboard_config
+---  
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-config-claim
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  volumeName: data-config-vol
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskboard-svc
+  labels:
+    run: taskboard
+spec:
+  type: NodePort
+  selector:
+    run: taskboard
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8082
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+---

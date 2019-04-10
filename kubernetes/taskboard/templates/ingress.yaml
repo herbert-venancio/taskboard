@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: taskboard-liferay-dev-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-issuer
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - hosts:
+    - taskboard-liferay-dev.objective.com.br
+    secretName: taskboard-liferay-dev-tls
+  rules:
+  - host: taskboard-liferay-dev.objective.com.br
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: taskboard-svc
+          servicePort: 8082
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: taskboard-liferay-dev-tls
+spec:
+  secretName: taskboard-liferay-dev-tls
+  issuerRef:
+    name: letsencrypt-issuer
+  commonName: taskboard-liferay-dev.objective.com.br
+  dnsNames:
+  - taskboard-liferay-dev.objective.com.br
+  acme:
+    config:
+    - http01:
+        ingressClass: nginx
+      domains:
+      - taskboard-liferay-dev.objective.com.br
+      
+      
+      

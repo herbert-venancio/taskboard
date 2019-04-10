@@ -1,0 +1,13 @@
+rootUser:
+  password:
+  forcePassword: true
+
+db:
+  user: taskboard
+  password:
+  name: taskboard
+  forcePassword: true
+  
+serviceAccount:
+  create: true
+  name: taskboard-db
