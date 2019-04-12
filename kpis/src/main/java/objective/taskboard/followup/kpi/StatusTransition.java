@@ -166,13 +166,12 @@ public class StatusTransition {
     }
 
     public Optional<LocalDate> getDateAfterLeavingLastProgressingStatus() {
-        Optional<StatusTransition> lastProgressingStatusOp = flatNext(s -> s.getLastProgressingStatus());
+        Optional<StatusTransition> lastProgressingStatusOp = flatNext(StatusTransition::getLastProgressingStatus);
         if(!lastProgressingStatusOp.isPresent())
             return Optional.empty();
         StatusTransition lastProgressingStatus = lastProgressingStatusOp.get();
 
-        Optional<DatedStatusTransition> nextWithDate = lastProgressingStatus.next.flatMap(n -> n.withDate());
-        return nextWithDate.flatMap(s -> Optional.of(s.getDate().toLocalDate()));
+        return lastProgressingStatus.getExitDate().map(ZonedDateTime::toLocalDate);
     }
 
     private Optional<StatusTransition> getLastProgressingStatus() {
