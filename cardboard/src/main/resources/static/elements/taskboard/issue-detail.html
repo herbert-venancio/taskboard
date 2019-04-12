@@ -2220,40 +2220,46 @@
                 _keyEventsSummary: function(event) {
                     var key = event.key;
 
-                    if (key === "Escape") {
+                    if (this._isEsc(event)) {
                         this._toggleSummaryEditMode();
                         this.querySelector('#modal').focus();
                         event.stopPropagation();
                     }
                     
-                    if (key === "Enter") {
+                    if (this._isEnter(event))
                         this._updateIssueSummary();
-                    }
                 },
 
                 _keyEventDescription: function(event) {
                     var key = event.key;
 
-                    if (key === "Escape") {
+                    if (this._isEsc(event)) {
                         this._closeDescriptionEditMode();
                         this.querySelector('#modal').focus();
                         event.stopPropagation();
-                    }
-
-                    if (key === "Enter") {
-                        this._saveIssueDescription();
                     }
                 },
 
                 _onKeyUp: function(event) {
                     var key = event.key;
-                    if (key === "Escape") {
-                        if (this.editSummaryIsOpen || this.descriptionIsEditable) {
+                    if (this._isEsc(event)) {
+                        if (this._canClose(event))
+                            this.close();
+                        else
                             event.preventDefault();
-                            return;
-                        }
-                        this.close();
                     }
+                },
+
+                _isEsc: function(event) {
+                    return event.key === "Escape";
+                },
+
+                _isEnter: function(event) {
+                    return event.key === "Enter";
+                },
+
+                _canClose: function(event) {
+                    return !this.editSummaryIsOpen && !this.descriptionIsEditable;
                 }
             });
         })();
