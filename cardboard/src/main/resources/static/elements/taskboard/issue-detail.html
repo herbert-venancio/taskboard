@@ -785,6 +785,7 @@
                       entry-animation="scale-up-animation"
                       exit-animation="fade-out-animation"
                       on-iron-overlay-opened="_afterOpen"
+                      on-keyup="_onKeyUp"
                       data-status$="{{_modalStatus}}">
 
             <div id="glasspane-updated" class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
@@ -999,7 +1000,7 @@
                                 </template>
 
                                 <template is="dom-if" if="{{descriptionIsEditable}}">
-                                    <textarea class="description-box__field" name="description" id="description" value={{editableDescription::input}}></textarea>
+                                    <textarea class="description-box__field" name="description" id="description"  value="{{editableDescription::input}}" on-keyup="_keyEventDescription"></textarea>
                                     <div class="description-box__footer">
                                         <paper-button class="tb-button tb-button__default" on-tap="_closeDescriptionEditMode">Cancel</paper-button>
                                         <paper-button class="tb-button tb-button--type_button description--save-button" on-tap="_saveIssueDescription">Save</paper-button>
@@ -2219,13 +2220,46 @@
                 _keyEventsSummary: function(event) {
                     var key = event.key;
 
-                    if (key === "Escape") {
+                    if (this._isEsc(event)) {
                         this._toggleSummaryEditMode();
+                        this.querySelector('#modal').focus();
+                        event.stopPropagation();
                     }
                     
-                    if (key === "Enter") {
+                    if (this._isEnter(event))
                         this._updateIssueSummary();
+                },
+
+                _keyEventDescription: function(event) {
+                    var key = event.key;
+
+                    if (this._isEsc(event)) {
+                        this._closeDescriptionEditMode();
+                        this.querySelector('#modal').focus();
+                        event.stopPropagation();
                     }
+                },
+
+                _onKeyUp: function(event) {
+                    var key = event.key;
+                    if (this._isEsc(event)) {
+                        if (this._canClose(event))
+                            this.close();
+                        else
+                            event.preventDefault();
+                    }
+                },
+
+                _isEsc: function(event) {
+                    return event.key === "Escape";
+                },
+
+                _isEnter: function(event) {
+                    return event.key === "Enter";
+                },
+
+                _canClose: function(event) {
+                    return !this.editSummaryIsOpen && !this.descriptionIsEditable;
                 }
             });
         })();
