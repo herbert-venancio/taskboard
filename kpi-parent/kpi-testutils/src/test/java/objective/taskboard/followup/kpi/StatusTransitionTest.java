@@ -646,6 +646,96 @@ public class StatusTransitionTest {
                 .status("Done").hasEnterDate("2020-01-05")
                 .status("Done").hasNoExitDate();
     }
+    
+    @Test
+    public void getLastTransitedStatus_happyDay() {
+        dsl()
+        .environment()
+            .statusTransition()
+                .status("To Do").date("2020-01-01")
+                .status("Doing").date("2020-01-02")
+                .status("To Review").date("2020-01-03")
+                .status("Reviewing").date("2020-01-04")
+                .status("Done").date("2020-01-05")
+            .eoSt()
+        .then()
+        .assertThat()
+            .statusTransition()
+                .lastTransitionStatus().is("Done");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_skippingStatus() {
+        dsl()
+        .environment()
+            .statusTransition()
+                .status("To Do").date("2020-01-01")
+                .status("Doing").date("2020-01-02")
+                .status("To Review").noDate()
+                .status("Reviewing").noDate()
+                .status("Done").date("2020-01-05")
+            .eoSt()
+        .then()
+        .assertThat()
+            .statusTransition()
+                .lastTransitionStatus().is("Done");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_inProgress() {
+        dsl()
+        .environment()
+            .statusTransition()
+                .status("To Do").date("2020-01-01")
+                .status("Doing").date("2020-01-02")
+                .status("To Review").noDate()
+                .status("Reviewing").noDate()
+                .status("Done").noDate()
+            .eoSt()
+        .then()
+        .assertThat()
+            .statusTransition()
+                .lastTransitionStatus().is("Doing");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_openIssue() {
+        dsl()
+        .environment()
+            .statusTransition()
+                .status("To Do").date("2020-01-01")
+                .status("Doing").noDate()
+                .status("To Review").noDate()
+                .status("Reviewing").noDate()
+                .status("Done").noDate()
+            .eoSt()
+        .then()
+        .assertThat()
+            .statusTransition()
+                .lastTransitionStatus().is("To Do");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_disregardingWorklog() {
+        dsl()
+        .environment()
+            .statusTransition()
+                .status("To Do").date("2020-01-01")
+                .status("Doing").date("2020-01-02")
+                .status("To Review").noDate()
+                .status("Reviewing").noDate()
+                .status("Done").date("2020-01-05")
+                .withWorklogs()
+                    .timeSpent(300)
+                    .withDate("2020-01-04")
+                    .on("Reviewing")
+                .eoW()
+            .eoSt()
+        .then()
+        .assertThat()
+            .statusTransition()
+                .lastTransitionStatus().is("Done");
+    }
 
     private DSLKpi dsl() {
         DSLKpi dsl = new DSLKpi();

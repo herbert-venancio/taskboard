@@ -36,15 +36,15 @@ public class IssueKpiTestRepository {
         return issues;
     }
     
-    Map<String,Map<KpiLevel,List<IssueKpi>>> getIssuesByProject(){
+    Map<String,List<IssueKpi>> getIssuesByProject(){
         if(issuesKpi == null)
             buildAll();
         
         Map<String, List<IssueKpiMetadata>> metadataByProject = issuesKpi.stream().collect(Collectors.groupingBy(IssueKpiMetadata::getProject));
-        Map<String,Map<KpiLevel,List<IssueKpi>>> issuesByProject = new LinkedHashMap<>();
+        Map<String,List<IssueKpi>> issuesByProject = new LinkedHashMap<>();
         for (Entry<String,List<IssueKpiMetadata>> entry : metadataByProject.entrySet()) {
-            Map<KpiLevel,List<IssueKpi>> issuesKpiByProjectAndLevel = entry.getValue().stream().map(IssueKpiMetadata::getIssue).collect(Collectors.groupingBy(IssueKpi::getLevel));
-            issuesByProject.put(entry.getKey(), issuesKpiByProjectAndLevel);
+            List<IssueKpi> issuesKpiByProject = entry.getValue().stream().map(IssueKpiMetadata::getIssue).collect(Collectors.toList());
+            issuesByProject.put(entry.getKey(), issuesKpiByProject);
         }
         return issuesByProject;
     }

@@ -192,4 +192,9 @@ public class IssueKpi {
                 children.stream().flatMap(IssueKpi::getDecendants)
             );
     }
+
+    public Optional<String> getLastTransitedStatus() {
+        Optional<DatedStatusTransition> lastTransitedStatus = firstStatus.flatMap(StatusTransition::lastTransitedStatus);
+        return lastTransitedStatus.map(StatusTransition::getStatusName);
+    }
 }

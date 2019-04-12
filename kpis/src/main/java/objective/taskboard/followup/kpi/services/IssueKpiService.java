@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.filters.FollowupIssueFilter;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
@@ -25,7 +23,6 @@ import objective.taskboard.utils.Clock;
 class IssueKpiService {
 
     private IssueBufferService issueBufferService;
-    private JiraProperties jiraProperties;
     private KPIProperties kpiProperties;
     private Clock clock;
     private IssueKpiDataItemAdapterFactory factory;
@@ -38,27 +35,24 @@ class IssueKpiService {
             Clock clock,
             IssueKpiDataItemAdapterFactory factory) {
         this.issueBufferService = issueBufferService;
-        this.jiraProperties = jiraProperties;
         this.kpiProperties = kpiProperties;
         this.clock = clock;
         this.factory = factory;
     }
 
-    List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone, KpiLevel kpiLevel){
+    List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone){
 
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
-                .filter(new FollowupIssueFilter(jiraProperties, projectKey))
+                .filter(issue -> projectKey.equals(issue.getProjectKey()))
                 .collect(Collectors.toList());
 
         List<IssueKpiDataItemAdapter> items = factory.getItems(issuesVisibleToUser,timezone);
-        List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties, clock)
+        return new IssueKpiTransformer(kpiProperties, clock)
                                         .withItems(items)
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()
                                         .settingWorklogWithTimezone(timezone)
                                         .transform();
-
-        return issuesKpi.stream().filter(i -> i.getLevel() == kpiLevel).collect(Collectors.toList());
     }
 
     List<IssueKpi> getIssues(Optional<AnalyticsTransitionsDataSet> analyticSet){

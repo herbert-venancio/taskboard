@@ -102,6 +102,11 @@ public class IssueKpiAsserter<T> {
         Assertions.assertThat(subject.getIssueTypeName()).isEqualTo(type);
         return this;
     }
+    
+    public IssueKpiAsserter<T> hasLastTransitedStatus(String status) {
+        Assertions.assertThat(subject.getLastTransitedStatus()).hasValue(status);
+        return this;
+    }
 
     public class SubtaskChecker {
         private List<ZonedWorklog> childrenWorklogs;

@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.filters.KpiLevelFilter;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.services.DSLKpi;
 import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
@@ -647,11 +649,13 @@ public class FullTouchTimeTest {
             IssueKpiDataItemAdapterFactory factory = services.itemAdapterFactory().getComponent();
 
             IssueKpiService subject = new IssueKpiService(issueBufferService, jiraProperties, kpiProperties, clock, factory);
+            List<IssueKpi> issuesFromCurrentState = subject.getIssuesFromCurrentState(project, zoneId);
 
             for (KpiLevel level : KpiLevel.values()) {
-                allIssues.put(level, subject.getIssuesFromCurrentState(project, zoneId, level));
+                List<IssueKpi> issuesFromLevel = issuesFromCurrentState.stream()
+                        .filter(new KpiLevelFilter(level)).collect(Collectors.toList());
+                allIssues.put(level, issuesFromLevel);
             }
-
         }
 
         @Override

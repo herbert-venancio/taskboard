@@ -152,6 +152,11 @@ public class StatusTransition {
     List<ZonedWorklog> getWorklogs(){
         return this.worklogs;
     }
+    
+    protected Optional<DatedStatusTransition> lastTransitedStatus(){
+        Optional<DatedStatusTransition> nextWithDate = next.flatMap(StatusTransition::withDate);
+        return nextWithDate.flatMap(StatusTransition::lastTransitedStatus);
+    }
 
     public List<ZonedWorklog> collectWorklog() {
         List<ZonedWorklog> allWorklogs = next.map(StatusTransition::collectWorklog).orElseGet(LinkedList::new);
