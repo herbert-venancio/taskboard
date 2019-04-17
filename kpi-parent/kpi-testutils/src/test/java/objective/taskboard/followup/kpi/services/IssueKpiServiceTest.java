@@ -1,9 +1,7 @@
 package objective.taskboard.followup.kpi.services;
 
-import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
 import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
 import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
-import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -14,11 +12,6 @@ import org.junit.Test;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
-import objective.taskboard.followup.kpi.services.DSLKpi;
-import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.services.IssueKpiService;
-import objective.taskboard.followup.kpi.services.IssuesAsserter;
-import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.services.snapshot.AnalyticsDataSetsGenerator;
 
 public class IssueKpiServiceTest {
@@ -50,7 +43,7 @@ public class IssueKpiServiceTest {
 
     @Test
     public void getIssues_currentState() {
-        KpiEnvironment context = dsl()
+        dsl()
             .services()
                 .projects()
                     .withKey("PROJ")
@@ -82,66 +75,48 @@ public class IssueKpiServiceTest {
                         .at("2020-01-03").timeSpentInHours(3.0)
                     .eoW()
                 .endOfSubtask()
-            .eoI();
-        context
+            .eoI()
             .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", DEMAND))
+                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ"))
             .then()
-                .amountOfIssueIs(0);
-        context
-            .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", FEATURES))
-            .then()
-                .amountOfIssueIs(1)
+                .amountOfIssueIs(2)
                 .givenIssue("I-1")
                     .hasLevel(FEATURES)
                     .hasType("Task")
                     .atDate("2020-01-04").isOnStatus("Doing").eoDc()
                     .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
                     .hasChild("I-2")
-                .eoIA();
-        context
-            .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", SUBTASKS))
-            .then()
-                .amountOfIssueIs(1)
-                .givenIssue("I-2")
+                .eoIA()
+                        .givenIssue("I-2")
                     .hasLevel(SUBTASKS)
                     .hasType("Alpha")
                     .atDate("2020-01-04").isOnStatus("Done").eoDc()
                     .atStatus("To Do").hasNoEffort().eoSa()
                     .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
                     .atStatus("Done").hasNoEffort().eoSa();
-        context
-            .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ", UNMAPPED))
-            .then()
-                .amountOfIssueIs(0);
     }
 
     private ServeIssuesFromDatasets getIssuesFromDataSet(KpiLevel kpiLevel) {
         return new ServeIssuesFromDatasets(kpiLevel);
     }
 
-    private ServeIssuesFromCurrentState getIssuesFromCurrentStateForProjectAndLevel(String projectKey, KpiLevel level) {
-        return new ServeIssuesFromCurrentState(projectKey, level);
+    private ServeIssuesFromCurrentState getIssuesFromCurrentStateForProjectAndLevel(String projectKey) {
+        return new ServeIssuesFromCurrentState(projectKey);
     }
 
     private class ServeIssuesFromCurrentState implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
         private String projectKey;
-        private KpiLevel level;
         private IssuesAsserter asserter;
         
-        public ServeIssuesFromCurrentState(String projectKey, KpiLevel level) {
+        public ServeIssuesFromCurrentState(String projectKey) {
             this.projectKey = projectKey;
-            this.level = level;
         }
 
         @Override
         public void behave(KpiEnvironment environment) {
             IssueKpiService subject = environment.services().issueKpi().buildServiceInstance();
             ZoneId timezone = environment.getTimezone();
-            List<IssueKpi> issues = subject.getIssuesFromCurrentState(projectKey, timezone , level);
+            List<IssueKpi> issues = subject.getIssuesFromCurrentState(projectKey, timezone);
             this.asserter = new IssuesAsserter(issues, environment);
         }
 

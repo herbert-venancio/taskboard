@@ -4,7 +4,6 @@ import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -46,13 +45,36 @@ public class StatusTransitionAsserter {
         return new DateChecker(date);
     }
 
-    public DatedStatusTransition atDate(String date) {
-        return new DatedStatusTransition(parseDateTime(date));
+    public DatedStatusTransitionAsserter atDate(String date) {
+        return new DatedStatusTransitionAsserter(parseDateTime(date));
     }
 
     public StatusTransitionNodeAsserter status(String statusName) {
         StatusTransition statusTransition = statusMap.get(statusName);
         return new StatusTransitionNodeAsserter(statusTransition);
+    }
+    
+    public StatusChecker<DatedStatusTransition> lastTransitionStatus() {
+        return new StatusChecker<DatedStatusTransition>(status.lastTransitedStatus());
+    }
+    
+    public class StatusChecker<T extends StatusTransition> {
+
+        private Optional<T> statusToBeChecked;
+
+        public StatusChecker(Optional<T> statusToBeChecked) {
+            this.statusToBeChecked = statusToBeChecked;
+        }
+
+        public StatusChecker<T> is(String statusName) {
+            Assertions.assertThat(statusToBeChecked).hasValueSatisfying(
+                    status -> Assertions.assertThat(status.getStatusName()).isEqualTo(statusName)
+            );
+            return this;
+        }
+        
+        
+        
     }
 
     public class DateChecker {
@@ -76,10 +98,10 @@ public class StatusTransitionAsserter {
 
     }
 
-    public class DatedStatusTransition {
+    public class DatedStatusTransitionAsserter {
         private ZonedDateTime date;
 
-        private DatedStatusTransition(ZonedDateTime date) {
+        private DatedStatusTransitionAsserter(ZonedDateTime date) {
             this.date = date;
         }
 
@@ -90,15 +112,15 @@ public class StatusTransitionAsserter {
 
         public StatusTransitionAsserter isStatus(String status) {
             Optional<StatusTransition> givenDate = givenDate();
-            assertTrue(givenDate.isPresent());
-            assertTrue(givenDate.get().isStatus(status));
+            Assertions.assertThat(givenDate).hasValueSatisfying(
+                    statusTransition -> Assertions.assertThat(statusTransition.isStatus(status)).isTrue() 
+            );
 
             return StatusTransitionAsserter.this;
         }
 
         public Optional<StatusTransition> givenDate() {
-            Optional<StatusTransition> givenDate = StatusTransitionAsserter.this.status.givenDate(date);
-            return givenDate;
+            return status.givenDate(date);
         }
 
     }
@@ -144,4 +166,5 @@ public class StatusTransitionAsserter {
             return parseDateTime(date, "00:00:00", timezone);
         }
     }
+
 }

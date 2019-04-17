@@ -26,6 +26,7 @@ import objective.taskboard.followup.FollowUpSnapshot;
 import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.filters.KpiFilterService;
 import objective.taskboard.followup.kpi.services.DSLKpi;
 import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.services.IssueKpiService;
@@ -415,7 +416,9 @@ public class KpiDataServiceTest {
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
             ProjectService projectService = environment.services().projects().getService();
-            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService);
+            KpiFilterService filterService = environment.services().filters().getService();
+            
+            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService, filterService);
             ZoneId timezone = environment.getTimezone();
             
             List<IssueKpi> issues = getIssues(subject, timezone);
@@ -438,7 +441,7 @@ public class KpiDataServiceTest {
 
         @Override
         protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
-            return subject.getIssuesFromCurrentState(projectKey, timezone, level);
+            return subject.getIssuesFromCurrentStateWithDefaultFilters(projectKey, timezone, level);
         }
 
     }
@@ -481,8 +484,9 @@ public class KpiDataServiceTest {
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             ProjectService projectService = environment.services().projects().getService();
+            KpiFilterService filterService = environment.services().filters().getService();
 
-            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService); 
+            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService, filterService); 
             this.asserter = new SnapshotAsserter(projectKey,timezone, environment, getSnapshot(timezone, subject));
         }
 

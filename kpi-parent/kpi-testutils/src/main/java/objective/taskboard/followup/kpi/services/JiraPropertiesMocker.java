@@ -197,6 +197,10 @@ public class JiraPropertiesMocker {
             this.statusesNames = Arrays.asList(statuses);
             return this;
         }
+        
+        public List<String> statusesExcluded(){
+            return statusesNames;
+        }
 
         public JiraPropertiesMocker eof() {
             return JiraPropertiesMocker.this;

@@ -1059,6 +1059,114 @@ public class IssueKpiTest {
                     .hasType("Demand")
                     .hasEffortSumFromChildrenWithSubtaskTypeName(0.0, "Foo");
     }
+    
+    @Test
+    public void getLastTransitedStatus_happyDay() {
+        dsl()
+        .environment()
+            .givenSubtask("PROJ-01")
+                .emptyType()
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").date("2020-01-02")
+                    .status("Doing").date("2020-01-03")
+                    .status("To Review").date("2020-01-06")
+                    .status("Reviewing").date("2020-01-07")
+                    .status("Done").date("2020-01-08")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01").hasLastTransitedStatus("Done");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_skippingStatus() {
+        dsl()
+        .environment()
+            .givenSubtask("PROJ-01")
+                .emptyType()
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-08")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01").hasLastTransitedStatus("Done");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_issueInProgress() {
+        dsl()
+        .environment()
+            .givenSubtask("PROJ-01")
+                .emptyType()
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01").hasLastTransitedStatus("Doing");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_issueIOpen() {
+        dsl()
+        .environment()
+            .givenSubtask("PROJ-01")
+                .emptyType()
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01").hasLastTransitedStatus("Open");
+    }
+    
+    @Test
+    public void getLastTransitedStatus_idisregardingWorklogs() {
+        dsl()
+        .environment()
+            .givenSubtask("PROJ-01")
+                .emptyType()
+                .project("PROJ")
+                .withTransitions()
+                    .status("Open").date("2020-01-01")
+                    .status("To Do").noDate()
+                    .status("Doing").date("2020-01-06")
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-08")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-07").timeSpentInHours(1.0)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01").hasLastTransitedStatus("Done");
+    }
 
     private DSLKpi dsl() {
         DSLKpi dsl = new DSLKpi();

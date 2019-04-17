@@ -95,6 +95,12 @@ public class DatedStatusTransition extends StatusTransition {
         Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
         return nextWithDate.map(n -> !n.isProgressingStatus && isSameDate(n)).orElse(false);
     }
+    
+    @Override
+    protected Optional<DatedStatusTransition> lastTransitedStatus() {
+        Optional<DatedStatusTransition> possibleNext = super.lastTransitedStatus(); 
+        return possibleNext.isPresent() ? possibleNext : Optional.of(this);
+    }
 
     @Override
     public Optional<LocalDate> firstDateOnProgressing() {

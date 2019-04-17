@@ -21,9 +21,10 @@ import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.filters.KpiFilterService;
+import objective.taskboard.followup.kpi.filters.KpiLevelFilter;
+import objective.taskboard.followup.kpi.filters.StatusExcludedFromFollowupFilter;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
-import objective.taskboard.followup.kpi.services.IssueKpiService;
-import objective.taskboard.followup.kpi.services.KpiDataService;
 import objective.taskboard.followup.kpi.services.KpiEnvironment.StatusDto;
 import objective.taskboard.followup.kpi.services.snapshot.AnalyticsDataSetsGenerator;
 import objective.taskboard.followup.kpi.services.snapshot.SnapshotGenerator;
@@ -48,6 +49,7 @@ public class MockedServices {
     private IssueColorServiceMocker colorService = new IssueColorServiceMocker();
     private FollowupSnapshotServiceMocker snapshotService = new FollowupSnapshotServiceMocker();
     private KpiDataServiceMocker kpiDataServiceMocker = new KpiDataServiceMocker();
+    private FilterServiceMocker filterService = new FilterServiceMocker();
 
     public MockedServices(KpiEnvironment environment) {
         this.environment = environment;
@@ -64,6 +66,7 @@ public class MockedServices {
         colorService.prepareMock();
         snapshotService.prepareMock();
         kpiDataServiceMocker.preapreMock();
+        filterService.prepareMock();
     }
 
     public ProjectServiceMocker projects() {
@@ -101,6 +104,10 @@ public class MockedServices {
     public FollowupSnapshotServiceMocker followupSnapshot() {
         return snapshotService;
     }
+    
+    public FilterServiceMocker filters() {
+        return filterService ;
+    }
 
     public KpiEnvironment eoS() {
         return environment;
@@ -125,18 +132,15 @@ public class MockedServices {
         }
 
         private void prepareMock() {
-            Map<String, Map<KpiLevel, List<IssueKpi>>> byProject = issuesRepository.getIssuesByProject();
-            byProject.entrySet().stream().forEach(entry -> {
-                String projectKey = entry.getKey();
-                Map<KpiLevel, List<IssueKpi>> issuesByProject = entry.getValue();
-                issuesByProject.entrySet().forEach(levelIssues -> mockIssuesByLevel(projectKey,levelIssues.getKey(),levelIssues.getValue()));
-            });
+            Map<String, List<IssueKpi>> byProject = issuesRepository.getIssuesByProject();
+            byProject.entrySet().stream().forEach(
+                    entry -> mockIssuesByProject(entry.getKey(),entry.getValue())
+            );
 
         }
 
-        void mockIssuesByLevel(String projectKey, KpiLevel level, List<IssueKpi> issuesByProjectAndLevel) {
-            Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
-                    .thenReturn(issuesByProjectAndLevel);
+        private void mockIssuesByProject(String projectKey, List<IssueKpi> issuesByProject) {
+            Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone())).thenReturn(issuesByProject);
         }
 
         public KpiEnvironment eoIks() {
@@ -267,10 +271,10 @@ public class MockedServices {
         
         private void preapreMock() {
             service = Mockito.mock(KpiDataService.class);
-            Map<String, Map<KpiLevel, List<IssueKpi>>> byProject = issuesRepository.getIssuesByProject();
+            Map<String, List<IssueKpi>> byProject = issuesRepository.getIssuesByProject();
             byProject.entrySet().stream().forEach(entry -> {
                 String projectKey = entry.getKey();
-                Map<KpiLevel, List<IssueKpi>> issuesByProject = entry.getValue();
+                Map<KpiLevel, List<IssueKpi>> issuesByProject = entry.getValue().stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
                 issuesByProject.entrySet().forEach(levelIssues -> mockIssuesByLevel(projectKey,levelIssues.getKey(),levelIssues.getValue()));
             });
             
@@ -284,7 +288,7 @@ public class MockedServices {
         }
 
         void mockIssuesByLevel(String projectKey, KpiLevel level, List<IssueKpi> issuesByProjectAndLevel) {
-            Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
+            Mockito.when(service.getIssuesFromCurrentStateWithDefaultFilters(projectKey, environment.getTimezone(), level))
                     .thenReturn(issuesByProjectAndLevel);
             Mockito.when(service.getIssuesFromCurrentProjectRange(projectKey, environment.getTimezone(), level))
                     .thenReturn(issuesByProjectAndLevel);
@@ -353,6 +357,33 @@ public class MockedServices {
             Mockito.when(mockedService.get(Mockito.any(),Mockito.eq(timezone), Mockito.eq(projectKey))).thenReturn(snapshot);
         }
         
+    }
+
+    class FilterServiceMocker {
+        private KpiFilterService service;
+        
+        public KpiFilterService getService() {
+            if(service == null)
+                prepareMock();
+            return service;
+        }
+        
+        private void prepareMock() {
+            service = Mockito.mock(KpiFilterService.class);
+            mockStatusFilter();
+            mockLevelFilter();
+        }
+        
+        private void mockLevelFilter() {
+            Stream.of(KpiLevel.values()).forEach(level -> 
+                Mockito.when(service.getLevelFilter(level)).thenReturn(new KpiLevelFilter(level))
+            );
+        }
+
+        private void mockStatusFilter() {
+            List<String> statuses = environment.withJiraProperties().followUp().statusesExcluded();
+            Mockito.when(service.getFilterStatusExcludedFromFollowup()).thenReturn(new StatusExcludedFromFollowupFilter(statuses));
+        }
     }
 
     
