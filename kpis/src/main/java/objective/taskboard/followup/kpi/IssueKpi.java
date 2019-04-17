@@ -139,12 +139,16 @@ public class IssueKpi {
 
         LocalDate firstDate = firstDateOp.get();
         LocalDate now = ZonedDateTime.ofInstant(clock.now(),timezone).toLocalDate();
-        LocalDate lastDate = firstStatus.flatMap(StatusTransition::getDateAfterLeavingLastProgressingStatus).orElse(now);
+        LocalDate lastDate = dateAfterLeavingLastProgressingStatus().orElse(now);
 
         if(firstDate.isAfter(lastDate))
             return Optional.of(RangeUtils.between(firstDate, firstDate));
 
         return Optional.of(RangeUtils.between(firstDate, lastDate));
+    }
+
+    public Optional<LocalDate> dateAfterLeavingLastProgressingStatus() {
+        return firstStatus.flatMap(StatusTransition::getDateAfterLeavingLastProgressingStatus);
     }
 
     public boolean hasCompletedCycle(Set<String> cycleStatuses) {

@@ -206,6 +206,24 @@ public class FilterNotClosedIssuesOnWeekTest {
             .issue(issueKpi).shouldBeSelected();
     }
     
+    @Test
+    public void issueOpenOnWeek_inProgressAfterWeek_thenIssueShouldBeSelected() {
+        IssueKpi issueKpi =  
+                givenIssue("I-1")
+                        .project("PROJ")
+                        .type("Alpha Bug")
+                        .withTransitions()
+                            .status("Open").date("2019-03-23")
+                            .status("To Do").date("2019-04-06")
+                            .status("Doing").date("2019-04-08")
+                            .status("Done").date("2019-04-12")
+                        .eoT()
+                     .buildIssueKpi();
+        filter()
+            .from("2019-03-31").to("2019-04-05")
+            .issue(issueKpi).shouldBeSelected();
+    }
+    
     private FilterNotClosed filter() {
         return new FilterNotClosed();
     }

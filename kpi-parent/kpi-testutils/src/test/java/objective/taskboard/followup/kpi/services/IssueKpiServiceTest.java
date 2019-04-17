@@ -39,8 +39,6 @@ public class IssueKpiServiceTest {
                     .atDate("2017-09-27").isOnStatus("Doing");
     }
 
-    
-
     @Test
     public void getIssues_currentState() {
         dsl()
@@ -83,7 +81,7 @@ public class IssueKpiServiceTest {
                 .endOfSubtask()
             .eoI()
             .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ"))
+                .appliesBehavior(getIssuesFromCurrentState("PROJ"))
             .then()
                 .amountOfIssueIs(2)
                 .givenIssue("I-1")
@@ -107,7 +105,7 @@ public class IssueKpiServiceTest {
         return new ServeIssuesFromDatasets(kpiLevel);
     }
 
-    private ServeIssuesFromCurrentState getIssuesFromCurrentStateForProjectAndLevel(String projectKey) {
+    private ServeIssuesFromCurrentState getIssuesFromCurrentState(String projectKey) {
         return new ServeIssuesFromCurrentState(projectKey);
     }
 

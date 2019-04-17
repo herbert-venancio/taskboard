@@ -1,5 +1,7 @@
 package objective.taskboard.followup;
 
+import static java.time.DayOfWeek.FRIDAY;
+import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.THURSDAY;
@@ -269,6 +271,69 @@ public class WeekRangeNormalizerTest {
         assertLocalDateRange(ranges.get(2))
             .startsAt("2018-09-30").endsAt("2018-10-02")
             .startsWith(SUNDAY).endsWith(TUESDAY);
+    }
+    
+    @Test
+    public void normalizeRangeWithWeekStartAndEndDays_happyDay(){
+        Range<LocalDate> dateRange = createLocalDateRange("2019-04-23","2019-04-25");
+        assertLocalDateRange(dateRange).startsWith(TUESDAY).endsWith(THURSDAY);
+        
+        Range<LocalDate> normalizedRange = WeekRangeNormalizer.normalizeRangeWithWeekStartAndEndDays(dateRange, SUNDAY, SATURDAY);
+        
+
+        assertLocalDateRange(normalizedRange)
+            .startsAt("2019-04-21").endsAt("2019-04-27")
+            .startsWith(SUNDAY).endsWith(SATURDAY);
+    }
+    
+    @Test
+    public void normalizeRangeWithWeekStartAndEndDays_withNoChangeNeeded(){
+        Range<LocalDate> dateRange = createLocalDateRange("2019-04-21","2019-04-27");
+        assertLocalDateRange(dateRange).startsWith(SUNDAY).endsWith(SATURDAY);
+        
+        Range<LocalDate> normalizedRange = WeekRangeNormalizer.normalizeRangeWithWeekStartAndEndDays(dateRange, SUNDAY, SATURDAY);
+        
+
+        assertLocalDateRange(normalizedRange)
+            .startsAt("2019-04-21").endsAt("2019-04-27")
+            .startsWith(SUNDAY).endsWith(SATURDAY);
+    }
+    
+    @Test
+    public void normalizeRangeWithWeekStartAndEndDays_moreThanOneWeek(){
+        Range<LocalDate> dateRange = createLocalDateRange("2019-04-22","2019-04-30");
+        assertLocalDateRange(dateRange).startsWith(MONDAY).endsWith(TUESDAY);
+        
+        Range<LocalDate> normalizedRange = WeekRangeNormalizer.normalizeRangeWithWeekStartAndEndDays(dateRange, SUNDAY, SATURDAY);
+        
+
+        assertLocalDateRange(normalizedRange)
+            .startsAt("2019-04-21").endsAt("2019-05-04")
+            .startsWith(SUNDAY).endsWith(SATURDAY);
+    }
+    
+    @Test
+    public void normalizeRangeWithWeekStartAndEndDays_rangeShorterThanAWeeek_noChangeNeeded(){
+        Range<LocalDate> dateRange = createLocalDateRange("2019-04-22","2019-04-30");
+        assertLocalDateRange(dateRange).startsWith(MONDAY).endsWith(TUESDAY);
+        
+        Range<LocalDate> normalizedRange = WeekRangeNormalizer.normalizeRangeWithWeekStartAndEndDays(dateRange, MONDAY, TUESDAY);
+        
+        assertLocalDateRange(normalizedRange)
+            .startsAt("2019-04-22").endsAt("2019-04-30")
+            .startsWith(MONDAY).endsWith(TUESDAY);
+    }
+    
+    @Test
+    public void normalizeRangeWithWeekStartAndEndDays_rangeShorterThanAWeeek_expandRange(){
+        Range<LocalDate> dateRange = createLocalDateRange("2019-04-21","2019-05-03");
+        assertLocalDateRange(dateRange).startsWith(SUNDAY).endsWith(FRIDAY);
+        
+        Range<LocalDate> normalizedRange = WeekRangeNormalizer.normalizeRangeWithWeekStartAndEndDays(dateRange, MONDAY, THURSDAY);
+        
+        assertLocalDateRange(normalizedRange)
+            .startsAt("2019-04-15").endsAt("2019-05-09")
+            .startsWith(MONDAY).endsWith(THURSDAY);
     }
     
     private LocalDateRangeAsserter assertLocalDateRange(Range<LocalDate> range) {

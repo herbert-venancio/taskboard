@@ -53,4 +53,8 @@ public class KpiWeekRange implements Comparable<KpiWeekRange> {
     public int compareTo(KpiWeekRange other) {
         return this.getFirstDay().compareTo(other.getFirstDay());
     }
+
+    public boolean contains(LocalDate date) {
+        return range.contains(date);
+    }
 }
