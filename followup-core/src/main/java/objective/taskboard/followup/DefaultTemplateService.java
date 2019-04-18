@@ -42,9 +42,7 @@ public class DefaultTemplateService implements TemplateService {
 
     @Override
     public void deleteTemplate(Long id) {
-        Template template = new Template();
-        template.setId(id);
-        templateRepository.delete(template);
+        templateRepository.delete(id);
     }
 
     @Override

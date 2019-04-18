@@ -11,11 +11,11 @@ import org.hibernate.annotations.CreationTimestamp;
 @MappedSuperclass
 public abstract class BaseEntity {
 
-    @Column(updatable=false)
+    @Column(updatable=false, nullable = false)
     @CreationTimestamp
     protected Instant created;
 
-    @Column
+    @Column(nullable = false)
     @Version
     protected Instant updated;
 

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,11 +75,14 @@ public class CardFieldFilterProviderTest {
 
     private UserTeamPermissionService getUserTeamPermissionServiceMock() {
         UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
+        AtomicLong teamIdGenerator = new AtomicLong();
         when(userTeamPermissionService.getTeamsVisibleToLoggedInUser()).thenReturn(Stream.of(
                 new Team("TEAM_1", null, null, asList()),
                 new Team("TEAM_2", null, null, asList()),
                 new Team("TEAM_3", null, null, asList())
-                ).collect(Collectors.toSet()));
+                )
+                .peek(team -> team.setId(teamIdGenerator.incrementAndGet()))
+                .collect(Collectors.toSet()));
         return userTeamPermissionService;
     }
 

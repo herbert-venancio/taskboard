@@ -216,16 +216,6 @@
 							<watch>
 								<directory>cardboard/src/main/resources</directory>
 							</watch>
-							<watch><directory>kpi-parent/kpi-budget-chart/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-cfd/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-cycle-time/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-lead-time/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-planned-x-ballpark/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-progress-chart/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-scope-by-type/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-throughput/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-touch-time/src/main/resources</directory></watch>
-							<watch><directory>kpi-parent/kpi-wip/src/main/resources</directory></watch>
 						</watches>
 						<goals>
 							<goal>resources:resources</goal>

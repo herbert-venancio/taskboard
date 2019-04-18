@@ -15,6 +15,7 @@ import static org.springframework.http.HttpStatus.OK;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -315,7 +316,10 @@ public class TeamsControllerTest {
         }
 
         public DLSBuilder withTeamsThatUserCanAdmin(Team... teams) {
-            Set<Team> teamsList = stream(teams).collect(toSet());
+            AtomicLong teamIdGenerator = new AtomicLong();
+            Set<Team> teamsList = stream(teams)
+                    .peek(team -> team.setId(teamIdGenerator.incrementAndGet()))
+                    .collect(toSet());
             when(userTeamService.getTeamsThatUserCanAdmin()).thenReturn(teamsList);
             return this;
         }
