@@ -49,6 +49,7 @@
 		<project.build.date>${maven.build.timestamp}</project.build.date>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 		<springboot.version>1.5.13.RELEASE</springboot.version>
+		<hibernate.version>5.4.2.Final</hibernate.version>
 	</properties>
 	<prerequisites>
 		<maven>3.1.0</maven>
@@ -215,6 +216,16 @@
 							<watch>
 								<directory>cardboard/src/main/resources</directory>
 							</watch>
+							<watch><directory>kpi-parent/kpi-budget-chart/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-cfd/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-cycle-time/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-lead-time/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-planned-x-ballpark/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-progress-chart/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-scope-by-type/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-throughput/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-touch-time/src/main/resources</directory></watch>
+							<watch><directory>kpi-parent/kpi-wip/src/main/resources</directory></watch>
 						</watches>
 						<goals>
 							<goal>resources:resources</goal>

@@ -17,9 +17,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -32,17 +29,13 @@ import objective.taskboard.project.ProjectDefaultTeamByIssueType;
 
 @Entity
 @Table(name = "project_filter_configuration")
-public class ProjectFilterConfiguration implements Serializable {
+public class ProjectFilterConfiguration extends TaskboardEntity implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectFilterConfiguration.class);
 
     private static final long serialVersionUID = 765599368694090438L;
 
     private static final int DEFAULT_PROJECTION_TIMESPAN = 20;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
 
     @Column
     private String projectKey;
@@ -88,7 +81,7 @@ public class ProjectFilterConfiguration implements Serializable {
     public Optional<Long> getTeamByIssueTypeId(Long issueTypeId) {
         return teamsByIssueTypes.stream()
                 .filter(item -> item.getIssueTypeId().equals(issueTypeId))
-                .map(item -> item.getTeamId())
+                .map(ProjectDefaultTeamByIssueType::getTeamId)
                 .findFirst();
     }
 
@@ -97,13 +90,9 @@ public class ProjectFilterConfiguration implements Serializable {
     }
 
     public void removeDefaultTeamForIssueType(ProjectDefaultTeamByIssueType projectTeamByIssueType) {
-        boolean wasRemoved = teamsByIssueTypes.removeIf(item -> projectTeamByIssueType.equals(item));
+        boolean wasRemoved = teamsByIssueTypes.removeIf(projectTeamByIssueType::equals);
         if (!wasRemoved)
             log.warn("removeDefaultTeamForIssueType: ProjectTeamByIssueType with id \""+ projectTeamByIssueType.getId() +"\" not found.");
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public String getProjectKey() {

@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static org.mockito.Matchers.any;
@@ -53,11 +54,11 @@ public class FollowUpSnapshotServiceTest {
     @Before
     public void setup() {
         when(project1.getProjectKey()).thenReturn("PROJ1");
-        when(project1.getId()).thenReturn(91);
+        when(project1.getId()).thenReturn(91L);
         when(project1.getBaselineDate()).thenReturn(Optional.empty());
         
         when(project2.getProjectKey()).thenReturn("PROJ2");
-        when(project2.getId()).thenReturn(92);
+        when(project2.getId()).thenReturn(92L);
         when(project2.getBaselineDate()).thenReturn(Optional.empty());
         
         when(projectService.getTaskboardProjects()).thenReturn(asList(project1, project2));
@@ -95,10 +96,10 @@ public class FollowUpSnapshotServiceTest {
     @Test
     public void generateHistoryShouldOverrideExistingValues() {
         historyRepository.save("PROJ1", LocalDate.parse("2018-04-10"), getDefaultFollowupData());
-        dailySynthesisRepository.add(new FollowupDailySynthesis(91, LocalDate.parse("2018-04-10"), 9.0, 2.0));
+        dailySynthesisRepository.add(new FollowupDailySynthesis(91L, LocalDate.parse("2018-04-10"), 9.0, 2.0));
 
         when(dataGenerator.generate(any(), any())).thenReturn(getEmptyFollowupData());
-        when(projectService.getTaskboardProjects()).thenReturn(asList(project1));
+        when(projectService.getTaskboardProjects()).thenReturn(singletonList(project1));
         
         clock.setNow("2018-04-10T12:00:00.00Z");
         subject.storeSnapshots(timezone);
@@ -128,7 +129,7 @@ public class FollowUpSnapshotServiceTest {
     @Test
     public void syncSynthesisShouldNotOverrideExistingValues() {
         historyRepository.save("PROJ1", LocalDate.parse("2018-04-10"), getEmptyFollowupData());
-        dailySynthesisRepository.add(new FollowupDailySynthesis(91, LocalDate.parse("2018-04-10"), 9.0, 2.0));
+        dailySynthesisRepository.add(new FollowupDailySynthesis(91L, LocalDate.parse("2018-04-10"), 9.0, 2.0));
         
         subject.syncSynthesis(timezone);
         

@@ -19,12 +19,12 @@ public class FollowupDailySynthesisRepositoryMock implements FollowupDailySynthe
     private final List<FollowupDailySynthesis> values = new ArrayList<>();
 
     @Override
-    public boolean exists(Integer projectId, LocalDate date) {
+    public boolean exists(Long projectId, LocalDate date) {
         return values.stream().anyMatch(findBy(projectId, date));
     }
 
     @Override
-    public List<FollowupDailySynthesis> listAllBefore(Integer projectId, LocalDate maxDateExclusive) {
+    public List<FollowupDailySynthesis> listAllBefore(Long projectId, LocalDate maxDateExclusive) {
         return values.stream()
                 .filter(s -> s.getProjectId().equals(projectId) && s.getFollowupDate().isBefore(maxDateExclusive))
                 .sorted(comparing(FollowupDailySynthesis::getFollowupDate))
@@ -37,11 +37,11 @@ public class FollowupDailySynthesisRepositoryMock implements FollowupDailySynthe
     }
 
     @Override
-    public void remove(Integer projectId, LocalDate date) {
+    public void remove(Long projectId, LocalDate date) {
         values.stream().filter(findBy(projectId, date)).findFirst().ifPresent(values::remove);
     }
 
-    private static Predicate<FollowupDailySynthesis> findBy(Integer projectId, LocalDate date) {
+    private static Predicate<FollowupDailySynthesis> findBy(Long projectId, LocalDate date) {
         return s -> s.getProjectId().equals(projectId) && s.getFollowupDate().equals(date);
     }
 

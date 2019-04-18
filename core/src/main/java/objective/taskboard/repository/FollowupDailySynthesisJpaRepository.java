@@ -19,7 +19,7 @@ class FollowupDailySynthesisJpaRepository implements FollowupDailySynthesisRepos
     private EntityManager entityManager;
 
     @Override
-    public boolean exists(Integer projectId, LocalDate date) {
+    public boolean exists(Long projectId, LocalDate date) {
         return entityManager.createNamedQuery("FollowupDailySynthesis.count", Long.class)
                 .setParameter("projectId", projectId)
                 .setParameter("date", date)
@@ -27,7 +27,7 @@ class FollowupDailySynthesisJpaRepository implements FollowupDailySynthesisRepos
     }
     
     @Override
-    public List<FollowupDailySynthesis> listAllBefore(Integer projectId, LocalDate maxDateExclusive) {
+    public List<FollowupDailySynthesis> listAllBefore(Long projectId, LocalDate maxDateExclusive) {
         return entityManager.createNamedQuery("FollowupDailySynthesis.findByMaxDate", FollowupDailySynthesis.class)
                 .setParameter("projectId", projectId)
                 .setParameter("maxDate", maxDateExclusive)
@@ -42,7 +42,7 @@ class FollowupDailySynthesisJpaRepository implements FollowupDailySynthesisRepos
 
     @Override
     @Transactional
-    public void remove(Integer projectId, LocalDate date) {
+    public void remove(Long projectId, LocalDate date) {
         entityManager.createNamedQuery("FollowupDailySynthesis.delete")
             .setParameter("projectId", projectId)
             .setParameter("date", date)
