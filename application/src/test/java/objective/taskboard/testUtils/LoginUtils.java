@@ -1,5 +1,6 @@
 package objective.taskboard.testUtils;
 
+import objective.taskboard.it.ProjectPreferencesModal;
 import org.openqa.selenium.WebDriver;
 
 import objective.taskboard.it.LoginPage;
@@ -49,8 +50,15 @@ public class LoginUtils {
                     "TASKB-658",
                     "TASKB-660",
                     "TASKB-662"
-                    );
+                );
         return mainPage;
     }
 
+    public static ProjectPreferencesModal doLoginAsNewUser(WebDriver webDriver) {
+        LoginPage loginPage = LoginPage.to(webDriver);
+        loginPage.login("newuser", "newuser");
+        ProjectPreferencesModal modal = ProjectPreferencesModal.produce(webDriver);
+        modal.waitUntilModalIsReady();
+        return modal;
+    }
 }

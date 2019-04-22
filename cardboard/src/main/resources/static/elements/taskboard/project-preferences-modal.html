@@ -1,0 +1,144 @@
+<dom-module id="project-preferences-modal">
+    <template>
+        <style>
+            modal-wrap-content {
+                width: 610px;
+                display: block;
+            }
+
+            .projects-list {
+                display: flex;
+                border: 1px solid #E5E5E5;
+                border-radius: 4px;
+                margin-top: 8px;
+                overflow: hidden;
+                max-heigh: 400px;
+            }
+
+            .scroll {
+                flex: 1;
+                margin-bottom: -1px;
+            }
+
+            .alert {
+                background-color: #FCE196;
+            }
+
+            label {
+                font-size: 16px;
+                line-height: 20px;
+                color: #555;
+            }
+
+        </style>
+
+        <modal-wrap id="modal"
+            icon="taskboard-icons:filter"
+            title="Projects preferences"
+            class="modal-project-preferences"
+            show-close-button="[[_modalShowCloseButton]]"
+            confirm-close="[[_confirmClose]]">
+
+            <modal-wrap-content>
+
+                <template is="dom-if" if="{{_errorMessage}}">
+                    <div class="alert" title="Alert">
+                        <p>{{_errorMessage}}</p>
+                    </div>
+                </template>
+
+                <div>
+                    <label>Select the projects that you want to see:</label>
+                    <div class="projects-list">
+                        <div class="scroll" id="listOfProjectPreferences">
+                            <template is="dom-repeat" items="[[cardFieldFilters]]" as="item" filter="filterProjectFromCardField">
+                                <template is="dom-repeat" items="{{item.filterFieldsValues}}" as="item">
+                                    <paper-checkbox class="tb-paper-checkbox" on-tap="_toggleVisibility" checked="{{item.selected}}" value="{{item}}">
+                                        [[item.name]]
+                                    </paper-checkbox>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <tb-button id="submitPreferencesButton" button="[[_btSubmit]]"></tb-button>
+            </modal-wrap-footer>
+        </modal-wrap>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'project-preferences-modal',
+
+                properties: {
+                    cardFieldFilters: {
+                        type: Array,
+                        observer: '_onOpen'
+                    },
+                    _btSubmit: {
+                        type: Object,
+                        value: null
+                    },
+                    _errorMessage: {
+                        type: String,
+                        value: ""
+                    },
+                    _confirmClose: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _modalShowCloseButton: {
+                        type: Boolean,
+                        value: false
+                    }
+                },
+
+                open: function () {
+                    this.$.modal.open();
+                    this._btSubmit = ButtonBuilder('Submit').disabled(true).onClick(this._submit.bind(this)).build();
+                },
+
+                filterProjectFromCardField: function (item) {
+                    return item.fieldSelector.name === taskboard.fieldSelector.PROJECT;
+                },
+
+                _toggleVisibility: function(event) {
+                    let item = event.target.parentElement.value;
+                    if(item === undefined){
+                        item = event.target.value;
+                    }
+                    userPreferences.setFilter(item.value, item.selected);
+                    this._updateSubmitButton();
+
+                },
+
+                _updateSubmitButton : function () {
+                    this._btSubmit = ButtonBuilder('Submit').disabled(this._hasNotSelectedProject()).onClick(this._submit.bind(this)).build();
+                },
+
+                _hasNotSelectedProject() {
+                    return (! this.cardFieldFilters
+                            .find(this.filterProjectFromCardField)
+                            .filterFieldsValues
+                            .some(item => item.selected));
+                },
+
+                _onOpen(cardFieldFilters) {
+                    if(!cardFieldFilters.find(this.filterProjectFromCardField).filterFieldsValues.length){
+                        this._errorMessage =  "You have no Projects visible to you. Please contact the Taskboard's Admin.";
+                    }
+                },
+
+                _submit: function() {
+                    this.$.modal.close();
+                    this.fire('iron-signal', {name: 'update-card-field-filter', data: taskboard.fieldSelector.PROJECT });
+                }
+
+            });
+        })();
+    </script>
+</dom-module>

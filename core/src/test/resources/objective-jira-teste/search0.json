@@ -3,6 +3,186 @@
     "issues": [
         {
             "changelog": {
+                "histories": [],
+                "maxResults": 0,
+                "startAt": 0,
+                "total": 0
+            },
+            "expand": "operations,versionedRepresentations,editmeta,changelog,transitions,renderedFields",
+            "fields": {
+                "assignee": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=11670",
+                        "24x24": "http://localhost:4567/secure/useravatar?size=small&avatarId=11670",
+                        "32x32": "http://localhost:4567/secure/useravatar?size=medium&avatarId=11670",
+                        "48x48": "http://localhost:4567/secure/useravatar?avatarId=11670"
+                    },
+                    "displayName": "Newuser",
+                    "key": "Newuser",
+                    "name": "Newuser",
+                    "self": "http://localhost:4567/rest/api/latest/user?username=Newuser",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "created": "2016-10-03T15:09:02.000+0000",
+                "customfield_11440": {
+                    "id": "12606",
+                    "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
+                    "value": "Standard"
+                },
+                "customfield_11451": null,
+                "customfield_11452": null,
+                "customfield_11455": null,
+                "customfield_11456": null,
+                "description": "Vide OSs",
+                "issuelinks": [],
+                "issuetype": {
+                    "avatarId": 12250,
+                    "description": "Project 1",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+                    "id": "10600",
+                    "name": "Demand",
+                    "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
+                    "subtask": false
+                },
+                "labels": [
+                    "onda6"
+                ],
+                "priority": {
+                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+                    "id": "9",
+                    "name": "M\u00e9dia",
+                    "self": "http://localhost:4567/rest/api/latest/priority/9"
+                },
+                "project": {
+                    "avatarUrls": {
+                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
+                    },
+                    "id": "11390",
+                    "key": "PROJ1",
+                    "name": "Project 1",
+                    "projectCategory": {
+                        "id": "10001",
+                        "name": "Externo",
+                        "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
+                    },
+                    "self": "http://localhost:4567/rest/api/latest/project/11315"
+                },
+                "reporter": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://localhost:4567/secure/useravatar?size=xsmall&ownerId=elizabeth&avatarId=11257",
+                        "24x24": "http://localhost:4567/secure/useravatar?size=small&ownerId=elizabeth&avatarId=11257",
+                        "32x32": "http://localhost:4567/secure/useravatar?size=medium&ownerId=elizabeth&avatarId=11257",
+                        "48x48": "http://localhost:4567/secure/useravatar?ownerId=elizabeth&avatarId=11257"
+                    },
+                    "displayName": "Elizabeth do Nascimento",
+                    "key": "elizabeth",
+                    "name": "elizabeth",
+                    "self": "http://localhost:4567/rest/api/latest/user?username=elizabeth",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "status": {
+                    "description": "Taskboard",
+                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                    "id": "10652",
+                    "name": "Doing",
+                    "self": "http://localhost:4567/rest/api/latest/status/10652",
+                    "statusCategory": {
+                        "colorName": "yellow",
+                        "id": 4,
+                        "key": "indeterminate",
+                        "name": "In Progress",
+                        "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
+                    }
+                },
+                "summary": "Onda 1 - Pacote 1",
+                "timetracking": {},
+                "updated": "2018-04-04T13:39:38.000+0000"
+            },
+            "id": "214709",
+            "key": "PROJ1-602",
+            "self": "http://localhost:4567/rest/api/latest/issue/214709",
+            "transitions": [
+                {
+                    "id": "41",
+                    "name": "To UAT",
+                    "to": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                        "id": "10653",
+                        "name": "To UAT",
+                        "self": "http://localhost:4567/rest/api/latest/status/10653",
+                        "statusCategory": {
+                            "colorName": "yellow",
+                            "id": 4,
+                            "key": "indeterminate",
+                            "name": "In Progress",
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
+                        }
+                    }
+                },
+                {
+                    "id": "51",
+                    "name": "Back to 'To Do'",
+                    "to": {
+                        "description": "",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/open.png",
+                        "id": "10052",
+                        "name": "To Do",
+                        "self": "http://localhost:4567/rest/api/latest/status/10052",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+                        }
+                    }
+                },
+                {
+                    "id": "111",
+                    "name": "Deferred",
+                    "to": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                        "id": "10655",
+                        "name": "Deferred",
+                        "self": "http://localhost:4567/rest/api/latest/status/10655",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+                        }
+                    }
+                },
+                {
+                    "id": "141",
+                    "name": "Cancel",
+                    "to": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                        "id": "10656",
+                        "name": "Cancelled",
+                        "self": "http://localhost:4567/rest/api/latest/status/10656",
+                        "statusCategory": {
+                            "colorName": "green",
+                            "id": 3,
+                            "key": "done",
+                            "name": "Done",
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "changelog": {
                 "histories": [
                     {
                         "author": {

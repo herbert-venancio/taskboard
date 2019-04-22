@@ -20,6 +20,7 @@ public class InvalidTeamIT extends AuthenticatedIntegrationTest {
         mainPage
             .assertVisibleIssues(
                     "TASKB-20",
+                    "PROJ1-602",
                     "TASKB-637",
                     "TASKB-626",
                     "TASKB-639",

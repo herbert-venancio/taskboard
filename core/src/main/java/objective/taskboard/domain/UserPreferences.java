@@ -37,6 +37,9 @@ public class UserPreferences extends TaskboardEntity {
 
     private String jiraUser;
 
+    @Transient
+    private Boolean isNewUser;
+
     @Lob
     private String preferences;
 
@@ -62,6 +65,10 @@ public class UserPreferences extends TaskboardEntity {
         if (this.preferencesObj == null)
             this.preferencesObj = stringToPreferences(this.preferences);
         return this.preferencesObj;
+    }
+
+    public Boolean getIsNewUser() {
+        return this.preferencesObj == null || this.preferencesObj.filterPreferences.isEmpty();
     }
 
     public void setJiraUser(final String jiraUser) {

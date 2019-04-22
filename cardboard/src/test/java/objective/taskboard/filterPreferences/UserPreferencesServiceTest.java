@@ -11,6 +11,7 @@ import static objective.taskboard.filterPreferences.CardFieldFilterUtils.TEAM_1_
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.TEAM_2_VALUE;
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.TEAM_3_VALUE;
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.cardFieldFiltersAllValuesSelected;
+import static objective.taskboard.filterPreferences.CardFieldFilterUtils.cardFieldFiltersAllValuesSelectedButProjectAllFalse;
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.getFilterFieldValue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -128,8 +129,8 @@ public class UserPreferencesServiceTest {
 
     @Test
     public void applyPreferencesOnCardFieldFilter_ifFilterPreferencesIsEmpty_dontDoAnything() {
-        List<CardFieldFilter> cardFieldFiltersWithUserPreferences = cardFieldFiltersAllValuesSelected();
-        List<CardFieldFilter> cardFieldFilters = cardFieldFiltersAllValuesSelected();
+        List<CardFieldFilter> cardFieldFiltersWithUserPreferences = cardFieldFiltersAllValuesSelectedButProjectAllFalse();
+        List<CardFieldFilter> cardFieldFilters = cardFieldFiltersAllValuesSelectedButProjectAllFalse();
 
         when(repository.findOneByJiraUser(USERNAME)).thenReturn(Optional.of(new UserPreferences(USERNAME)));
 

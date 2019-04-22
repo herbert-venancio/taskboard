@@ -1,22 +1,31 @@
 package objective.taskboard.it;
 
-import java.util.List;
-
+import objective.taskboard.it.basecluster.BaseClusterSearchPage;
+import objective.taskboard.testUtils.ProjectInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-import objective.taskboard.it.basecluster.BaseClusterSearchPage;
-import objective.taskboard.testUtils.ProjectInfo;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static org.openqa.selenium.By.cssSelector;
 
 public class MenuFilters extends AbstractUiFragment {
 
     private static final String CONFIG_TEAMS_SELECTOR = "config-teams";
     private static final String CONFIG_BASE_CLUSTER_SELECTOR = "config-base-clusters";
+    private static final String CONFIG_ITEM_TITLE = ".config-item-title";
 
     @FindBy(tagName = "card-field-filters")
     private WebElement cardFieldFilters;
+
+    @FindBy(tagName = "card-field-filter")
+    private List<WebElement> listOfCardFieldFilter;
 
     @FindBy(css = "card-field-filter .config-item-title")
     private List<WebElement> cardFieldFiltersHeaders;
@@ -45,6 +54,8 @@ public class MenuFilters extends AbstractUiFragment {
 
     public MenuFilters openCardFieldFilters() {
         waitForClick(cardFieldFilters);
+        WebElement ironCollapse = cardFieldFilters.findElement(cssSelector("iron-collapse"));
+        waitAttributeValueInElementContains(ironCollapse, "class", "iron-collapse-opened");
         return this;
     }
 
@@ -133,4 +144,40 @@ public class MenuFilters extends AbstractUiFragment {
         waitForClick(baseClusterConfigurationButton);
         return new BaseClusterSearchPage(webDriver);
     }
+
+    public MenuFilters openCardFieldFilter(String cardFieldFilterName) {
+        WebElement projectCardFieldFilter = listOfCardFieldFilter
+                .stream()
+                .filter(cardFieldFilter -> cardFieldFilter.findElement(cssSelector(CONFIG_ITEM_TITLE)).getText().equals(cardFieldFilterName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Card field Filter not found : " + cardFieldFilterName));
+        waitForClick(projectCardFieldFilter.findElement(cssSelector(CONFIG_ITEM_TITLE)));
+        WebElement ironCollapse = projectCardFieldFilter.findElement(cssSelector("iron-collapse"));
+        waitAttributeValueInElementContains(ironCollapse, "class", "iron-collapse-opened");
+
+        return this;
+    }
+    public MenuFilters assertProjectsAreSelected(String... expectedSelectedProjects) {
+        final String unselectedClass = "icon";
+
+        waitAssertEquals(join(expectedSelectedProjects, "\n"), () -> {
+            List<String> listOfSelectedProjects = new ArrayList<>();
+
+            WebElement projectCardFieldFilter = listOfCardFieldFilter.stream()
+                    .filter(filter -> filter.findElement(cssSelector(".config-item-title")).getText().equals("Project"))
+                    .findFirst().orElseThrow(IllegalStateException::new);
+
+            projectCardFieldFilter.findElements(cssSelector("filter-field-value")).forEach(filterFieldValue -> {
+                WebElement elWithSelectedClass = filterFieldValue.findElement(cssSelector("paper-button"));
+                String[] classes = elWithSelectedClass.getAttribute("class").split(" ");
+                if (!asList(classes).contains(unselectedClass))
+                    listOfSelectedProjects.add(filterFieldValue.getText());
+            });
+
+            return listOfSelectedProjects.stream().collect(joining("\n"));
+
+        });
+        return this;
+    }
+
 }

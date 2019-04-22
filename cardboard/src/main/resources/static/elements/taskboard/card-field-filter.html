@@ -78,7 +78,8 @@
                 properties: {
                     cardFieldFilter: {
                         type: Object,
-                        notify: true
+                        notify: true,
+                        observer: '_setCheckAll'
                     }
                 },
 
@@ -114,9 +115,7 @@
                 },
 
                 _fireFilterEvents: function() {
-                    this.fire('iron-signal', {name: 'update-user-preferences'});
-                    if (this.cardFieldFilter.fieldSelector.name === taskboard.fieldSelector.PROJECT)
-                        this.fire('iron-signal', {name: 'refresh-release-filter'});
+                    this.fire('iron-signal', {name: 'update-card-field-filter', data: this.cardFieldFilter.fieldSelector.name });
                 },
 
                 _setCheckAll: function() {

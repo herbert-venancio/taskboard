@@ -328,6 +328,7 @@
                 text-decoration: underline;
                 cursor: pointer;
             }
+
         </style>
         <style is="custom-property">
             tb-button {
@@ -361,6 +362,7 @@
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
                       on-iron-signal-projects-changed="retrieveFilters"
+                      on-iron-signal-update-card-field-filter="updateCardFieldFilter"
         ></iron-signals>
 
 
@@ -447,6 +449,9 @@
             </template>
         </paper-drawer-panel>
 
+        <project-preferences-modal id="projectPreferencesModal"
+            card-field-filters="[[cardFieldFilters]]">
+        </project-preferences-modal>
     </template>
 
     <script>
@@ -509,7 +514,7 @@
                     this.updatedIssueKeys = [];
                     this.user = taskboard.getLoggedUser();
                     this.isFiltering = false;
-                    var afterAnimation = function(){self.fire('iron-signal', {name: 'board-resized'})}
+                    var afterAnimation = function(){self.fire('iron-signal', {name: 'board-resized'})};
                     $("#lane-container").on("animationend", afterAnimation);
                     this.extensionIcons = EXTENSION_TOOLBAR_ITEMS;
                 },
@@ -530,6 +535,7 @@
                         url: '/ws/user-preferences/update'
                     }).done(function () {
                         self.hasIssuesVisibilityChanged(customEvent, self);
+                        self.retrieveFilters();
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         console.error(errorThrown);
                         self.set('errorMessage', 'An unexpected error ocurred. Could not save your preferences on server.');
@@ -573,6 +579,8 @@
                         dataType: "json",
                         success: function (data) {
                             userPreferences.setPreferences(data.userPreferences);
+                            if(data.isNewUser)
+                                self.$.projectPreferencesModal.open();
                             taskboard.setLaneConfiguration(data.laneConfiguration);
                             taskboard.urlJira = data.urlJira;
                             taskboard.urlLinkGraph = data.urlLinkGraph;
@@ -760,6 +768,12 @@
                         this.set('cacheState', data.detail.newstate);
                         this.setCacheState(data.detail.newstate);
                     })
+                },
+
+                updateCardFieldFilter: function(customEvent) {
+                    this.fire('iron-signal', {name: 'update-user-preferences'});
+                    if (customEvent.detail === taskboard.fieldSelector.PROJECT)
+                        this.fire('iron-signal', {name: 'refresh-release-filter'});
                 },
 
                 onCacheStateResponse: function(data) {
