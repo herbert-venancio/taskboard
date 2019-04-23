@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.TeamEditPermission;
@@ -56,8 +57,10 @@ public class UserTeamTestUtils {
     }
 
     public class DSLBuilder {
-        List<Team> defaulTeamsInProjects = new LinkedList<Team>();
-        List<Team> globallyVisibleTeams = new LinkedList<Team>();
+
+        AtomicLong teamIdGenerator = new AtomicLong();
+        List<Team> defaulTeamsInProjects = new LinkedList<>();
+        List<Team> globallyVisibleTeams = new LinkedList<>();
         Map<String, Team> teamByName = new HashMap<>();
 
         public DSLBuilder() {
@@ -68,6 +71,7 @@ public class UserTeamTestUtils {
 
         public DSLTeam team(String teamName) {
             Team team = new Team(teamName, "sue", "sue", emptyList());
+            team.setId(teamIdGenerator.incrementAndGet());
             teamByName.put(teamName, team);
 
             when(teamRepo.findByName(teamName)).thenReturn(team);

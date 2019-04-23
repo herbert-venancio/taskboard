@@ -73,7 +73,7 @@ public class IssuePriorityService {
         TaskboardIssue priorityOrder = cache.get(issue.getIssueKey());
         if (priorityOrder == null)
             return new Date(issue.getCreated());
-        return priorityOrder.getUpdated();
+        return Date.from(priorityOrder.getUpdated());
     }
 
     public synchronized List<TaskboardIssue> reorder(String[] issueKeys) {

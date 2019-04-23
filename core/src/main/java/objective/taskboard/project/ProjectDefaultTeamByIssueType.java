@@ -47,41 +47,4 @@ public class ProjectDefaultTeamByIssueType extends TaskboardEntity implements Se
         this.issueTypeId = issueTypeId;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((issueTypeId == null) ? 0 : issueTypeId.hashCode());
-        result = prime * result + ((project == null) ? 0 : project.hashCode());
-        result = prime * result + ((teamId == null) ? 0 : teamId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ProjectDefaultTeamByIssueType other = (ProjectDefaultTeamByIssueType) obj;
-        if (issueTypeId == null) {
-            if (other.issueTypeId != null)
-                return false;
-        } else if (!issueTypeId.equals(other.issueTypeId))
-            return false;
-        if (project == null) {
-            if (other.project != null)
-                return false;
-        } else if (!project.equals(other.project))
-            return false;
-        if (teamId == null) {
-            if (other.teamId != null)
-                return false;
-        } else if (!teamId.equals(other.teamId))
-            return false;
-        return true;
-    }
-
 }

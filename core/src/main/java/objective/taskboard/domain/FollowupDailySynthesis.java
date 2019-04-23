@@ -23,7 +23,7 @@ import javax.persistence.Table;
 })
 public class FollowupDailySynthesis extends TaskboardEntity {
     @Column
-    private Integer projectId;
+    private Long projectId;
 
     @Column
     private LocalDate followupDate;
@@ -36,7 +36,7 @@ public class FollowupDailySynthesis extends TaskboardEntity {
 
     public FollowupDailySynthesis(){}
 
-    public FollowupDailySynthesis(Integer projectId, LocalDate followupDate, Double effortDone, Double effortBacklog){
+    public FollowupDailySynthesis(Long projectId, LocalDate followupDate, Double effortDone, Double effortBacklog){
         this.projectId = projectId;
         this.followupDate = followupDate;
         this.sumEffortDone = effortDone;
@@ -55,7 +55,7 @@ public class FollowupDailySynthesis extends TaskboardEntity {
         return sumEffortDone;
     }
     
-    public Integer getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
@@ -63,10 +63,5 @@ public class FollowupDailySynthesis extends TaskboardEntity {
     public String toString() {
         return "FollowupDailySynthesis [id=" + id + ", projectId=" + projectId + ", followupDate=" + followupDate
                 + ", sumEffortDone=" + sumEffortDone + ", sumEffortBacklog=" + sumEffortBacklog + "]";
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
     }
 }

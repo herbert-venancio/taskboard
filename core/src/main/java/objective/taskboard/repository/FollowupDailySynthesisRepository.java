@@ -7,9 +7,9 @@ import objective.taskboard.domain.FollowupDailySynthesis;
 
 public interface FollowupDailySynthesisRepository {
 
-    boolean exists(Integer projectId, LocalDate date);
-    List<FollowupDailySynthesis> listAllBefore(Integer projectId, LocalDate maxDateExclusive);
+    boolean exists(Long projectId, LocalDate date);
+    List<FollowupDailySynthesis> listAllBefore(Long projectId, LocalDate maxDateExclusive);
     void add(FollowupDailySynthesis followupDailySynthesis);
-    void remove(Integer projectId, LocalDate date);
+    void remove(Long projectId, LocalDate date);
 
 }
