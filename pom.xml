@@ -10,7 +10,7 @@
 
 	<groupId>br.com.objective</groupId>
 	<artifactId>taskboard-parent</artifactId>
-	<version>0.0.84</version>
+	<version>0.0.85-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -69,7 +69,7 @@
 		<url>https://github.com/objective-solutions/taskboard</url>
 		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
 		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
-		<tag>taskboard-parent-0.0.84</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<build>
 		<resources>
