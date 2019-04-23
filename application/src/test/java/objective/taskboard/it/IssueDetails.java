@@ -14,73 +14,80 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.Select;
 
+import objective.taskboard.it.components.ButtonComponent;
+
 class IssueDetails extends AbstractUiFragment {
 
-    WebElement issueDetailRoot;
+    private static final By issueDetailRootSelector = By.cssSelector("paper-dialog.issue-detail");
+
     SummaryEdit summaryEdit = new SummaryEdit();
+
+    private final ButtonComponent assignToMeButton;
+    private final ButtonComponent addAssigneeButton;
+    private final ButtonComponent assignTeamButton;
 
     public IssueDetails(WebDriver driver) {
         super(driver);
-        issueDetailRoot = webDriver.findElement(By.cssSelector("paper-dialog.issue-detail"));
+        assignToMeButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("assignToMe")));
+        addAssigneeButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("addAssigneeButton")));
+        assignTeamButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("addTeamButton")));
     }
 
     public IssueDetails assignToMe() {
         assertIsOpened();
-        WebElement assignButton = issueDetailRoot.findElement(By.id("assignToMe"));
-        waitForClick(assignButton);
+        assignToMeButton.click();
         return this;
     }
 
     public IssueDetails addAssignee(String assigneeName) {
         assertIsOpened();
-        WebElement assignButton = issueDetailRoot.findElement(By.id("addAssigneeButton"));
-        waitForClick(assignButton);
+        addAssigneeButton.click();
 
         return selectStringInPicker(assigneeName, "#pickerForAddAssignee");
     }
 
     public IssueDetails removeAssignee(String assigneeToRemove) {
         assertIsOpened();
-        By removeButtonSelector = By.cssSelector(".assignees paper-material[data-assignee='"+assigneeToRemove+"'] .remove-button");
-        waitUntilElementExists(removeButtonSelector);
-        WebElement teamTag = issueDetailRoot.findElement(removeButtonSelector);
-        waitForClick(teamTag);
+        ButtonComponent removeAssigneeButton = new ButtonComponent(webDriver, new ByChained(issueDetailRootSelector
+                , cssSelector(".assignees paper-material[data-assignee='" + assigneeToRemove + "'] .remove-button")));
+        removeAssigneeButton.click();
 
         return this;
     }
 
     public IssueDetails addTeam(String teamName) {
         assertIsOpened();
-        WebElement assignButton = issueDetailRoot.findElement(By.id("addTeamButton"));
-        waitForClick(assignButton);
+        assignTeamButton.click();
 
-        String pickerSelector = "#teamSelector";
-        return selectStringInPicker(teamName, pickerSelector);
+        return selectStringInPicker(teamName, "#teamSelector");
     }
 
     public IssueDetails replaceTeam(String teamToReplace, String replacement) {
         assertIsOpened();
-        String pickerSelector = "#teamSelector";
 
-        WebElement teamTag = issueDetailRoot.findElement(By.cssSelector(".teams paper-material[data-team='"+teamToReplace+"'] span"));
-        waitForClick(teamTag);
+        ButtonComponent replaceTeamButton = new ButtonComponent(webDriver, new ByChained(issueDetailRootSelector
+                , By.cssSelector(".teams paper-material[data-team='"+teamToReplace+"'] span")));
+        replaceTeamButton.click();
 
-        return selectStringInPicker(replacement, pickerSelector);
+        return selectStringInPicker(replacement, "#teamSelector");
     }
 
     public IssueDetails removeTeam(String teamToRemove) {
         assertIsOpened();
-        WebElement teamTag = getElementWhenItExists(By.cssSelector(".teams paper-material[data-team='"+teamToRemove+"'] .remove-button"));
-        waitForClick(teamTag);
+
+        ButtonComponent removeTeamButton = new ButtonComponent(webDriver, new ByChained(issueDetailRootSelector
+                , By.cssSelector(".teams paper-material[data-team='"+teamToRemove+"'] .remove-button")));
+        removeTeamButton.click();
 
         return this;
     }
 
     private IssueDetails selectStringInPicker(String valueToSelect, String pickerSelector) {
-        TagPicker tagPicker = TagPicker.init(webDriver, issueDetailRoot, pickerSelector);
+        TagPicker tagPicker = new TagPicker(webDriver, new ByChained(issueDetailRootSelector, By.cssSelector(pickerSelector)));
         tagPicker.select(valueToSelect);
         return this;
     }
@@ -122,8 +129,8 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public void assertIsClosed() {
-        waitUntil(attributeToBe(issueDetailRoot, "data-status", "closed"));
-        waitInvisibilityOfElement(issueDetailRoot);
+        waitUntil(attributeToBe(issueDetailRoot(), "data-status", "closed"));
+        waitInvisibilityOfElement(issueDetailRoot());
     }
 
     public IssueDetails assertCardName(String cardNameExpected) {
@@ -154,9 +161,7 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails transitionClick(String transitionName) {
         assertIsOpened();
-        waitUntilElementExists(By.cssSelector("[data-transition-name=\""+transitionName+"\"]"));
-        WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name=\""+transitionName+"\"]"));
-        waitForClick(transitionButton);
+        waitForClick(new ByChained(issueDetailRootSelector, By.cssSelector("[data-transition-name=\""+transitionName+"\"]")));
         return this;
     }
 
@@ -176,7 +181,7 @@ class IssueDetails extends AbstractUiFragment {
 
         waitForClick(By.cssSelector(".wrapper-edit"));
 
-        WebElement descriptionField = issueDetailRoot.findElement(By.className("description-box__field"));
+        WebElement descriptionField = issueDetailRoot().findElement(By.className("description-box__field"));
         setInputValue(descriptionField, description);
 
         waitForClick(By.cssSelector(".description--save-button"));
@@ -218,8 +223,7 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails closeDialog() {
         assertIsOpened();
-        WebElement close = issueDetailRoot.findElement(By.className("button-close"));
-        waitForClick(close);
+        waitForClick(new ByChained(issueDetailRootSelector, By.className("button-close")));
         assertIsClosed();
         return this;
     }
@@ -249,7 +253,7 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails assertInvalidTeamWarnIsVisible() {
-        WebElement icon = issueDetailRoot.findElement(By.cssSelector(".assignee .icon"));
+        WebElement icon = issueDetailRoot().findElement(By.cssSelector(".assignee .icon"));
         waitVisibilityOfElement(icon);
         return this;
     }
@@ -279,7 +283,7 @@ class IssueDetails extends AbstractUiFragment {
         assertIsOpened();
         String pickerSelector = "#classOfServiceSelector";
 
-        WebElement classOfServiceTag = issueDetailRoot.findElement(By.id("class-of-service-selector"));
+        WebElement classOfServiceTag = issueDetailRoot().findElement(By.id("class-of-service-selector"));
         waitForClick(classOfServiceTag);
 
         return selectStringInPicker(classOfService, pickerSelector);
@@ -287,7 +291,7 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails assertClassOfService(String classOfServiceExpected) {
         assertIsOpened();
-        WebElement classOfServiceValue = issueDetailRoot.findElement(By.id("class-of-service-value"));
+        WebElement classOfServiceValue = issueDetailRoot().findElement(By.id("class-of-service-value"));
         waitTextInElement(classOfServiceValue, classOfServiceExpected);
         return this;
     }
@@ -341,12 +345,12 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails assertColor(String colorExpected) {
         assertIsOpened();
-        waitAttributeValueInElement(issueDetailRoot, "background-color", colorExpected);
+        waitAttributeValueInElement(issueDetailRoot(), "background-color", colorExpected);
         return this;
     }
 
     private void assertIsOpened() {
-        waitAttributeValueInElement(issueDetailRoot, "data-status", "opened");
+        waitAttributeValueInElement(issueDetailRoot(), "data-status", "opened");
     }
 
     public void assertListOfItems(By by, String... expectedItemList) {
@@ -376,7 +380,7 @@ class IssueDetails extends AbstractUiFragment {
         assertIsOpened();
 
         try {
-            WebElement element = issueDetailRoot.findElement(By.className("release"));
+            WebElement element = issueDetailRoot().findElement(By.className("release"));
             waitInvisibilityOfElement(element);
         } catch (NoSuchElementException e) { }
 
@@ -449,7 +453,7 @@ class IssueDetails extends AbstractUiFragment {
         }
 
         public void setInputValue(String value) {
-            WebElement summaryField = issueDetailRoot.findElement(By.className("card-summary-field"));
+            WebElement summaryField = issueDetailRoot().findElement(By.className("card-summary-field"));
             IssueDetails.this.setInputValue(summaryField, value);
         }
 
@@ -466,5 +470,9 @@ class IssueDetails extends AbstractUiFragment {
             WebElement summaryContentArea = webDriver.findElement(By.cssSelector(".card-summary-value"));
             waitTextInElement(summaryContentArea, text);
         }
+    }
+
+    private WebElement issueDetailRoot() {
+        return getElementWhenItExists(issueDetailRootSelector);
     }
 }

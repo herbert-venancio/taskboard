@@ -64,7 +64,7 @@ public class BoardStepFragment extends AbstractUiFragment {
 
     public void scrollTo(String issueKey) {
         WebElement issueEl = boardStepRoot.findElement(By.cssSelector("issue-item#"+issueKey));
-        scroolToElement(issueEl);
+        scrollToElement(issueEl);
         waitVisibilityOfElement(issueEl);
     }
 

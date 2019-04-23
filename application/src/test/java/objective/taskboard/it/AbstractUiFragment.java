@@ -1,33 +1,40 @@
 package objective.taskboard.it;
 
+import static objective.taskboard.it.PageWait.atLeastOneElementExists;
+import static objective.taskboard.it.PageWait.attributeContains;
+import static objective.taskboard.it.PageWait.attributeToBe;
+import static objective.taskboard.it.PageWait.elementClicked;
+import static objective.taskboard.it.PageWait.elementExist;
+import static objective.taskboard.it.PageWait.elementIsClickable;
+import static objective.taskboard.it.PageWait.elementIsVisible;
+import static objective.taskboard.it.PageWait.elementTextContains;
+import static objective.taskboard.it.PageWait.elementTextIs;
+import static objective.taskboard.it.PageWait.noneExists;
 import static org.junit.Assert.assertEquals;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContains;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.not;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
+
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+
+import objective.taskboard.it.PageWait.WebElementCondition;
+import objective.taskboard.it.PageWait.WebElementsCondition;
 
 public abstract class AbstractUiFragment {
     protected WebDriver webDriver;
@@ -37,18 +44,36 @@ public abstract class AbstractUiFragment {
     }
 
     public static void waitUntil(WebDriver driver, ExpectedCondition<?> condition) {
-        PageWait.wait(driver).until((Function<? super WebDriver, ?>) condition);
+        PageWait.wait(driver).until(condition);
     }
 
     public void waitUntil(ExpectedCondition<?> condition) {
         waitUntil(webDriver, condition);
     }
 
+    protected WebElement waitAllConditions(By selector, WebElementCondition... conditions) {
+        return new PageWait(webDriver).allConditions(selector, conditions);
+    }
+
+    protected List<WebElement> waitAllConditions(By selector, WebElementsCondition... conditions) {
+        return new PageWait(webDriver).allConditions(selector, conditions);
+    }
+
+    protected WebElement waitAllConditions(WebElement element, WebElementCondition... conditions) {
+        return new PageWait(webDriver).allConditions(element, conditions);
+    }
+
+    protected WebElement waitAllConditions(WebElement parent, By selector, WebElementCondition... conditions) {
+        return new PageWait(webDriver).allConditions(parent, selector, conditions);
+    }
+
+    protected List<WebElement> waitAllConditions(WebElement parent, By selector, WebElementsCondition... conditions) {
+        return new PageWait(webDriver).allConditions(parent, selector, conditions);
+    }
+
     public <T> void waitAssertEquals(T expected, Supplier<T> actualSupplier) {
         try {
-            waitUntil(w -> {
-                return expected.equals(actualSupplier.get());
-            });
+            waitUntil(w -> expected.equals(actualSupplier.get()));
         } catch (TimeoutException e) {
             assertEquals(expected, actualSupplier.get());
         }
@@ -58,46 +83,36 @@ public abstract class AbstractUiFragment {
         waitAssertEquals(true, actualSupplier);
     }
 
-    protected void scroolToElement(WebElement element) {
+    protected void scrollToElement(WebElement element) {
         executeJavascript("arguments[0].scrollIntoView(true);", element);
     }
 
     protected void waitTextInElement(WebElement element, String expected) {
-        waitVisibilityOfElement(element);
-        waitUntil(textToBePresentInElement(element, expected));
+        waitAllConditions(element, elementIsVisible(), elementTextContains(expected));
     }
 
     protected void waitUntilElementExistsWithText(By by, String valueToSelect) {
-        waitVisibilityOfElement(getElementWhenItExists(by));
-        waitUntil(textToBe(by, valueToSelect));
+        waitAllConditions(by, elementIsVisible(), elementTextIs(valueToSelect));
     }
 
     protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {
-        waitVisibilityOfElement(element);
-        waitUntil(attributeToBe(element, attribute, expected));
+        waitAllConditions(element, elementIsVisible(), attributeToBe(attribute, expected));
     }
 
     protected void waitAttributeValueInElementIsNot(WebElement element, String attribute, String expected) {
-        waitVisibilityOfElement(element);
-        waitUntil(not(attributeToBe(element, attribute, expected)));
+        waitAllConditions(element, elementIsVisible(), attributeToBe(attribute, expected).negate());
     }
 
     protected void waitAttributeValueInElementContains(WebElement element, String attribute, String expected) {
-        waitVisibilityOfElement(element);
-        waitUntil(attributeContains(element, attribute, expected));
-    }
-
-    protected void waitAttributeValueInElementNotContains(WebElement element, String attribute, String expected) {
-        waitVisibilityOfElement(element);
-        waitUntil(not(attributeContains(element, attribute, expected)));
+        waitAllConditions(element, elementIsVisible(), attributeContains(attribute, expected));
     }
 
     protected void waitVisibilityOfElement(WebElement element) {
-        waitUntil(visibilityOf(element));
+        waitAllConditions(element, elementIsVisible());
     }
 
     protected void ensureVisibilityOfElementDuringMilliseconds(WebElement element, Long milliseconds) {
-        Long end = System.currentTimeMillis() + milliseconds;
+        long end = System.currentTimeMillis() + milliseconds;
         while (System.currentTimeMillis() < end)
             waitUntil(visibilityOf(element));
     }
@@ -117,67 +132,31 @@ public abstract class AbstractUiFragment {
     }
 
     protected void waitUntilElementExists(By by) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver element) {
-                return element.findElements(by).size() > 0;
-            }
-        });
-    }
-
-    protected void waitUntilElementsShowsUpCountTimes(By by, int count) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver element) {
-                return element.findElements(by).size() == count;
-            }
-        });
+        waitAllConditions(by, atLeastOneElementExists());
     }
 
     protected void waitUntilElementNotExists(By by) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return input.findElements(by).size() == 0;
-            }
-        });
+        waitAllConditions(by, noneExists());
     }
 
     protected WebElement getElementWhenItExists(By by) {
-        waitUntilElementExists(by);
-        return webDriver.findElement(by);
+        return waitAllConditions(by, elementExist());
     }
 
     protected WebElement getElementWhenItExistsAndIsVisible(By by) {
-        waitUntilElementExistsAndIsVisible(by);
-        return webDriver.findElement(by);
-    }
-
-    protected void waitUntilElementExistsAndIsVisible(By by) {
-        waitUntil(c -> isElementVisibleAndExists(by));
+        return waitAllConditions(by, elementExist(), elementIsVisible());
     }
 
     protected List<WebElement> getElementsWhenTheyExists(By by) {
-        waitUntilElementExists(by);
-        return webDriver.findElements(by);
+        return waitAllConditions(by, atLeastOneElementExists());
     }
 
     protected void waitUntilChildElementExists(WebElement element, By by) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return childElementExists(element, by);
-            }
-        });
+        waitAllConditions(element, by, atLeastOneElementExists());
     }
 
     protected void waitUntilChildElementNotExists(WebElement element, By by) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return childElementExists(element, by) == false;
-            }
-        });
+        waitAllConditions(element, by, noneExists());
     }
 
     protected boolean childElementExists(WebElement element, By by) {
@@ -185,28 +164,15 @@ public abstract class AbstractUiFragment {
     }
 
     protected WebElement getChildElementWhenExists(WebElement element, By by) {
-        waitUntilChildElementExists(element, by);
-        return element.findElement(by);
+        return waitAllConditions(element, by, elementExist());
     }
 
     protected List<WebElement> getChildrenElementsWhenTheyExists(WebElement element, By by) {
-        waitUntilChildElementExists(element, by);
-        return element.findElements(by);
+        return waitAllConditions(element, by, atLeastOneElementExists());
     }
 
     protected void waitForClick(WebElement element) {
-        waitVisibilityOfElement(element);
-        waitUntil(elementToBeClickable(element));
-        waitUntil(w -> {
-            try {
-                element.click();
-                return true;
-            } catch(WebDriverException ex) {
-                if (ex.getMessage().matches("(?sm).*Element .* is not clickable at point .* because another element .* obscures it.*"))
-                    return false;
-                throw ex;
-            }
-        });
+        waitAllConditions(element, elementIsVisible(), elementIsClickable(), elementClicked());
     }
 
     protected void waitForClickHoldingAKey(WebElement element, Keys keyHolding) {
@@ -221,23 +187,7 @@ public abstract class AbstractUiFragment {
     }
 
     protected void waitForClick(By by) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver element) {
-                List<WebElement> elements = element.findElements(by);
-                if (elements.size() == 0)
-                    return false;
-                try {
-                    WebElement we = elements.get(0);
-                    if (!we.isDisplayed())
-                        return false;
-                    we.click();
-                    return true;
-                }catch(StaleElementReferenceException ex) {
-                    return false;
-                }
-            }
-        });
+        waitAllConditions(by, elementIsVisible(), elementIsClickable(), elementClicked());
     }
 
     protected void waitForHover(By by) {
@@ -280,8 +230,7 @@ public abstract class AbstractUiFragment {
             public Boolean apply(WebDriver driver) {
                 try {
                     return dropDownMenu.findElements(By.tagName("paper-item")).stream()
-                            .filter(paperItem -> expected.equals(paperItem.getAttribute("textContent").trim()))
-                            .findFirst().isPresent();
+                            .anyMatch(paperItem -> expected.equals(paperItem.getAttribute("textContent").trim()));
                 } catch (StaleElementReferenceException e) {
                     return null;
                 }
@@ -305,10 +254,6 @@ public abstract class AbstractUiFragment {
         return menuItem;
     }
 
-    protected void waitUntilPaperCheckboxSelectionStateToBe(WebElement element, Boolean selected) {
-        waitUntil(attributeToBe(element, "aria-checked", String.valueOf(selected)));
-    }
-
     protected void selectPaperDropdownItem(WebElement dropdown, String itemText) {
         waitForClick(dropdown);
         WebElement dateElement = getPaperDropdownMenuItemByText(dropdown, itemText);
@@ -318,21 +263,11 @@ public abstract class AbstractUiFragment {
     }
 
     protected void waitElementIsDisabled(WebElement element) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return element.getAttribute("disabled") != null;
-            }
-        });
+        waitUntil((ExpectedCondition<Boolean>) input -> element.getAttribute("disabled") != null);
     }
 
     protected void waitElementIsEnabled(WebElement element) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return element.getAttribute("disabled") == null;
-            }
-        });
+        waitUntil((ExpectedCondition<Boolean>) input -> element.getAttribute("disabled") == null);
     }
 
     protected void toggleElementVisibility(By elementToToggle, Runnable toggle) {
@@ -342,32 +277,20 @@ public abstract class AbstractUiFragment {
     }
 
     protected void waitElementExistenceAndVisibilityIs(boolean isVisibleAndExists, By selector) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return isElementVisibleAndExists(selector) == isVisibleAndExists;
-            }
-        });
+        waitUntil((ExpectedCondition<Boolean>) input -> isElementVisibleAndExists(selector) == isVisibleAndExists);
     }
 
     protected boolean isElementVisibleAndExists(By selector) {
         try {
             WebElement element = webDriver.findElement(selector);
             return element.isDisplayed();
-        } catch (NoSuchElementException e) {
-            return false;
-        } catch (StaleElementReferenceException e) {
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
             return false;
         }
     }
 
     protected void waitElementNotExistsOrInvisible(By selector) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return !isElementVisibleAndExists(selector);
-            }
-        });
+        waitUntil((ExpectedCondition<Boolean>) input -> !isElementVisibleAndExists(selector));
     }
 
     protected boolean hasClass(WebElement element, String className) {
@@ -375,10 +298,10 @@ public abstract class AbstractUiFragment {
     }
 
     private void executeJavascript(String script, Object... args) {
-        if (!(webDriver instanceof RemoteWebDriver))
+        if (!(webDriver instanceof JavascriptExecutor))
             throw new RuntimeException("WebDriver " + webDriver + " is unable to execute javascript");
 
-        RemoteWebDriver remoteWebDriver = (RemoteWebDriver) webDriver;
+        JavascriptExecutor remoteWebDriver = (JavascriptExecutor) webDriver;
         remoteWebDriver.executeScript(script, args);
     }
 
