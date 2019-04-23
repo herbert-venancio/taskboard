@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,8 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         assertTrue(givenUserWithoutTaskboardAdministrationPermission_butWithTeamInCommonUserTargettedUser());
 
         assertFalse(givenUserWithoutTaskboardAdministrationPermission_andNoTeamInCommonUserTargettedUser());
+
+        assertTrue(givenNoOtherPermission_butLoggedInUserAndTargetWithSameName());
     }
 
     private boolean givenUserWithTaskboardAdministrationPermission() {
@@ -74,6 +77,18 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         return subject.isAuthorizedFor("Mark");
     }
 
+    private boolean givenNoOtherPermission_butLoggedInUserAndTargetWithSameName() {
+        UserVisibilityPermission subject = permission()
+                .withUserTaskboardAdministrationPermission(false)
+                .withVisibleTeams()
+                .build();
+
+        LoggedUserDetails loggedInUser = mock(LoggedUserDetails.class);
+        when(loggedInUser.defineUsername()).thenReturn("Mark");
+
+        return subject.isAuthorized(loggedInUser, "Mark");
+    }
+
     private Team teamWithMembers(String... members) {
         Team team = mock(Team.class);
         List<UserTeam> userTeamList = stream(members)
@@ -97,7 +112,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
 
         public DSLBuilder withUserTaskboardAdministrationPermission(boolean hasPermission) {
-            when(tbAdminPermission.isAuthorized()).thenReturn(hasPermission);
+            when(tbAdminPermission.isAuthorized(any())).thenReturn(hasPermission);
             return this;
         }
 

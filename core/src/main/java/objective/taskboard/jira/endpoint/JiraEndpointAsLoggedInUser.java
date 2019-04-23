@@ -1,5 +1,3 @@
-package objective.taskboard.jira.endpoint;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,7 +19,13 @@ package objective.taskboard.jira.endpoint;
  * [/LICENSE]
  */
 
+package objective.taskboard.jira.endpoint;
+
+import static objective.taskboard.auth.authorizer.permission.ImpersonatePermission.IMPERSONATE_HEADER;
+
 import org.springframework.stereotype.Component;
+
+import com.squareup.okhttp.Headers;
 
 import objective.taskboard.auth.CredentialsHolder;
 
@@ -30,11 +34,26 @@ public class JiraEndpointAsLoggedInUser extends AuthorizedJiraEndpoint {
 
     @Override
     protected String getUsername() {
-        return CredentialsHolder.username();
+        return CredentialsHolder.realUsername();
     }
 
     @Override
     protected String getPassword() {
         return CredentialsHolder.password();
     }
+
+    @Override
+    protected Headers getHeaders() {
+        Headers.Builder headersBuilder = new Headers.Builder();
+
+        addImpersonateUser(headersBuilder);
+
+        return headersBuilder.build();
+    }
+
+    private void addImpersonateUser(Headers.Builder headersBuilder) {
+        CredentialsHolder.impersonateUsername()
+            .ifPresent(impersonate -> headersBuilder.add(IMPERSONATE_HEADER, impersonate));
+    }
+
 }

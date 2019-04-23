@@ -25,7 +25,7 @@ public class UserTeamPermissionServiceTest {
 
     @Before
     public void setup() {
-        when(loggedInUser.getUsername()).thenReturn("mary");
+        when(loggedInUser.defineUsername()).thenReturn("mary");
     }
 
     @Test

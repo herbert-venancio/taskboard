@@ -1,5 +1,3 @@
-package objective.taskboard.jira.endpoint;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,6 +19,8 @@ package objective.taskboard.jira.endpoint;
  * [/LICENSE]
  */
 
+package objective.taskboard.jira.endpoint;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,4 +41,5 @@ public class JiraEndpointAsMaster extends AuthorizedJiraEndpoint {
     protected String getPassword() {
         return jiraProperties.getLousa().getPassword();
     }
+
 }

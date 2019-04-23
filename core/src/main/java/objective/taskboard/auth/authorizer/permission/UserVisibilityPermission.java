@@ -29,9 +29,13 @@ public class UserVisibilityPermission extends BaseTargettedPermission {
 
     @Override
     protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
-        boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.isAuthorized();
+        boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.isAuthorized(loggedUserDetails);
 
-        return hasPermissionToSeeAllUsers || isThereSomeTeamInCommon(target);
+        return hasPermissionToSeeAllUsers || isSameUser(loggedUserDetails, target) || isThereSomeTeamInCommon(target);
+    }
+
+    private boolean isSameUser(LoggedUserDetails loggedUserDetails, String target) {
+        return target.equals(loggedUserDetails.defineUsername());
     }
 
     private boolean isThereSomeTeamInCommon(String target) {

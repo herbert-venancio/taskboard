@@ -303,7 +303,7 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
     }
 
     public synchronized Issue addMeAsAssignee(String issueKey) {
-        return addAssigneeToIssue(issueKey, CredentialsHolder.username());
+        return addAssigneeToIssue(issueKey, CredentialsHolder.defineUsername());
     }
     
     public synchronized Issue addAssigneeToIssue(String issueKey, String username) {

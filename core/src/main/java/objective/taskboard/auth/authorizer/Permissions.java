@@ -4,6 +4,7 @@ public interface Permissions {
 
     String TASKBOARD_ADMINISTRATION = "taskboard.administration";
 
+    String IMPERSONATE = "impersonate";
     String USER_VISIBILITY = "user.visibility";
 
     String PROJECT_ADMINISTRATION = "project.administration";

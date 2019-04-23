@@ -64,7 +64,7 @@ class SizingImporterSocketStatusEmmiter implements SizingSheetImporterListener {
     }
 
     private void emmitStatus() {
-        String receiver = CredentialsHolder.username();
+        String receiver = CredentialsHolder.defineUsername();
         SizingImportStatusDto status = new SizingImportStatusDto(linesToImportCount, importedLinesCount, failedLinesCount, ofNullable(currentSheetStatus), sheetsStatus);
         
         messagingTemplate.convertAndSendToUser(receiver, TOPIC_DESTINATION, status);

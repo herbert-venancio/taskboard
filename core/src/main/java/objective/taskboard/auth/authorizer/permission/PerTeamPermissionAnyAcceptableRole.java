@@ -28,7 +28,7 @@ public class PerTeamPermissionAnyAcceptableRole extends BaseTargettedPermission 
     @Override
     protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
         Optional<UserTeam> userTeam = userTeamRepository.findByUsernameTeamAndRoles(
-                loggedUserDetails.getUsername(),
+                loggedUserDetails.defineUsername(),
                 target,
                 acceptedRoles);
         return userTeam.isPresent();
@@ -36,7 +36,7 @@ public class PerTeamPermissionAnyAcceptableRole extends BaseTargettedPermission 
 
     @Override
     public List<String> applicableTargets() {
-        List<String> applicableTargets = userTeamRepository.findByUsernameAndRoles(getLoggedUser().getUsername(), acceptedRoles).stream()
+        List<String> applicableTargets = userTeamRepository.findByUsernameAndRoles(getLoggedUser().defineUsername(), acceptedRoles).stream()
                 .map(UserTeam::getTeam)
                 .collect(toList());
         return applicableTargets;

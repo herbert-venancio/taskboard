@@ -34,6 +34,6 @@ public class LoggedInUserKeyGenerator implements KeyGenerator {
     
     @Override
     public Object generate(Object target, Method method, Object... params) {
-        return CredentialsHolder.username();
+        return CredentialsHolder.defineUsername();
     }
 }

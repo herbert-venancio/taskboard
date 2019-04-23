@@ -43,7 +43,7 @@ public class UserPreferencesController {
     @RequestMapping(path = "update", method = RequestMethod.POST)
     @Transactional
     public Boolean updatePreferences(@RequestBody Preferences preferences) {
-        service.save(CredentialsHolder.username(), preferences);
+        service.save(CredentialsHolder.defineUsername(), preferences);
         return true;
     }
 

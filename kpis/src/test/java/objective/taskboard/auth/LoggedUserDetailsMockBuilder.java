@@ -19,7 +19,7 @@ public class LoggedUserDetailsMockBuilder {
     }
 
     public LoggedUserDetailsMockBuilder withName(String name) {
-        when(mock.getUsername()).thenReturn(name);
+        when(mock.defineUsername()).thenReturn(name);
         return this;
     }
 

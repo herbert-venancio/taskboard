@@ -1,12 +1,12 @@
 package objective.taskboard.jira;
 
 import static objective.taskboard.jira.JiraSearchService.postProcessWorklogs;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValueOrId;
-import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -35,11 +35,11 @@ import objective.taskboard.data.User;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraResolutionDto;
 import objective.taskboard.jira.client.JiraServerInfoDto;
+import objective.taskboard.jira.data.FieldsRequiredInTransition;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.JiraUser.UserDetails;
 import objective.taskboard.jira.data.Transition;
-import objective.taskboard.jira.data.FieldsRequiredInTransition;
 import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
 import objective.taskboard.jira.data.plugin.RoleData;
@@ -175,7 +175,7 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
         try {
             return Optional.of(postProcessWorklogs(jiraEndpointAsUser, jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key)));
-        }catch(retrofit.RetrofitError e) {
+        }catch(RetrofitError e) {
             if (e.getResponse().getStatus() == 404)
                 return Optional.empty();
             throw e;
@@ -186,7 +186,7 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
         try {
             return postProcessWorklogs(jiraEndpointAsMaster, jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key));
-        } catch(retrofit.RetrofitError e) {
+        } catch(RetrofitError e) {
             if (e.getResponse().getStatus() == 404)
                 return null;
             throw e;
@@ -209,6 +209,19 @@ public class JiraService {
     public JiraUser getJiraUser(String username) {
         log.debug("⬣⬣⬣⬣⬣  getJiraUser");
         return jiraEndpointAsUser.request(JiraUser.Service.class).get(username);
+    }
+
+
+    @Cacheable(CacheConfiguration.JIRA_USER)
+    public Optional<JiraUser> getJiraUserAsMaster(String username) {
+        log.debug("⬣⬣⬣⬣⬣  getJiraUserAsMaster");
+        try {
+            return Optional.of(jiraEndpointAsMaster.request(JiraUser.Service.class).get(username));
+        } catch(RetrofitError e) {
+            if (e.getResponse().getStatus() == 404)
+                return Optional.empty();
+            throw e;
+        }
     }
 
     public void block(String issueKey, BlockCardValue blockCardValue) {
@@ -316,7 +329,7 @@ public class JiraService {
     }
 
     public User getLoggedUser() {
-        JiraUser loggedJiraUser = getJiraUser(CredentialsHolder.username());
+        JiraUser loggedJiraUser = getJiraUser(CredentialsHolder.defineUsername());
         return getUser(loggedJiraUser);
     }
 
