@@ -8,14 +8,19 @@ import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 
 public abstract class RequestChartDataBehavior<T> implements DSLSimpleBehaviorWithAsserter<AssertResponse> {
     protected final String projectKey;
-    protected final String level;
+    protected String level;
     protected final String zoneId;
     protected final boolean hasPermission;
     protected boolean preventProviderMock;
     protected AssertResponse asserter;
+    
     public RequestChartDataBehavior(String projectKey, String level, String zoneId, boolean hasPermission, boolean preventProviderMock) {
-        this.projectKey = projectKey;
+        this(projectKey, zoneId, hasPermission, preventProviderMock);
         this.level = level;
+    }
+    
+    public RequestChartDataBehavior(String projectKey, String zoneId, boolean hasPermission, boolean preventProviderMock) {
+        this.projectKey = projectKey;
         this.zoneId = zoneId;
         this.hasPermission = hasPermission;
         this.preventProviderMock = preventProviderMock;
