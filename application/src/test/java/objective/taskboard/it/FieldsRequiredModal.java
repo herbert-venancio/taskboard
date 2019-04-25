@@ -5,14 +5,13 @@ import static org.openqa.selenium.support.PageFactory.initElements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.pagefactory.ByChained;
 
 public class FieldsRequiredModal extends AbstractUiFragment {
 
     private WebElement confirmButton;
 
-    @FindBy(css = "#fieldsRequiredDialog .modal")
-    private WebElement fieldsRequiredModal;
+    private static final By fieldsRequiredModalSelector = By.cssSelector("#fieldsRequiredDialog .modal");
 
     public FieldsRequiredModal(WebDriver driver) {
         super(driver);
@@ -23,8 +22,9 @@ public class FieldsRequiredModal extends AbstractUiFragment {
     }
 
     private FieldsRequiredModal open() {
-        waitVisibilityOfElement(fieldsRequiredModal);
-        confirmButton = getChildElementWhenExists(fieldsRequiredModal, By.id("confirm-button"));
+        waitVisibilityOfElement(fieldsRequiredModal());
+        By buttonSelector = new ByChained(fieldsRequiredModalSelector, By.id("confirm-button"));
+        confirmButton = getElementWhenItExists(buttonSelector);
         return this;
     }
 
@@ -34,24 +34,30 @@ public class FieldsRequiredModal extends AbstractUiFragment {
     }
 
     public FieldsRequiredModal assertRequiredMessageIsVisible(String fieldId) {
-        WebElement error = getChildElementWhenExists(fieldsRequiredModal, By.id("error-" + fieldId));
+        By errorFieldSelector = new ByChained(fieldsRequiredModalSelector, By.id("error-" + fieldId));
+        WebElement error = getElementWhenItExists(errorFieldSelector);
         waitVisibilityOfElement(error);
         return this;
     }
 
     public FieldsRequiredModal addVersion(String fieldId, String value) {
-        WebElement versionField = getChildElementWhenExists(fieldsRequiredModal, By.cssSelector("version-field#" + fieldId));
+        By versionFieldSelector = new ByChained(fieldsRequiredModalSelector, By.cssSelector("version-field#" + fieldId));
+        WebElement versionField = getElementWhenItExists(versionFieldSelector);
         WebElement addVersion = getChildElementWhenExists(versionField, By.id("addVersionButton"));
         waitForClick(addVersion);
 
-        TagPicker versionPicker = TagPicker.init(webDriver, versionField, "#pickerForAddVersion");
+        TagPicker versionPicker = new TagPicker(webDriver, new ByChained(versionFieldSelector, By.cssSelector("#pickerForAddVersion")));
         versionPicker.select(value);
         return this;
     }
 
     public FieldsRequiredModal assertIsClosed() {
-        waitInvisibilityOfElement(fieldsRequiredModal);
+        waitInvisibilityOfElement(webDriver.findElement(fieldsRequiredModalSelector));
         return this;
+    }
+
+    private WebElement fieldsRequiredModal() {
+        return getElementWhenItExistsAndIsVisible(fieldsRequiredModalSelector);
     }
 
 }
