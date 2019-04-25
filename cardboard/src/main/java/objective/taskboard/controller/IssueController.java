@@ -224,6 +224,7 @@ public class IssueController {
         map.put("ballparks", jiraProperties.getFollowup().getBallparkMappings());
         map.put("urlLinkGraph", linkGraphProperties.getUrl());
         map.put("userPreferences", userPreferencesService.getLoggedUserPreferences().getPreferences());
+        map.put("isNewUser", userPreferencesService.getLoggedUserPreferences().getIsNewUser());
         return map;
     }
 

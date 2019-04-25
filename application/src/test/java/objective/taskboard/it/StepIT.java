@@ -46,6 +46,7 @@ public class StepIT extends AuthenticatedIntegrationTest {
         demandDoing.assertIssueList(
                 "TASKB-611",
                 "TASKB-612",
+                "PROJ1-602",
                 DEMAND_TO_EXPEDITE,
                 "TASKB-608",
                 "TASKB-604",
@@ -62,6 +63,7 @@ public class StepIT extends AuthenticatedIntegrationTest {
                 DEMAND_TO_EXPEDITE,
                 "TASKB-611",
                 "TASKB-612",
+                "PROJ1-602",
                 "TASKB-608",
                 "TASKB-604",
                 "TASKB-605",
@@ -86,6 +88,7 @@ public class StepIT extends AuthenticatedIntegrationTest {
                 DEMAND_TO_EXPEDITE,
                 "TASKB-611",
                 "TASKB-612",
+                "PROJ1-602",
                 "TASKB-608",
                 "TASKB-604",
                 "TASKB-605",
@@ -100,6 +103,7 @@ public class StepIT extends AuthenticatedIntegrationTest {
         demandDoing.assertIssueList(
                 "TASKB-611",
                 "TASKB-612",
+                "PROJ1-602",
                 DEMAND_TO_EXPEDITE,
                 "TASKB-608",
                 "TASKB-604",

@@ -63,7 +63,7 @@ class CardFieldFilterProvider {
                         .filter(t -> p.getTeamId().equals(t.getId()))
                         .map(t -> t.getName())
                         .collect(toList());
-                    return new FilterFieldValue(p.getName(), p.getKey(), null, true, filteredTeams, p.getVersions());
+                    return new FilterFieldValue(p.getName(), p.getKey(), null, false, filteredTeams, p.getVersions());
                 })
                 .sorted(this::compareFilter)
                 .collect(toList());

@@ -32,6 +32,14 @@ public class CardFieldFilterUtils {
                 );
     }
 
+    public static List<CardFieldFilter> cardFieldFiltersAllValuesSelectedButProjectAllFalse() {
+        return asList(
+                new CardFieldFilter(FieldSelector.ISSUE_TYPE, issueTypeFilterFieldsValuesAllSelected()),
+                new CardFieldFilter(FieldSelector.PROJECT, projectFilterFieldsValuesAllFalse()),
+                new CardFieldFilter(FieldSelector.TEAM, teamFilterFieldsValuesAllSelected())
+        );
+    }
+
     public static List<FilterFieldValue> issueTypeFilterFieldsValuesAllSelected() {
         return asList(
                 new FilterFieldValue(ISSUE_TYPE_1_VALUE, ISSUE_TYPE_1_VALUE, null, true),
@@ -46,6 +54,14 @@ public class CardFieldFilterUtils {
                 new FilterFieldValue(PROJECT_2_VALUE, PROJECT_2_VALUE, null, true),
                 new FilterFieldValue(PROJECT_3_VALUE, PROJECT_3_VALUE, null, true)
                 );
+    }
+
+    public static List<FilterFieldValue> projectFilterFieldsValuesAllFalse() {
+        return asList(
+                new FilterFieldValue(PROJECT_1_VALUE, PROJECT_1_VALUE, null, false),
+                new FilterFieldValue(PROJECT_2_VALUE, PROJECT_2_VALUE, null, false),
+                new FilterFieldValue(PROJECT_3_VALUE, PROJECT_3_VALUE, null, false)
+        );
     }
 
     public static List<FilterFieldValue> teamFilterFieldsValuesAllSelected() {

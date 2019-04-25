@@ -72,9 +72,11 @@
                         <iron-icon class="modal__icon tb-icon tb-icon--24" icon="[[icon]]" title="[[title]]"></iron-icon>
                     </template>
                     <h2 class="modal__title">[[title]]</h2>
-                    <div class="modal__close">
-                        <iron-icon on-tap="close" class="modal__close-icon tb-icon tb-icon--16" icon="clear"></iron-icon>
-                    </div>
+                    <template is="dom-if" if="[[showCloseButton]]">
+                        <div class="modal__close">
+                            <iron-icon on-tap="close" class="modal__close-icon tb-icon tb-icon--16" icon="clear"></iron-icon>
+                        </div>
+                    </template>
                 </div>
                 <div class="modal__main">
                     <div class="modal__content">
@@ -107,6 +109,10 @@
                     loading: {
                         type: Boolean,
                         value: false
+                    },
+                    showCloseButton: {
+                        type: Boolean,
+                        value: true
                     },
                     confirmClose: {
                         type: Boolean,

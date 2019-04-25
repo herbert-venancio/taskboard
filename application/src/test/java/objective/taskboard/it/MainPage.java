@@ -20,27 +20,28 @@
  */
 package objective.taskboard.it;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.openqa.selenium.By.className;
-import static org.openqa.selenium.By.cssSelector;
-import static org.openqa.selenium.By.tagName;
-import static org.openqa.selenium.support.PageFactory.initElements;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.openqa.selenium.By.*;
+import static org.openqa.selenium.support.PageFactory.initElements;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
 public class MainPage extends AbstractUiFragment {
-    @FindBy(css=".nameButton.user-account")
+
+    private static final String USER_LABEL_BUTTON_CSS = ".nameButton.user-account";
+
+    @FindBy(css = "#drawer")
+    private WebElement drawer;
+
+    @FindBy(css= USER_LABEL_BUTTON_CSS)
     private WebElement userLabelButton;
 
     @FindBy(id = "searchIssues")
@@ -67,7 +68,8 @@ public class MainPage extends AbstractUiFragment {
 
     public MainPage reload() {
         webDriver.navigate().refresh();
-        waitUserLabelToBe("Foo");
+        waitElementExistenceAndVisibilityIs(true, By.cssSelector(USER_LABEL_BUTTON_CSS));
+        waitTrue(() -> ! isEmpty(userLabelButton.getText()));
         return this;
     }
 
@@ -97,7 +99,9 @@ public class MainPage extends AbstractUiFragment {
 
     public MenuFilters openMenuFilters() {
         waitForClick(menuFiltersButton);
-        return initElements(webDriver, MenuFilters.class);
+        MenuFilters menuFilters = initElements(webDriver, MenuFilters.class);
+        waitAttributeValueInElementContains(drawer, "class", "iron-selected");
+        return menuFilters;
     }
 
     public MainPage waitReleaseFilterContains(String release) {
@@ -256,8 +260,8 @@ public class MainPage extends AbstractUiFragment {
             @Override
             public String toString() {
                 return String.format("issue key list to be \"%s\". Current issue key list: \"%s\"",
-                        StringUtils.join(expectedIssueKeyList, ","),
-                        StringUtils.join(actualIssueKeyList, ","));
+                        join(expectedIssueKeyList, ","),
+                        join(actualIssueKeyList, ","));
             }
             private WebElement getElement(WebElement element, By bySubSelector) {
                 if(bySubSelector != null)
