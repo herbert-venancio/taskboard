@@ -1,4 +1,4 @@
-package objective.taskboard.followup.budget;
+package objective.taskboard.project;
 
 public class ProjectNotFoundException extends IllegalArgumentException {
 

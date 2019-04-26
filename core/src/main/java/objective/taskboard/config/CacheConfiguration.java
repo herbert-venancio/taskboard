@@ -53,6 +53,7 @@ public class CacheConfiguration {
     public static final String DASHBOARD_BUDGET_DATA = "dashboardBudgetData";
     public static final String JIRA_USER = "jiraUser";
     public static final String USER_PREFERENCES = "userPreferences";
+    public static final String DASHBOARD_MONITORS = "dashboardMonitors";
 
     @Bean
     public CacheManager cacheManager() {
@@ -74,7 +75,8 @@ public class CacheConfiguration {
                 new GuavaCache(DASHBOARD_PROGRESS_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
                 new GuavaCache(DASHBOARD_BUDGET_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_USER, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
-                new GuavaCache(USER_PREFERENCES, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build())
+                new GuavaCache(USER_PREFERENCES, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
+                new GuavaCache(DASHBOARD_MONITORS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).concurrencyLevel(1).build())
         ));
         return simpleCacheManager;
     }

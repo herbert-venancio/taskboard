@@ -44,6 +44,7 @@ import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
+import objective.taskboard.project.ProjectNotFoundException;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.project.ProjectProfileItemRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -91,6 +92,11 @@ public class ProjectService {
     
     public Optional<Project> getJiraProjectAsUser(String projectKey) {
         return Optional.ofNullable(getUserProjects().get(projectKey));
+    }
+
+    public Project getJiraProjectAsUserOrCry(String projectKey) {
+        return getJiraProjectAsUser(projectKey)
+                .orElseThrow(() -> new ProjectNotFoundException(projectKey));
     }
 
     public List<ProjectFilterConfiguration> getTaskboardProjects() {

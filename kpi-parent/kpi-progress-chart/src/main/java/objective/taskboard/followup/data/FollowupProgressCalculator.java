@@ -46,13 +46,13 @@ public class FollowupProgressCalculator {
 
         FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, timezone);
         if (!snapshot.hasClusterConfiguration())
-            throw new ClusterNotConfiguredException();
+            throw ClusterNotConfiguredException.fromProject(projectKey);
         
         Optional<LocalDate> optionalProjectStartDate = snapshot.getTimeline().getStart();
         Optional<LocalDate> optionalProjectDeliveryDate = snapshot.getTimeline().getEnd();
         
         if (!optionalProjectStartDate.isPresent() || !optionalProjectDeliveryDate.isPresent())
-            throw new ProjectDatesNotConfiguredException();
+            throw ProjectDatesNotConfiguredException.fromProject(projectKey);
         
         LocalDate projectStartDate = optionalProjectStartDate.get();
         LocalDate projectDeliveryDate = optionalProjectDeliveryDate.get(); 
