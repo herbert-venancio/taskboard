@@ -1,0 +1,30 @@
+.monitor-cost {
+    &__wrapper {
+        margin-top: 24px;
+    }
+
+    &__values {
+        margin:0;
+        font-size:24px;
+        font-weight: bold;
+        color:#fff;
+    }
+
+    &__label {
+        margin:0;
+        font-size:12px;
+        color:#E5E5E5;
+
+        &--normal {
+            color: #53B873;
+        }
+
+        &--alert {
+            color: #E2AE33;
+        }
+
+        &--danger {
+            color: #FFA39A;
+        }
+    }
+}

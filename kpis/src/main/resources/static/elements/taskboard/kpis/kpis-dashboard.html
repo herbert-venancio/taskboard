@@ -351,14 +351,20 @@
                         type: Boolean,
                         value: true
                     },
+                    verifyHashChange: {
+                        type: Boolean,
+                        value: false
+                    },
                 },
 
                 observers: [
                     '_setupScreen(selectedProjectKey)',
                     '_onShowDashboard(_showDashboard)',
+                    '_verifyProjectKeyHash(verifyHashChange)'
                 ],
 
                 ready: function () {
+                    var self = this;
                     this.populateProjects();
                     this.set('user', taskboard.getLoggedUser());
 
@@ -366,6 +372,11 @@
                         const chartWidgets = this.querySelectorAll('.kpis__widget');
                         chartWidgets.forEach(widget => widget.windowHasResized = true);
                     }); 
+
+                    window.addEventListener('hashchange', () => {
+                        if (self.projects)
+                            self.set('verifyHashChange', true);
+                    });
 
                     // adds the reversed option in the tooltip
                     Highcharts.wrap(Highcharts.Tooltip.prototype, 'refresh', function(proceed, items, event) {
@@ -385,10 +396,7 @@
                         self.set('hasOnlyOneProject', projects.length == 1);
                         self.$$('.loader').classList.remove('active');
 
-                        if (self.hasOnlyOneProject)
-                            self.set('selectedProjectKey', projects[0].projectKey);
-                        else
-                            self._setupScreen(self.selectedProjectKey);
+                        self.set('verifyHashChange', true);
                     })
                 },
 
@@ -410,6 +418,7 @@
 
                     var projectDates = hasProjectSelected ? this._getDatesFromProject(selectedProjectKey) : undefined;
                     this.set('_projectDates', projectDates);
+                    window.location.hash = '#/project/' + selectedProjectKey;
                 },
 
                 _getDatesFromProject: function(projectKey) {
@@ -422,6 +431,30 @@
                 _onShowDashboard: function(showDashboard) {
                     if (showDashboard) {
                         this._activeCategory(this.selectedCategory);
+                    }
+                },
+
+                _verifyProjectKeyHash: function (verifyHash) {
+                    if (verifyHash) {
+                        this.set('verifyHashChange', false);
+
+                        var matchProjectRoute = new RegExp('#/project/(.*)').exec(window.location.hash);
+
+                        if (matchProjectRoute) {
+                            selectedProjectKey = matchProjectRoute[1];
+
+                            const projectKeyIsPresent = findInArray(this.projects, function (p) {
+                                return p.projectKey === selectedProjectKey;
+                            });
+
+                            if (!projectKeyIsPresent) {
+                                window.location.href = '/strategical-dashboard';
+                            } else {
+                                this.set('selectedProjectKey', selectedProjectKey);
+                            }
+                        } else {
+                            window.location.href = '/strategical-dashboard';
+                        }
                     }
                 },
 
