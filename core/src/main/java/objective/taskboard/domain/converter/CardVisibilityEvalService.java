@@ -1,6 +1,5 @@
 package objective.taskboard.domain.converter;
 
-import static java.lang.Integer.parseInt;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 import java.time.Instant;
@@ -12,18 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.data.Changelog;
-import objective.taskboard.domain.Filter;
-import objective.taskboard.repository.FilterCachedRepository;
+import objective.taskboard.data.IssuesConfiguration;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.utils.Clock;
 
 @Component
 public class CardVisibilityEvalService {
     
-    @Autowired
-    private FilterCachedRepository filterRepository;
+    private LaneService laneService;
     
-    @Autowired
     private Clock localDateTimeProvider;
+
+    @Autowired
+    public CardVisibilityEvalService(LaneService laneService, Clock localDateTimeProvider) {
+        this.laneService = laneService;
+        this.localDateTimeProvider = localDateTimeProvider;
+    }
     
     public boolean isStillInVisibleRange(Long status, Instant lastUpdatedDate, List<Changelog> all) {
         Optional<Instant> visibleUntil = calculateVisibleUntil(status, lastUpdatedDate, all);
@@ -34,31 +37,29 @@ public class CardVisibilityEvalService {
     }
 
     public Optional<Instant> calculateVisibleUntil(Long status, Instant lastUpdatedDate, List<Changelog> all) {
-        List<Filter> filters = filterRepository.getCache();
+        List<IssuesConfiguration> filters = laneService.getFilters();
         if (filters.isEmpty())
             return Optional.empty();
-        
-        Optional<Filter> filter = filters.stream()
-                .filter(f->f.getStatusId() == status)
+
+        Optional<IssuesConfiguration> filter = filters.stream()
+                .filter(f->f.getStatus() == status)
                 .filter(f->f.getLimitInDays() != null)
                 .findFirst();
-        
+
         if (!filter.isPresent())
             return Optional.empty();
-        
+
         List<Changelog> changelogs = all.stream()
                 .filter(c->"status".equals(c.field))
-                .filter(c->Integer.parseInt(c.originalTo)==filter.get().getStatusId())
+                .filter(c->Integer.parseInt(c.originalTo)==filter.get().getStatus())
                 .sorted((o1,o2) -> o2.timestamp.compareTo(o1.timestamp))
                 .collect(Collectors.toList());
-        
-        if (changelogs.isEmpty()) 
-            return Optional.of(lastUpdatedDate.plus(-limitInDays(filter.get()), DAYS));
-        
-        return Optional.of(changelogs.get(0).timestamp.toInstant().plus(-limitInDays(filter.get()), DAYS));
-    }
-    
-    private int limitInDays(Filter f) {
-        return parseInt(f.getLimitInDays().replaceAll("[^0-9-]", ""));
+
+        int limitInDays = filter.get().getLimitInDays();
+
+        if (changelogs.isEmpty())
+            return Optional.of(lastUpdatedDate.plus(-limitInDays, DAYS));
+
+        return Optional.of(changelogs.get(0).timestamp.toInstant().plus(-limitInDays, DAYS));
     }
 }

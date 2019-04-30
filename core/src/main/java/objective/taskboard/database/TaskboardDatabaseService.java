@@ -43,7 +43,7 @@ public class TaskboardDatabaseService {
     @Cacheable(CacheConfiguration.CONFIGURATION)
     public List<LaneConfiguration> laneConfiguration() {
         List<Lane> lanes = laneRepository.getAll();
-        return TaskboardConfigToLaneConfigurationTransformer.getInstance().transform(lanes);
+        return TaskboardConfigToLaneConfigurationTransformer.transform(lanes);
     }
     
     @Cacheable(CacheConfiguration.CONFIGURATION_COLOR)

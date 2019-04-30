@@ -1,46 +1,45 @@
 package objective.taskboard.data;
 
+import static java.lang.Integer.valueOf;
+
 import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
 
 import objective.taskboard.domain.Filter;
 
 public class IssuesConfiguration implements Serializable {
     private static final long serialVersionUID = -1742753347921403277L;
+
     private long issueType;
     private long status;
-    private String limitInDays;
+    private Integer limitInDays;
 
-    public IssuesConfiguration(long issueType, long status) {
-        this.issueType = issueType;
-        this.status = status;
+    public IssuesConfiguration() {
+        this(0L, 0L);
     }
 
-    public IssuesConfiguration(long issueType, long status, String limitInDays) {
+    public IssuesConfiguration(long issueType, long status) {
+        this(issueType, status, null);
+    }
+
+    public IssuesConfiguration(long issueType, long status, Integer limitInDays) {
         this.issueType = issueType;
         this.status = status;
         this.limitInDays = limitInDays;
     }
 
-    public static IssuesConfiguration from(long issueType, long status) {
-        return new IssuesConfiguration(issueType, status);
-    }
-
-    public static IssuesConfiguration from(long issueType, long status, String limitInDays) {
-        return new IssuesConfiguration(issueType, status, limitInDays);
-    }
-
     public static IssuesConfiguration fromFilter(Filter filter) {
-        if (filter.getLimitInDays() == null) {
-            return new IssuesConfiguration(filter.getIssueTypeId(), filter.getStatusId());
-        } else {
-            return new IssuesConfiguration(filter.getIssueTypeId(), filter.getStatusId(), filter.getLimitInDays());
-        }
+        Integer limitInDays = Optional.ofNullable(filter.getLimitInDays())
+                .map(days -> valueOf(days.replaceAll("[^0-9-]", "")))
+                .orElse(null);
+        return new IssuesConfiguration(filter.getIssueTypeId(), filter.getStatusId(), limitInDays);
     }
 
     public boolean matches(Issue issue) {
         return issue.getType() == getIssueType() && issue.getStatus() == getStatus();
     }
-    
+
     public boolean matches(Long issueType, long status) {
         return issueType == getIssueType() && status == getStatus();
     }
@@ -53,20 +52,8 @@ public class IssuesConfiguration implements Serializable {
         return this.status;
     }
 
-    public String getLimitInDays() {
+    public Integer getLimitInDays() {
         return this.limitInDays;
-    }
-
-    public void setIssueType(final long issueType) {
-        this.issueType = issueType;
-    }
-
-    public void setStatus(final long status) {
-        this.status = status;
-    }
-
-    public void setLimitInDays(final String limitInDays) {
-        this.limitInDays = limitInDays;
     }
 
     @Override
@@ -78,7 +65,7 @@ public class IssuesConfiguration implements Serializable {
 
         if (issueType != that.issueType) return false;
         if (status != that.status) return false;
-        return limitInDays != null ? limitInDays.equals(that.limitInDays) : that.limitInDays == null;
+        return Objects.equals(limitInDays, that.limitInDays);
     }
 
     @Override
@@ -96,8 +83,5 @@ public class IssuesConfiguration implements Serializable {
                 ", status=" + status +
                 ", limitInDays='" + limitInDays + '\'' +
                 '}';
-    }
-
-    public IssuesConfiguration() {
     }
 }

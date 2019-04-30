@@ -143,7 +143,7 @@ public class UserPreferencesServiceTest {
     public void applyPreferencesOnLaneConfiguration_ifLevelPreferencesIsNotEmpty_modifyValues() {
         when(repository.findOneByJiraUser(USERNAME)).thenReturn(Optional.of(new UserPreferences(USERNAME, generatePreferences())));
 
-        List<LaneConfiguration> lanesConfiguration = TaskboardConfigToLaneConfigurationTransformer.getInstance().transform(asList(
+        List<LaneConfiguration> lanesConfiguration = TaskboardConfigToLaneConfigurationTransformer.transform(asList(
                 createLane("LANE_1", 1D, true, true, true),
                 createLane("LANE_2", 2D, true, true, true),
                 createLane("LANE_3", 3D, true, true, true)
@@ -164,8 +164,8 @@ public class UserPreferencesServiceTest {
                 createLane("LANE_2", 2D, true, true, true),
                 createLane("LANE_3", 3D, true, true, true)
                 );
-        List<LaneConfiguration> lanesConfigurationWithUserPreferences = TaskboardConfigToLaneConfigurationTransformer.getInstance().transform(lanes);
-        List<LaneConfiguration> lanesConfiguration = TaskboardConfigToLaneConfigurationTransformer.getInstance().transform(lanes);
+        List<LaneConfiguration> lanesConfigurationWithUserPreferences = TaskboardConfigToLaneConfigurationTransformer.transform(lanes);
+        List<LaneConfiguration> lanesConfiguration = TaskboardConfigToLaneConfigurationTransformer.transform(lanes);
 
         subject.applyLoggedUserPreferencesOnLaneConfiguration(lanesConfigurationWithUserPreferences);
 

@@ -1,23 +1,3 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
 package objective.taskboard.database;
 
 import java.util.ArrayList;
@@ -39,13 +19,11 @@ import objective.taskboard.domain.Step;
 
 public class TaskboardConfigToLaneConfigurationTransformer {
 
-    public static final TaskboardConfigToLaneConfigurationTransformer getInstance() {
-        return new TaskboardConfigToLaneConfigurationTransformer();
-    }
+    private TaskboardConfigToLaneConfigurationTransformer() { }
 
-    public List<LaneConfiguration> transform(List<Lane> lanes) {
+    public static List<LaneConfiguration> transform(List<Lane> lanes) {
 
-        List<LaneConfiguration> lanesConfiguration = new ArrayList<LaneConfiguration>();
+        List<LaneConfiguration> lanesConfiguration = new ArrayList<>();
 
         ArrayList<Lane> sortedLanes = new ArrayList<>(lanes);
         sortLanes(sortedLanes);
@@ -75,7 +53,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         return lanesConfiguration;
     }
 
-    private void sortLanes(List<Lane> lanes) {
+    private static void sortLanes(List<Lane> lanes) {
         final Comparator<Lane> comparator = new Comparator<Lane>() {
 
             @Override
@@ -93,7 +71,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         Collections.sort(lanes, comparator);
     }
 
-    private void sortStages(List<Stage> stages) {
+    private static void sortStages(List<Stage> stages) {
         final Comparator<Stage> comparator = new Comparator<Stage>() {
 
             @Override
@@ -104,7 +82,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         Collections.sort(stages, comparator);
     }
 
-    private void sortSteps(List<Step> steps) {
+    private static void sortSteps(List<Step> steps) {
         final Comparator<Step> comparator = new Comparator<Step>() {
 
             @Override
@@ -115,7 +93,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         Collections.sort(steps, comparator);
     }
 
-    private LaneConfiguration getLaneConfiguration(List<LaneConfiguration> lanesConfiguration, Lane lane) {
+    private static LaneConfiguration getLaneConfiguration(List<LaneConfiguration> lanesConfiguration, Lane lane) {
         Optional<LaneConfiguration> laneConfOptional = lanesConfiguration.stream().filter(stg -> stg.getLevel().equals(lane.getName())).findFirst();
 
         LaneConfiguration laneConfiguration = null;
@@ -130,7 +108,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         return laneConfiguration;
     }
 
-    private RuleConfiguration ruleConfiguration(LaneConfiguration lane, Rule rule) {
+    private static RuleConfiguration ruleConfiguration(LaneConfiguration lane, Rule rule) {
 
         Optional<RuleConfiguration> ruleConfOptional = lane.getRules().stream().filter(r -> r.getChave().equals(rule.getChave())).findFirst();
 
@@ -146,7 +124,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         return ruleConfiguration;
     }
 
-    private StageConfiguration getStageConfiguration(LaneConfiguration lane, Stage stage) {
+    private static StageConfiguration getStageConfiguration(LaneConfiguration lane, Stage stage) {
 
         Optional<StageConfiguration> stageConfOptional = lane.getStages().stream().filter(stg -> stg.getStage().equals(stage.getName())).findFirst();
 
@@ -162,7 +140,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         return stageConfiguration;
     }
 
-    private StepConfiguration getStepConfiguration(StageConfiguration stageConfiguration, Step step) {
+    private static StepConfiguration getStepConfiguration(StageConfiguration stageConfiguration, Step step) {
         Optional<StepConfiguration> stepConfOptional = stageConfiguration.getSteps().stream().filter(stp -> stp.getStep().equals(step.getName())).findFirst();
 
         StepConfiguration stepConfiguration = null;
@@ -177,7 +155,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
         return stepConfiguration;
     }
 
-    private void issuesConfiguration(StepConfiguration stepConfiguration, Filter filter) {
+    private static void issuesConfiguration(StepConfiguration stepConfiguration, Filter filter) {
         if (filter.getIssueTypeId() != 0L && filter.getStatusId() != 0L)
             stepConfiguration.addIssueConfiguration(IssuesConfiguration.fromFilter(filter));
     }
