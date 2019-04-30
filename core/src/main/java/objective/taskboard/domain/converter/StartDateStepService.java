@@ -43,8 +43,12 @@ import objective.taskboard.repository.FilterCachedRepository;
 @Service
 public class StartDateStepService {
 
-    @Autowired
     private FilterCachedRepository filterRepository;
+
+    @Autowired
+    public StartDateStepService(FilterCachedRepository filterRepository) {
+        this.filterRepository = filterRepository;
+    }
 
     public long get(JiraIssueDto jiraIssue) {
         if (jiraIssue == null)
