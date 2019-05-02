@@ -5,7 +5,7 @@
     <parent>
         <groupId>br.com.objective</groupId>
         <artifactId>kpi-parent</artifactId>
-        <version>0.0.85</version>
+        <version>0.0.86-SNAPSHOT</version>
     </parent>
 
     <artifactId>kpi-planned-x-ballpark</artifactId>
