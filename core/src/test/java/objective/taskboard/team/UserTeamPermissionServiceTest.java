@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.filter.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 import objective.taskboard.team.UserTeamTestUtils.DSLBuilder;

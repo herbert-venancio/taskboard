@@ -30,6 +30,7 @@ import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.domain.converter.StartDateStepService;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.client.JiraSearchTestSupport;
@@ -41,7 +42,6 @@ import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
 import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDetails;
-import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.utils.IOUtilities;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,7 +54,7 @@ public class IssueBufferServiceSearchVisitorTest {
     private IssuePriorityService priorityService;
     
     @Mock
-    private FilterCachedRepository filterCachedRepo;
+    private LaneService filterCachedRepo;
     
     @Mock
     private CardVisibilityEvalService cardVisibilityEvalService;

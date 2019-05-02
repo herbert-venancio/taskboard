@@ -18,7 +18,7 @@ import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.repository.FilterCachedRepository;
+import objective.taskboard.filter.LaneService;
 
 @Component
 @Profile({"prod", "dev"})
@@ -38,7 +38,7 @@ public class CardRepoServiceImpl implements CardRepoService {
     private IssueTeamService issueTeamService;
     
     @Autowired
-    private FilterCachedRepository filterRepository;
+    private LaneService laneService;
 
     @Autowired
     private CycleTime cycleTime;
@@ -73,7 +73,7 @@ public class CardRepoServiceImpl implements CardRepoService {
                     jiraProperties,
                     metaDataService,
                     issueTeamService,
-                    filterRepository,
+                    laneService,
                     cycleTime,
                     cardVisibilityEvalService,
                     projectService,

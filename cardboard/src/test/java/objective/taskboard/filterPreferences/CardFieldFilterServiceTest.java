@@ -12,6 +12,7 @@ import static objective.taskboard.filterPreferences.CardFieldFilterUtils.cardFie
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.getFilterFieldValue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,14 +35,15 @@ import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.data.LaneConfiguration;
 import objective.taskboard.data.StageConfiguration;
 import objective.taskboard.data.StepConfiguration;
-import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.filter.LaneService;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CardFieldFilterServiceTest {
 
     private static final long ISSUES_CONFIGURATION_STATUS = 10L;
 
     private UserPreferencesService userPreferencesService = mock(UserPreferencesService.class);
-    private TaskboardDatabaseService taskboardDatabaseService = mock(TaskboardDatabaseService.class);
+    private LaneService laneService = mock(LaneService.class);
     private CardFieldFilterProvider cardFieldFilterProvider = mock(CardFieldFilterProvider.class);
 
     private CardFieldFilterService subject;
@@ -50,7 +52,10 @@ public class CardFieldFilterServiceTest {
     public void setup() {
         when(cardFieldFilterProvider.getDefaultList()).thenAnswer(i -> cardFieldFiltersAllValuesSelected());
 
-        subject = new CardFieldFilterService(cardFieldFilterProvider, userPreferencesService, taskboardDatabaseService);
+        subject = new CardFieldFilterService(cardFieldFilterProvider, userPreferencesService, laneService);
+        doAnswer(invocation ->
+                invocation.getArgumentAt(0, LaneConfiguration.class)
+        ).when(userPreferencesService).applyLoggedUserPreferencesOnLaneConfiguration(any());
     }
 
     @Test
@@ -176,15 +181,11 @@ public class CardFieldFilterServiceTest {
         LaneConfiguration laneConf = mock(LaneConfiguration.class);
         when(laneConf.getStages()).thenReturn(asList(stageConf));
 
-        when(taskboardDatabaseService.laneConfiguration()).thenReturn(asList(laneConf));
+        when(laneService.getLanes()).thenReturn(asList(laneConf));
     }
 
     private static IssuesConfiguration issuesConfigurationMock(Long status, Long issueType) {
-        IssuesConfiguration issuesConf = mock(IssuesConfiguration.class);
-        when(issuesConf.matches(any(Issue.class))).thenCallRealMethod();
-        when(issuesConf.getStatus()).thenReturn(status);
-        when(issuesConf.getIssueType()).thenReturn(Long.valueOf(issueType));
-        return issuesConf;
+        return new IssuesConfiguration(issueType, status);
     }
 
     private Issue issueMock(String issueKey, String projectKey, long type, long status, String team) {

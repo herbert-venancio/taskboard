@@ -5,7 +5,6 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Comparator;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +26,7 @@ import objective.taskboard.domain.Lane;
 import objective.taskboard.domain.Stage;
 import objective.taskboard.domain.Step;
 import objective.taskboard.domain.WipConfiguration;
-import objective.taskboard.repository.LaneCachedRepository;
+import objective.taskboard.repository.StepRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.WipConfigurationRepository;
 
@@ -37,7 +35,7 @@ import objective.taskboard.repository.WipConfigurationRepository;
 public class WipController {
 
     private final WipConfigurationRepository wipConfigRepo;
-    private final LaneCachedRepository laneRepo;
+    private final StepRepository stepRepository;
     private final TeamCachedRepository teamRepo;
     
     private final Comparator<WipConfiguration> wipConfigComparatorByOrder = comparing((WipConfiguration c) -> c.getStep().getStage().getLane().getOrdem())
@@ -45,9 +43,9 @@ public class WipController {
             .thenComparing(c -> c.getStep().getOrdem());
     
     @Autowired
-    public WipController(WipConfigurationRepository wipConfigRepo, LaneCachedRepository laneRepo, TeamCachedRepository teamRepo) {
+    public WipController(WipConfigurationRepository wipConfigRepo, StepRepository stepRepository, TeamCachedRepository teamRepo) {
         this.wipConfigRepo = wipConfigRepo;
-        this.laneRepo = laneRepo;
+        this.stepRepository = stepRepository;
         this.teamRepo = teamRepo;
     }
 
@@ -87,7 +85,6 @@ public class WipController {
 
     @RequestMapping(method = RequestMethod.PUT)
     public void setWipConfigurations(@RequestBody List<WipConfigurationDto> configsDto) {
-        Map<Long, Step> stepById = laneRepo.getAllSteps().stream().collect(toMap(Step::getId, Function.identity()));
         List<WipConfiguration> existingConfigs = wipConfigRepo.findAll();
         Set<WipConfiguration> configsToDelete = new HashSet<>(existingConfigs);
         
@@ -102,7 +99,7 @@ public class WipController {
                 existingConfig.get().setWip(configDto.wip);
                 wipConfigRepo.save(existingConfig.get());
             } else {
-                Step step = stepById.get(configDto.stepId);
+                Step step = stepRepository.getOne(configDto.stepId);
                 if (step == null)
                     throw new IllegalArgumentException("Step with id <" + configDto.stepId + "> not found");
 

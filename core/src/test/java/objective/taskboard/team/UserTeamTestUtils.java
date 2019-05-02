@@ -23,7 +23,7 @@ import objective.taskboard.auth.authorizer.permission.TeamEditPermission;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.data.UserTeam.UserTeamRole;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.filter.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 

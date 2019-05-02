@@ -1,9 +1,12 @@
 package objective.taskboard.controller;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toMap;
 import static objective.taskboard.testUtils.AssertUtils.collectionToString;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,7 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import objective.taskboard.controller.WipController.LaneDto;
@@ -26,7 +31,7 @@ import objective.taskboard.domain.Lane;
 import objective.taskboard.domain.Stage;
 import objective.taskboard.domain.Step;
 import objective.taskboard.domain.WipConfiguration;
-import objective.taskboard.repository.LaneCachedRepository;
+import objective.taskboard.repository.StepRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.WipConfigurationRepository;
 import objective.taskboard.testUtils.JpaRepositoryMock;
@@ -34,9 +39,9 @@ import objective.taskboard.testUtils.JpaRepositoryMock;
 public class WipControllerTest {
     
     private final WipConfigurationRepository configRepo = new WipConfigurationRepositoryMock();
-    private final LaneCachedRepository laneRepo = mock(LaneCachedRepository.class);
+    private final StepRepository stepRepo = mock(StepRepository.class);
     private final TeamCachedRepository teamRepo = mock(TeamCachedRepository.class);
-    private final WipController subject = new WipController(configRepo, laneRepo, teamRepo);
+    private final WipController subject = new WipController(configRepo, stepRepo, teamRepo);
 
     private final Lane feature = lane(1, "Feature", 0);
     private final Lane stories = lane(2, "Stories", 1);
@@ -46,6 +51,16 @@ public class WipControllerTest {
     private final Step featureUat   = step(13, "UAT",   2, feature);
     private final Step storyTodo    = step(21, "Todo",  0, stories);
     private final Step storyDev     = step(22, "Dev",   1, stories);
+
+    @Before
+    public void repoConfig() {
+        Map<Long, Step> steps = Stream.of(featureTodo, featureDoing, featureUat, storyTodo, storyDev)
+                .collect(toMap(Step::getId, Function.identity()));
+        willAnswer(invocation -> {
+            Long id = invocation.getArgumentAt(0, Long.class);
+            return steps.get(id);
+        }).given(stepRepo).getOne(any());
+    }
     
     @Test
     public void getWipConfigurationsTest() {
@@ -85,8 +100,6 @@ public class WipControllerTest {
     
     @Test
     public void setWipConfigurations() {
-        when(laneRepo.getAllSteps()).thenReturn(asList(featureTodo, featureDoing, featureUat));
-        
         configRepo.save(asList(
                 new WipConfiguration("Brundle", featureTodo, 99),
                 new WipConfiguration("Devcare", featureUat,   4)));
