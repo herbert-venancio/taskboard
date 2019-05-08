@@ -181,7 +181,7 @@ public class CardFieldFilterServiceTest {
 
     private static IssuesConfiguration issuesConfigurationMock(Long status, Long issueType) {
         IssuesConfiguration issuesConf = mock(IssuesConfiguration.class);
-        when(issuesConf.matches(any())).thenCallRealMethod();
+        when(issuesConf.matches(any(Issue.class))).thenCallRealMethod();
         when(issuesConf.getStatus()).thenReturn(status);
         when(issuesConf.getIssueType()).thenReturn(Long.valueOf(issueType));
         return issuesConf;
