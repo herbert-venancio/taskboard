@@ -384,7 +384,7 @@
 
             <paper-material id="issueCard" class$="issue {{_classes}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
                             on-tap="_onIssueClicked" title="Issue details">
-                <template is="dom-if" if="{{item.blocked}}">
+                <template is="dom-if" if="{{shouldHaveBlockedIcon(item)}}">
                     <div class="impedida">
                         <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
                                    title="Blocked issue. Last Block Reason: {{item.lastBlockReason}}"></iron-icon>
@@ -650,6 +650,10 @@
                         event.stopPropagation();
 
                     }
+                },
+
+                shouldHaveBlockedIcon: function(item) {
+                    return item.blocked || item.blockedByParent;
                 },
 
                 getIssueTypeName: function(issueTypeId) {

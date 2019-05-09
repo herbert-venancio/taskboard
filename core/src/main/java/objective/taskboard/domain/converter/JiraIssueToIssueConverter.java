@@ -5,6 +5,7 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.convertW
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractAdditionalEstimatedHours;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractAssignedTeamsIds;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractBlocked;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractShouldBlockAllSubtasks;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractChangelog;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractClassOfService;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractCoAssignees;
@@ -131,6 +132,7 @@ public class JiraIssueToIssueConverter {
                 extractLabels(jiraIssue),
                 extractComponents(jiraIssue),
                 extractBlocked(jiraProperties, jiraIssue),
+                extractShouldBlockAllSubtasks(jiraProperties, jiraIssue),
                 extractLastBlockReason(jiraProperties, jiraIssue),
                 extractTShirtSizes(jiraProperties, jiraIssue),
                 extractAdditionalEstimatedHours(jiraProperties, jiraIssue),

@@ -83,6 +83,7 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
                     extractLabels(jiraIssue),
                     extractComponents(jiraIssue),
                     false,
+                    false,
                     null,
                     new LinkedHashMap<>(),
                     null,

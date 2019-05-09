@@ -84,6 +84,7 @@ public class JiraIssueToIssueConverterTest {
     private static final String CLASS_OF_SERVICE_ID = "classOfServiceId";
     private static final String CO_ASSIGNEES_ID = "coAssigneesId";
     private static final String BLOCKED_ID = "blockedId";
+    private static final String SHOULD_BLOCK_ALL_SUBTASKS_ID = "shouldBlockAllSubTasksId";
     private static final String LAST_BLOCK_REASON_ID = "lastBlockReasonId";
     private static final String ADDITIONAL_ESTIMATED_HOURS_ID = "additionalEstimatedHoursId";
     private static final String RELEASE_ID = "releaseId";
@@ -116,6 +117,8 @@ public class JiraIssueToIssueConverterTest {
     private JiraProperties.CustomField.CustomFieldDetails coAssigneesDetails;
     @Mock
     private JiraProperties.CustomField.Blocked blocked;
+    @Mock
+    private JiraProperties.CustomField.ShouldBlockAllSubtasks shouldBlockAllSubtasks;
     @Mock
     private JiraProperties.CustomField.TShirtSize tShirtSize;
     @Mock
@@ -164,6 +167,9 @@ public class JiraIssueToIssueConverterTest {
 
         when(blocked.getId()).thenReturn(BLOCKED_ID);
         when(customField.getBlocked()).thenReturn(blocked);
+
+        when(shouldBlockAllSubtasks.getId()).thenReturn(SHOULD_BLOCK_ALL_SUBTASKS_ID);
+        when(customField.getShouldBlockAllSubtasks()).thenReturn(shouldBlockAllSubtasks);
 
         when(tShirtSize.getIds()).thenReturn(asList());
         when(customField.getTShirtSize()).thenReturn(tShirtSize);

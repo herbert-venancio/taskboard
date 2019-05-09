@@ -7,12 +7,16 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.pagefactory.ByChained;
 
 class TestIssue extends AbstractUiFragment {
+
+    private final String issueKey;
     private WebElement issueElement;
 
     public TestIssue(WebDriver driver, String issueKey) {
         super(driver);
+        this.issueKey = issueKey;
         this.issueElement = getIssueByKey(issueKey);
     }
 
@@ -82,6 +86,15 @@ class TestIssue extends AbstractUiFragment {
             waitVisibilityOfElement(updatingElement);
         else
             waitInvisibilityOfElement(updatingElement);
+        return this;
+    }
+
+    public TestIssue assertHasBlockedIcon(boolean isBlocked) {
+        if(isBlocked) {
+            waitUntilChildElementExists(issueElement, By.className("iconImpedidaCancelada"));
+        } else {
+            waitElementNotExistsOrInvisible(new ByChained(By.cssSelector("issue-item#" + issueKey), By.className("iconImpedidaCancelada")));
+        }
         return this;
     }
 

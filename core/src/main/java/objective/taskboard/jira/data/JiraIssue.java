@@ -150,6 +150,11 @@ public class JiraIssue {
             return field(jiraProperties.getCustomfield().getLastBlockReason().getId(), lastBlockReason);
         }
 
+        public CustomInputBuilder shouldBlockAllSubtasks(boolean shouldBlockAllSubtasks) {
+            String yesOptionId = jiraProperties.getCustomfield().getShouldBlockAllSubtasks().getYesOptionId().toString();
+            return field(jiraProperties.getCustomfield().getShouldBlockAllSubtasks().getId(), byIds(shouldBlockAllSubtasks ? yesOptionId : null));
+        }
+
         public CustomInputBuilder coAssignees(FieldBuilder fieldBuilder) {
             return field(jiraProperties.getCustomfield().getCoAssignees().getId(), fieldBuilder);
         }

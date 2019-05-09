@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
+import objective.taskboard.data.BlockCardValue;
 import objective.taskboard.data.SubtaskDto;
 import objective.taskboard.data.User;
 import objective.taskboard.jira.client.JiraIssueDto;
@@ -210,11 +211,12 @@ public class JiraService {
         return jiraEndpointAsUser.request(JiraUser.Service.class).get(username);
     }
 
-    public void block(String issueKey, String lastBlockReason) {
+    public void block(String issueKey, BlockCardValue blockCardValue) {
         log.debug("⬣⬣⬣⬣⬣  setBlocked");
         Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
                 .blocked(true)
-                .lastBlockReason(lastBlockReason)
+                .shouldBlockAllSubtasks(blockCardValue.isShouldBlockAllSubtasks())
+                .lastBlockReason(blockCardValue.getLastBlockReason())
                 .build());
 
         if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
@@ -225,6 +227,7 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  setUnblocked");
         Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
                 .blocked(false)
+                .shouldBlockAllSubtasks(false)
                 .lastBlockReason("")
                 .build());
 

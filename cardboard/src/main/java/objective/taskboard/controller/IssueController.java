@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.data.BlockCardValue;
 import objective.taskboard.data.CardFieldFilter;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueTypeDto;
@@ -221,8 +222,8 @@ public class IssueController {
     }
 
     @RequestMapping(path = "block-task/{issue}", method = RequestMethod.POST)
-    public CardDto blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
-        jiraBean.block(issue, lastBlockReason);
+    public CardDto blockTask(@PathVariable("issue") String issue, @RequestBody BlockCardValue blockCardValue) {
+        jiraBean.block(issue, blockCardValue);
         return toCardDto(issueBufferService.updateIssueBuffer(issue));
     }
 

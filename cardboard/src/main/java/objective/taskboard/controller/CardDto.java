@@ -41,6 +41,7 @@ public class CardDto {
     public List<String> labels;
     public List<String> components;
     public boolean blocked;
+    public boolean blockedByParent;
     public String lastBlockReason;
     public Double additionalEstimatedHours;
     public TaskboardTimeTracking timeTracking;
@@ -97,6 +98,7 @@ public class CardDto {
         cardDto.labels = issue.getLabels();
         cardDto.components = issue.getComponents();
         cardDto.blocked = issue.isBlocked();
+        cardDto.blockedByParent = issue.isBlockedByParent();
         cardDto.lastBlockReason = issue.getLastBlockReason();
         cardDto.additionalEstimatedHours = issue.getAdditionalEstimatedHours();
         cardDto.timeTracking = issue.getTimeTracking();
@@ -177,6 +179,7 @@ public class CardDto {
                 , dto.cancelled
                 , dto.completed
                 , dto.blocked
+                , dto.blockedByParent
                 , dto.lastBlockReason
                 , dto.ballparks
                 , dto.additionalEstimatedHoursField

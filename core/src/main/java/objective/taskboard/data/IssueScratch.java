@@ -36,6 +36,7 @@ public class IssueScratch implements Serializable {
     protected List<String> labels;       //NOSONAR
     protected List<String> components;   //NOSONAR
     protected boolean blocked;
+    protected boolean shouldBlockAllSubtasks;
     protected String lastBlockReason;
     protected Map<String, CustomField> tshirtSizes; //NOSONAR
     protected CustomField additionalEstimatedHours;
@@ -84,6 +85,7 @@ public class IssueScratch implements Serializable {
             List<String> labels,
             List<String> components,
             boolean blocked,
+            boolean shouldBlockAllSubtasks,
             String lastBlockReason,
             Map<String, CustomField> tshirtSizes,
             CustomField additionalEstimatedHours,
@@ -118,6 +120,7 @@ public class IssueScratch implements Serializable {
         this.labels = labels;
         this.components = components;
         this.blocked = blocked;
+        this.shouldBlockAllSubtasks = shouldBlockAllSubtasks;
         this.lastBlockReason = lastBlockReason;
         this.tshirtSizes = tshirtSizes;
         this.additionalEstimatedHours = additionalEstimatedHours;

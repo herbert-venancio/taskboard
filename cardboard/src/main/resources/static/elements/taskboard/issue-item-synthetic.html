@@ -134,7 +134,7 @@
                     style$="{{getIssueColor(item)}} -webkit-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); -moz-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}});"></span>
             </div>
 
-            <template is="dom-if" if="{{item.blocked}}">
+            <template is="dom-if" if="{{shouldHaveBlockedIcon(item)}}">
                 <div class="impedida">
                     <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
                                title="Blocked issue. Last Block Reason: {{item.lastBlockReason}}"></iron-icon>
@@ -218,6 +218,10 @@
 
                 getStatusName: function(statusId) {
                     return taskboard.getStatusName(statusId);
+                },
+
+                shouldHaveBlockedIcon: function(item) {
+                    return item.blocked || item.blockedByParent;
                 }
 
             });

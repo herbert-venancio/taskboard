@@ -66,6 +66,7 @@ public class IssueTest {
                 Arrays.asList("labels"),
                 Arrays.asList("components"),
                 false,
+                false,
                 "lastBlockReason",
                 new LinkedHashMap<>(),
                 new CustomField("id", 1.0),

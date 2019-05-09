@@ -39,6 +39,7 @@ import objective.taskboard.jira.properties.JiraProperties.CustomField;
 import objective.taskboard.jira.properties.JiraProperties.IssueLink;
 import objective.taskboard.jira.properties.JiraProperties.IssueType;
 import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.ShouldBlockAllSubtasks;
 import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDetails;
@@ -82,6 +83,7 @@ public class IssueBufferServiceSearchVisitorTest {
         coAssignees.setId("customfield_11456");
         customFieldConfiguration.setCoAssignees(coAssignees);
         customFieldConfiguration.setBlocked(new Blocked());
+        customFieldConfiguration.setShouldBlockAllSubtasks(new ShouldBlockAllSubtasks());
         CustomFieldDetails lastBlockReason = new CustomFieldDetails();
         lastBlockReason.setId("customfield_11452");
         customFieldConfiguration.setLastBlockReason(lastBlockReason);

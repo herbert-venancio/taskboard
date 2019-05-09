@@ -88,6 +88,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.labels = scratch.labels;
         this.components = scratch.components;
         this.blocked = scratch.blocked;
+        this.shouldBlockAllSubtasks = scratch.shouldBlockAllSubtasks;
         this.lastBlockReason = scratch.lastBlockReason;
         this.tshirtSizes = scratch.tshirtSizes;
         this.additionalEstimatedHours = scratch.additionalEstimatedHours;
@@ -198,7 +199,7 @@ public class Issue extends IssueScratch implements Serializable {
         if (parentCard != null)
             parentCard.addsubtask(this);
     }
-    
+
     private void addsubtask(Issue issue) {
         this.subtasks.remove(issue);
         this.subtasks.add(issue);
@@ -325,6 +326,22 @@ public class Issue extends IssueScratch implements Serializable {
 
     public boolean isBlocked() {
         return blocked;
+    }
+
+    public boolean shouldBlockAllSubtasks() {
+
+        if (shouldBlockAllSubtasks || parentCard == null )
+            return shouldBlockAllSubtasks;
+        return parentCard.shouldBlockAllSubtasks();
+    }
+
+    public boolean isBlockedByParent() {
+
+        if (parentCard == null)
+            return false;
+
+        return (parentCard.isBlocked() || parentCard.isBlockedByParent())
+                    && shouldBlockAllSubtasks();
     }
 
     public String getLastBlockReason() {

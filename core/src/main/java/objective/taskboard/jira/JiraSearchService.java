@@ -86,6 +86,7 @@ public class JiraSearchService {
             properties.getCustomfield().getClassOfService().getId(),
             properties.getCustomfield().getCoAssignees().getId(),
             properties.getCustomfield().getBlocked().getId(),
+            properties.getCustomfield().getShouldBlockAllSubtasks().getId(),
             properties.getCustomfield().getLastBlockReason().getId(),
             properties.getCustomfield().getAdditionalEstimatedHours().getId(),
             properties.getCustomfield().getRelease().getId(),
