@@ -31,7 +31,8 @@
         <module>kpi-throughput</module>
         <module>kpi-touch-time</module>
         <module>kpi-wip</module>
-    </modules>
+        <module>kpi-bug-by-environment</module>
+  </modules>
 
     <properties>
         <java.version>1.8</java.version>

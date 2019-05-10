@@ -17,4 +17,6 @@ public interface IssueKpiDataItemAdapter {
 
     KpiLevel getLevel();
     
+    Optional<String> getCustomFieldValue(String customFieldId);
+    
 }

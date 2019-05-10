@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 
 import objective.taskboard.data.Issue;
@@ -41,6 +42,8 @@ public class KpiEnvironment {
     private ZoneId timezone = ZoneId.systemDefault();
 
     private MockedServices services = new MockedServices(this);
+    
+    private Map<String, TransitionsBuilder> preConfiguredTransitions = new LinkedHashMap<>();
 
     public KpiEnvironment() {}
 
@@ -136,6 +139,16 @@ public class KpiEnvironment {
     public TransitionsBuilder statusTransition() {
         return transitionsBuilder;
     }
+    
+    public TransitionsBuilder preConfigureTransitions(String name) {
+        preConfiguredTransitions.putIfAbsent(name, new TransitionsBuilder(this));
+        return preConfiguredTransitions.get(name);
+    }
+    
+    public TransitionsBuilder getPreconfiguredTransition(String name) {
+        Optional<TransitionsBuilder> transitions = Optional.ofNullable(preConfiguredTransitions.get(name));
+        return transitions.orElseThrow(() -> new AssertionError(String.format("Preconfigured transition %s not found",name)));
+    }
 
     public IssueKpiMocker givenSubtask(String pkey) {
         return givenIssue(pkey).isSubtask();
@@ -157,8 +170,10 @@ public class KpiEnvironment {
         return typeRepository.getExistent(type);
     }
 
-    public Optional<IssueTypeDTO> getOptionalType(String type) {
-        return typeRepository.getOptional(type);
+    public Optional<IssueTypeDTO> getOptionalFromExistentType(String type) {
+        Optional<IssueTypeDTO> optionalType = typeRepository.getOptional(type);
+        Assertions.assertThat(optionalType).as("Type %s must be preconfigured on environment",type).isPresent();
+        return optionalType;
     }
 
     public StatusRepository statuses() {
@@ -396,4 +411,5 @@ public class KpiEnvironment {
 
         T build(KpiEnvironment environment);
     }
+
 }

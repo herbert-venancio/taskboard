@@ -48,8 +48,12 @@ public class KpiDataService {
     }
     
     public List<IssueKpi> getIssuesFromCurrentStateWithDefaultFilters(String projectKey, ZoneId timezone, KpiLevel kpiLevel){
-        List<IssueKpi> allIssues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone);
+        List<IssueKpi> allIssues = getAllIssuesFromCurrentState(projectKey, timezone);
         return allIssues.stream().filter(getDefaultFilters(kpiLevel)).collect(Collectors.toList());
+    }
+    
+    public List<IssueKpi> getAllIssuesFromCurrentState(String projectKey, ZoneId timezone) {
+        return issueKpiService.getIssuesFromCurrentState(projectKey, timezone);
     }
     
     private Predicate<IssueKpi> getDefaultFilters(KpiLevel level){
@@ -78,5 +82,5 @@ public class KpiDataService {
     public List<IssueKpi> getIssuesFromAnalyticDataSet(Optional<AnalyticsTransitionsDataSet> analyticTransitionDs) {
         return issueKpiService.getIssues(analyticTransitionDs);
     }
-    
+
 }

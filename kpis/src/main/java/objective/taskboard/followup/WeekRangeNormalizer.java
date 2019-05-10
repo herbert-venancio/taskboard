@@ -29,6 +29,13 @@ public class WeekRangeNormalizer {
         return RangeUtils.between(normalizedStartDate, normalizedEndDate);
     }
     
+    public static Range<LocalDate> normalizeRangeWithWeekStartAndEndDays(Range<LocalDate> range, DayOfWeek startOfWeek, DayOfWeek endOfWeek){
+        LocalDate normalizedStartDate = range.getMinimum().with(TemporalAdjusters.previousOrSame(startOfWeek));
+        LocalDate normalizedEndDate = range.getMaximum().with(TemporalAdjusters.nextOrSame(endOfWeek));
+        
+        return RangeUtils.between(normalizedStartDate, normalizedEndDate);
+    }
+    
     public static Stream<Range<LocalDate>> splitByWeek(Range<LocalDate> range, DayOfWeek startOfWeek, DayOfWeek endOfWeek){
     	Iterable<Range<LocalDate>> it = () -> new Iterator<Range<LocalDate>>() {
             LocalDate rangeIndex = range.getMinimum();

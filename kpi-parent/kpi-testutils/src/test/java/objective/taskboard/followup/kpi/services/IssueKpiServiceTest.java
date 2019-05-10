@@ -39,8 +39,6 @@ public class IssueKpiServiceTest {
                     .atDate("2017-09-27").isOnStatus("Doing");
     }
 
-    
-
     @Test
     public void getIssues_currentState() {
         dsl()
@@ -62,6 +60,9 @@ public class IssueKpiServiceTest {
                     .status("Doing").date("2020-01-03")
                     .status("Done").noDate()
                 .eoT()
+                .fields()
+                    .field("clientEnvironment").value("Production")
+                .eoF()
                 .subtask("I-2")
                     .type("Alpha")
                     .project("PROJ")
@@ -74,10 +75,13 @@ public class IssueKpiServiceTest {
                     .worklogs()
                         .at("2020-01-03").timeSpentInHours(3.0)
                     .eoW()
+                    .fields()
+                        .field("clientEnvironment").value("Alpha")
+                    .eoF()
                 .endOfSubtask()
             .eoI()
             .when()
-                .appliesBehavior(getIssuesFromCurrentStateForProjectAndLevel("PROJ"))
+                .appliesBehavior(getIssuesFromCurrentState("PROJ"))
             .then()
                 .amountOfIssueIs(2)
                 .givenIssue("I-1")
@@ -90,6 +94,7 @@ public class IssueKpiServiceTest {
                         .givenIssue("I-2")
                     .hasLevel(SUBTASKS)
                     .hasType("Alpha")
+                    .hasClientEnvironment("Alpha")
                     .atDate("2020-01-04").isOnStatus("Done").eoDc()
                     .atStatus("To Do").hasNoEffort().eoSa()
                     .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
@@ -100,7 +105,7 @@ public class IssueKpiServiceTest {
         return new ServeIssuesFromDatasets(kpiLevel);
     }
 
-    private ServeIssuesFromCurrentState getIssuesFromCurrentStateForProjectAndLevel(String projectKey) {
+    private ServeIssuesFromCurrentState getIssuesFromCurrentState(String projectKey) {
         return new ServeIssuesFromCurrentState(projectKey);
     }
 
@@ -162,6 +167,7 @@ public class IssueKpiServiceTest {
                 .atFeatureHierarchy("Doing")
                     .withChildrenType("Alpha")
                 .eoH()
+                .environmentField("clientEnvironment")
             .eoKP()
             .types()
                 .addFeatures("Task")

@@ -17,6 +17,7 @@ import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -30,14 +31,18 @@ public class IssueKpiDataItemAdapterFactory {
     
     private IssueTransitionService transitionService;
     
+    private IssueBufferService issueBufferService;
+    
     @Autowired
     public IssueKpiDataItemAdapterFactory(
             MetadataService metadataService, 
             JiraProperties jiraProperties,
-            IssueTransitionService transitionService) {
+            IssueTransitionService transitionService,
+            IssueBufferService issueBufferService) {
         this.metadataService = metadataService;
         this.jiraProperties = jiraProperties;
         this.transitionService = transitionService;
+        this.issueBufferService = issueBufferService;
     }
 
     public List<IssueKpiDataItemAdapter> getItems(Optional<AnalyticsTransitionsDataSet> dataSet){
@@ -68,9 +73,10 @@ public class IssueKpiDataItemAdapterFactory {
 
     private IssueKpiDataItemAdapter makeItem(AnalyticsTransitionsDataRow row, List<String> headers) {
 
-        Optional<JiraIssueTypeDto> type = metadataService.getIssueTypeByName(row.issueType); 
+        Optional<JiraIssueTypeDto> type = metadataService.getIssueTypeByName(row.issueType);
+        Issue issue = issueBufferService.getIssueByKey(row.issueKey);
 
-        return new AnalyticDataRowAdapter(row,getType(type), headers,getLevel(type));
+        return new AnalyticDataRowAdapter(row,issue,getType(type), headers,getLevel(type));
     }
     
     private Optional<IssueTypeKpi> getType(Optional<JiraIssueTypeDto> type) {

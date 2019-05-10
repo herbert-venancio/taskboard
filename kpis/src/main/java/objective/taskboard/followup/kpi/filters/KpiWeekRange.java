@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi.touchtime;
+package objective.taskboard.followup.kpi.filters;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -10,11 +10,11 @@ import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 
-public class TouchTimeKpiWeekRange implements Comparable<TouchTimeKpiWeekRange> {
+public class KpiWeekRange implements Comparable<KpiWeekRange> {
     private Range<LocalDate> range;
     private ZoneId timezone;
 
-    public TouchTimeKpiWeekRange(Range<LocalDate> weekRange, ZoneId timezone) {
+    public KpiWeekRange(Range<LocalDate> weekRange, ZoneId timezone) {
         this.range = weekRange;
         this.timezone = timezone;
     }
@@ -50,7 +50,11 @@ public class TouchTimeKpiWeekRange implements Comparable<TouchTimeKpiWeekRange> 
     }
 
     @Override
-    public int compareTo(TouchTimeKpiWeekRange other) {
+    public int compareTo(KpiWeekRange other) {
         return this.getFirstDay().compareTo(other.getFirstDay());
+    }
+
+    public boolean contains(LocalDate date) {
+        return range.contains(date);
     }
 }

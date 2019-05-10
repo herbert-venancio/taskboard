@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
@@ -18,8 +19,10 @@ public class AnalyticDataRowAdapter implements IssueKpiDataItemAdapter {
     private List<String> statusHeader;
     private KpiLevel level;
     private Optional<IssueTypeKpi> type;
+    private Issue issue;
 
-    public AnalyticDataRowAdapter(AnalyticsTransitionsDataRow row, Optional<IssueTypeKpi> type, List<String> statusHeader,KpiLevel level) {
+    public AnalyticDataRowAdapter(AnalyticsTransitionsDataRow row, Issue issue, Optional<IssueTypeKpi> type, List<String> statusHeader,KpiLevel level) {
+        this.issue = issue;
         this.row = row;
         this.type = type;
         this.statusHeader = statusHeader;
@@ -53,6 +56,11 @@ public class AnalyticDataRowAdapter implements IssueKpiDataItemAdapter {
     @Override
     public KpiLevel getLevel() {
         return level;
+    }
+
+    @Override
+    public Optional<String> getCustomFieldValue(String customFieldId) {
+        return Optional.ofNullable(issue.getExtraFields().get(customFieldId));
     }
         
 }

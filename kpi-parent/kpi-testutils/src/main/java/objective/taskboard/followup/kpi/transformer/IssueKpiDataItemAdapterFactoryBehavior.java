@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 
 import objective.taskboard.data.Issue;
@@ -25,6 +26,7 @@ import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
 import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.services.snapshot.AnalyticsDataSetsGenerator;
+import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.properties.JiraProperties;
 
@@ -37,8 +39,9 @@ public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpl
             JiraProperties jiraProperties = environment.getJiraProperties();
             MetadataService metadataService = environment.services().metadata().getService();
             IssueTransitionService transitionService = environment.services().issuesTransition().getService();
+            IssueBufferService issueService = environment.services().issuesBuffer().getService();
             
-            IssueKpiDataItemAdapterFactory subject = new IssueKpiDataItemAdapterFactory(metadataService,jiraProperties,transitionService);
+            IssueKpiDataItemAdapterFactory subject = new IssueKpiDataItemAdapterFactory(metadataService,jiraProperties,transitionService, issueService);
             
             asserter = new ItemsAsserter(getItems(environment, subject));
         }
@@ -94,7 +97,7 @@ public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpl
             return Optional.ofNullable(items.get(pkey))
                         .orElseThrow(() -> new AssertionError("Issue not found: "+pkey));
         }
-        
+
         class IssueKpiDataItemAdapterAsserter {
             private IssueKpiDataItemAdapter subject;
             private List<String> testedStatuses = new LinkedList<>();
@@ -135,6 +138,25 @@ public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpl
                 return this;
             }
             
+            FieldAsserter hasField(String field) {
+                return new FieldAsserter(field);
+            }
+            
+            class FieldAsserter {
+
+                private String field;
+
+                FieldAsserter(String field) {
+                    this.field = field;
+                }
+                
+                IssueKpiDataItemAdapterAsserter withValue(String value) {
+                    Assertions.assertThat(subject.getCustomFieldValue(field)).hasValueSatisfying(value::equalsIgnoreCase);
+                    return IssueKpiDataItemAdapterAsserter.this;
+                }
+                
+            }
+            
             DateAsserter status(String status) {
                 this.testedStatuses.add(status);
                 Map<String, ZonedDateTime> transitions = subject.getTransitions();
@@ -172,8 +194,6 @@ public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpl
                 }
                 
             }
-
-            
         }
         
 }

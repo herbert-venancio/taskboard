@@ -107,7 +107,7 @@ public class JiraIssueToIssueConverterTest {
     private static final String LAST_BLOCK_REASON_ID = "lastBlockReasonId";
     private static final String ADDITIONAL_ESTIMATED_HOURS_ID = "additionalEstimatedHoursId";
     private static final String RELEASE_ID = "releaseId";
-    private static final String DEVELOPMENT_SHIRT_SIZE_FIELD_ID = "customfield_11447";
+    private static final String ADDITIONAL_ESTIMATED_HOURS_FIELD_ID = "customfield_11450";
 
     @InjectMocks
     private JiraIssueToIssueConverter subject;
@@ -398,14 +398,14 @@ public class JiraIssueToIssueConverterTest {
     @Test
     public void givenExtraFieldsNotSupported_whenConvert_thenExtractedAsUnsupportedValueString() throws JSONException {
         // given
-        setupExtraFields(DEVELOPMENT_SHIRT_SIZE_FIELD_ID);
-        mockIssueField(issue, DEVELOPMENT_SHIRT_SIZE_FIELD_ID, JSON_SHIRT_SIZE_SMALL);
+        setupExtraFields(ADDITIONAL_ESTIMATED_HOURS_FIELD_ID);
+        mockIssueField(issue, ADDITIONAL_ESTIMATED_HOURS_FIELD_ID, JSON_SHIRT_SIZE_SMALL);
 
         // when
         Issue converted = subject.convertSingleIssue(issue, buildProvider());
 
         // then
-        assertThat(converted.getExtraFields()).containsEntry(DEVELOPMENT_SHIRT_SIZE_FIELD_ID, UNSUPPORTED_EXTRACTION_VALUE);
+        assertThat(converted.getExtraFields()).containsEntry(ADDITIONAL_ESTIMATED_HOURS_FIELD_ID, UNSUPPORTED_EXTRACTION_VALUE);
     }
 
     private void setupExtraFields(String... extraFieldIds) {

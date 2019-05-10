@@ -14,12 +14,19 @@ public class FakeIssueKpiAdapter implements IssueKpiDataItemAdapter {
     private String issueKey;
     private Optional<IssueTypeKpi> issueType;
     private KpiLevel level;
+    private Map<String,String> customFieldsValues;
     
-    public FakeIssueKpiAdapter(Map<String, ZonedDateTime> transitions, String issueKey, Optional<IssueTypeKpi> issueType, KpiLevel level) {
+    public FakeIssueKpiAdapter(Map<String, ZonedDateTime> transitions, String issueKey, Optional<IssueTypeKpi> issueType, KpiLevel level, Map<String, String> customFieldsValues) {
         this.transitions = transitions;
         this.issueKey = issueKey;
         this.issueType = issueType;
         this.level = level;
+        this.customFieldsValues = customFieldsValues;
+    }
+    
+    public FakeIssueKpiAdapter withCustomField(String field, String value) {
+        customFieldsValues.put(field, value);
+        return this;
     }
 
     @Override
@@ -40,6 +47,11 @@ public class FakeIssueKpiAdapter implements IssueKpiDataItemAdapter {
     @Override
     public KpiLevel getLevel() {
         return level;
+    }
+
+    @Override
+    public Optional<String> getCustomFieldValue(String customFieldId) {
+        return Optional.ofNullable(customFieldsValues .get(customFieldId));
     }
     
 }

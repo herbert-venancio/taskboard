@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -125,6 +126,10 @@ public class MockedServices {
         
         public Map<String, IssueKpi> getIssuesKpiByKey() {
             return issuesRepository.getIssuesKpi();
+        }
+        
+        public List<IssueKpi> getAllIssues() {
+            return new LinkedList<>(getIssuesKpiByKey().values());
         }
 
         public Map<KpiLevel, List<IssueKpi>> getIssuesByLevel() {
@@ -258,7 +263,7 @@ public class MockedServices {
             });
         }
     }
-    
+
     public class KpiDataServiceMocker {
 
         private KpiDataService service;
@@ -274,12 +279,18 @@ public class MockedServices {
             Map<String, List<IssueKpi>> byProject = issuesRepository.getIssuesByProject();
             byProject.entrySet().stream().forEach(entry -> {
                 String projectKey = entry.getKey();
-                Map<KpiLevel, List<IssueKpi>> issuesByProject = entry.getValue().stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
-                issuesByProject.entrySet().forEach(levelIssues -> mockIssuesByLevel(projectKey,levelIssues.getKey(),levelIssues.getValue()));
+                List<IssueKpi> allIssues = entry.getValue();
+                Map<KpiLevel, List<IssueKpi>> issuesByProjectAndLevel = allIssues.stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
+                issuesByProjectAndLevel.entrySet().forEach(levelIssues -> mockIssuesByLevel(projectKey,levelIssues.getKey(),levelIssues.getValue()));
+                mockAllIssuesForProject(projectKey,allIssues);
             });
             
         }
         
+        private void mockAllIssuesForProject(String projectKey, List<IssueKpi> allIssues) {
+            Mockito.when(service.getAllIssuesFromCurrentState(projectKey, environment.getTimezone())).thenReturn(allIssues);
+        }
+
         public void prepareFromDataSet(AnalyticsDataSetsGenerator factory) {
             Stream.of(KpiLevel.values()).forEach(level ->
                 when(getService().getIssuesFromAnalyticDataSet(factory.getOptionalDataSetForLevel(level)))
@@ -292,6 +303,7 @@ public class MockedServices {
                     .thenReturn(issuesByProjectAndLevel);
             Mockito.when(service.getIssuesFromCurrentProjectRange(projectKey, environment.getTimezone(), level))
                     .thenReturn(issuesByProjectAndLevel);
+            
         }
         
     }

@@ -27,12 +27,6 @@ import objective.taskboard.followup.FollowUpSnapshotService;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.filters.KpiFilterService;
-import objective.taskboard.followup.kpi.services.DSLKpi;
-import objective.taskboard.followup.kpi.services.DSLSimpleBehaviorWithAsserter;
-import objective.taskboard.followup.kpi.services.IssueKpiService;
-import objective.taskboard.followup.kpi.services.IssuesAsserter;
-import objective.taskboard.followup.kpi.services.KpiDataService;
-import objective.taskboard.followup.kpi.services.KpiEnvironment;
 import objective.taskboard.followup.kpi.services.snapshot.SnapshotGenerator;
 import objective.taskboard.jira.ProjectService;
 
@@ -129,7 +123,7 @@ public class KpiDataServiceTest {
     }
 
     @Test
-    public void getIssues_currentState() {
+    public void getIssues_currentState_withDefaultFilters() {
         DSLKpi context = dsl()
         .environment()
             .givenFeature("I-1")
@@ -159,13 +153,13 @@ public class KpiDataServiceTest {
         
         context
             .when()
-                .appliesBehavior(getIssuesFromCurrentState("PROJ", DEMAND))
+                .appliesBehavior(getIssuesFromCurrentStateWithDefaultFilters("PROJ", DEMAND))
             .then()
                 .amountOfIssueIs(0);
         
         context
             .when()
-                .appliesBehavior(getIssuesFromCurrentState("PROJ", FEATURES))
+                .appliesBehavior(getIssuesFromCurrentStateWithDefaultFilters("PROJ", FEATURES))
             .then()
                 .amountOfIssueIs(1)
                 .givenIssue("I-1")
@@ -178,7 +172,7 @@ public class KpiDataServiceTest {
         
         context
             .when()
-                .appliesBehavior(getIssuesFromCurrentState("PROJ", SUBTASKS))
+                .appliesBehavior(getIssuesFromCurrentStateWithDefaultFilters("PROJ", SUBTASKS))
             .then()
                 .amountOfIssueIs(1)
                 .givenIssue("I-2")
@@ -191,7 +185,7 @@ public class KpiDataServiceTest {
         
         context
             .when()
-            .appliesBehavior(getIssuesFromCurrentState("PROJ", UNMAPPED))
+            .appliesBehavior(getIssuesFromCurrentStateWithDefaultFilters("PROJ", UNMAPPED))
             .then()
                 .amountOfIssueIs(0);
     }
@@ -350,6 +344,16 @@ public class KpiDataServiceTest {
                             .at("2020-01-03").timeSpentInHours(5.0)
                         .eoW()
                     .endOfSubtask()
+                    .subtask("I-5")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").noDate()
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                    .endOfSubtask()
                 .eoI();
         
             context
@@ -389,40 +393,161 @@ public class KpiDataServiceTest {
                     .eoIA();
     }
     
+    @Test
+    public void getIssuesFromCurrentState_allIssues() {
+        dsl().environment()
+                .services()
+                    .projects()
+                        .withKey("PROJ")
+                            .startAt("2020-01-04")
+                            .deliveredAt("2020-01-10")
+                        .eoP()
+                    .eoPs()
+                .eoS()
+                .todayIs("2020-01-12")
+                .givenFeature("I-1")
+                    .project("PROJ")
+                    .type("Task")
+                    .withTransitions()
+                        .status("Open").date("2020-01-01")
+                        .status("To Do").date("2020-01-02")
+                        .status("Doing").date("2020-01-03")
+                        .status("Done").noDate()
+                    .eoT()
+                    .subtask("I-2")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").date("2020-01-03")
+                            .status("Done").date("2020-01-04")
+                        .eoT()
+                        .worklogs()
+                            .at("2020-01-03").timeSpentInHours(3.0)
+                        .eoW()
+                    .endOfSubtask()
+                    .subtask("I-3")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                    .endOfSubtask()
+                    .subtask("I-4")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").date("2020-01-02")
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                        .worklogs()
+                            .at("2020-01-03").timeSpentInHours(5.0)
+                        .eoW()
+                    .endOfSubtask()
+                    .subtask("I-5")
+                        .type("Alpha")
+                        .project("PROJ")
+                        .withTransitions()
+                            .status("Open").date("2020-01-01")
+                            .status("To Do").noDate()
+                            .status("Doing").noDate()
+                            .status("Done").noDate()
+                        .eoT()
+                    .endOfSubtask()
+                .eoI()
+                .when()
+                    .appliesBehavior(getAllIssuesFromCurrrentState("PROJ"))
+                .then()
+                    .amountOfIssueIs(5)
+                    .givenIssue("I-1")
+                        .hasLevel(FEATURES)
+                        .hasType("Task")
+                        .hasLastTransitedStatus("Doing")
+                        .hasChild("I-2").hasChild("I-3")
+                        .hasChild("I-4").hasChild("I-5")
+                    .eoIA()
+                    .givenIssue("I-2")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .hasLastTransitedStatus("Done")
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasTotalEffortInHours(3.0).eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA()
+                    .givenIssue("I-3")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .hasLastTransitedStatus("To Do")
+                        .atStatus("Doing").hasNoEffort().eoSa()
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA()
+                    .givenIssue("I-4")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .hasLastTransitedStatus("To Do")
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasTotalEffortInHours(5.0).eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA()
+                    .givenIssue("I-5")
+                        .hasLevel(SUBTASKS)
+                        .hasType("Alpha")
+                        .hasLastTransitedStatus("Open")
+                        .atStatus("To Do").hasNoEffort().eoSa()
+                        .atStatus("Doing").hasNoEffort().eoSa()
+                        .atStatus("Done").hasNoEffort().eoSa()
+                    .eoIA();
+    }
+    
+    private ServeAllIssuesFromCurrentState getAllIssuesFromCurrrentState(String projectKey) {
+        return new ServeAllIssuesFromCurrentState(projectKey);
+    }
+
     private FollowupSnapshotBehavior getSnapshot(String projectKey) {
         return new FollowupSnapshotBehavior(projectKey);
     }
 
-    private ServeIssuesFromCurrentState getIssuesFromCurrentState(String projectKey, KpiLevel level) {
-        return new ServeIssuesWithoutFilter(projectKey, level);
+    private ServeIssuesFromCurrentState getIssuesFromCurrentStateWithDefaultFilters(String projectKey, KpiLevel level) {
+        return new ServeIssuesWithDefaultFilter(projectKey, level);
     }
     
     private ServeIssuesFromCurrentState getIssuesFromCurrentStateFilteringByProjectRange(String projectKey, KpiLevel level) {
         return new ServeIssuesFilteringByProject(projectKey, level);
     }
-
+    
+    
     private abstract class ServeIssuesFromCurrentState implements DSLSimpleBehaviorWithAsserter<IssuesAsserter> {
         protected String projectKey;
-        protected KpiLevel level;
         private IssuesAsserter asserter;
         
-        public ServeIssuesFromCurrentState(String projectKey, KpiLevel level) {
+        public ServeIssuesFromCurrentState(String projectKey) {
             this.projectKey = projectKey;
-            this.level = level;
         }
 
         @Override
         public void behave(KpiEnvironment environment) {
+            
+            KpiDataService subject = getService(environment);
+            ZoneId timezone = environment.getTimezone();
+            
+            List<IssueKpi> issues = getIssues(subject, timezone);
+            this.asserter = new IssuesAsserter(issues, environment);
+        }
+        
+        protected KpiDataService getService(KpiEnvironment environment) {
             IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             FollowUpSnapshotService followupSnapshotService = environment.services().followupSnapshot().getService();
             ProjectService projectService = environment.services().projects().getService();
             KpiFilterService filterService = environment.services().filters().getService();
             
-            KpiDataService subject = new KpiDataService(issueKpiService, followupSnapshotService, projectService, filterService);
-            ZoneId timezone = environment.getTimezone();
-            
-            List<IssueKpi> issues = getIssues(subject, timezone);
-            this.asserter = new IssuesAsserter(issues, environment);
+            return new KpiDataService(issueKpiService, followupSnapshotService, projectService, filterService);
         }
 
         protected abstract List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone);
@@ -433,24 +558,43 @@ public class KpiDataServiceTest {
         }
     }
     
-    private class ServeIssuesWithoutFilter extends ServeIssuesFromCurrentState {
+    private class ServeAllIssuesFromCurrentState extends ServeIssuesFromCurrentState {
 
-        private ServeIssuesWithoutFilter(String projectKey, KpiLevel level) {
-            super(projectKey, level);
+        public ServeAllIssuesFromCurrentState(String projectKey) {
+            super(projectKey);
         }
 
         @Override
         protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
-            return subject.getIssuesFromCurrentStateWithDefaultFilters(projectKey, timezone, level);
+            return subject.getAllIssuesFromCurrentState(projectKey, timezone);
+        }
+        
+    }
+
+    private class ServeIssuesWithDefaultFilter extends ServeIssuesFromCurrentState {
+
+        private KpiLevel level;
+
+        private ServeIssuesWithDefaultFilter(String projectKey, KpiLevel level) {
+            super(projectKey);
+            this.level = level;
+        }
+
+        @Override
+        protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
+            return subject.getIssuesFromCurrentStateWithDefaultFilters(projectKey, timezone,level);
         }
 
     }
     
     private class ServeIssuesFilteringByProject extends ServeIssuesFromCurrentState {
     
+        private KpiLevel level;
+
         private ServeIssuesFilteringByProject(String projectKey, KpiLevel level) {
-                super(projectKey, level);
-            }
+                super(projectKey);
+                this.level = level;
+        }
     
         @Override
         protected List<IssueKpi> getIssues(KpiDataService subject, ZoneId timezone) {
@@ -467,7 +611,7 @@ public class KpiDataServiceTest {
         public FollowupSnapshotBehavior(String projectKey) {
             this.projectKey = projectKey;
         }
-        
+
         private FollowupSnapshotBehavior withDate(String date) {
             this.date = Optional.of(LocalDate.parse(date));
             return this;

@@ -8,6 +8,7 @@ public abstract class RequestChartDataBehaviorBuilder<T extends RequestChartData
     protected String zoneId;
     protected Boolean hasPermission;
     protected boolean preventProviderMock = false;
+    private boolean requireLevel = true;
 
     public RequestChartDataBehaviorBuilder<T> forProject(String projectKey) {
         this.projectKey = projectKey;
@@ -21,6 +22,12 @@ public abstract class RequestChartDataBehaviorBuilder<T extends RequestChartData
         this.level = level;
         return this;
     }
+    
+    public RequestChartDataBehaviorBuilder<T> withNoLevelConfigured() {
+        this.requireLevel = false;
+        return this;
+    }
+    
     public RequestChartDataBehaviorBuilder<T> withTimezone(String timezone) {
         this.zoneId = timezone;
         return this;
@@ -42,17 +49,31 @@ public abstract class RequestChartDataBehaviorBuilder<T extends RequestChartData
     protected abstract T doBuild();
 
     protected void validate() {
-        if (projectKey == null) {
-            Assertions.fail("Project key not configured");
-        }
-        if (level == null) {
+        
+        validateProjectKey();
+        validateZoneId();
+        validatePermission();
+        validateLevel();
+        
+    }
+    
+    private void validateLevel() {
+        if(!requireLevel)
+            return;
+        
+        if (level == null) 
             Assertions.fail("Level not configured");
-        }
-        if (zoneId == null) {
-            Assertions.fail("ZoneId not configured");
-        }
-        if (hasPermission == null) {
+    }
+    private void validatePermission() {
+        if (hasPermission == null)
             Assertions.fail("Permission not configured");
-        }
+    }
+    private void validateZoneId() {
+        if (zoneId == null)
+            Assertions.fail("ZoneId not configured");
+    }
+    private void validateProjectKey() {
+        if (projectKey == null)
+            Assertions.fail("Project key not configured");
     }
 }
