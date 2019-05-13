@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.task.RefreshCacheTask;
 
@@ -51,4 +52,10 @@ public class CacheRefreshController {
         return "CONFIGURATION UPDATED";
     }
 
+    @RequestMapping("dashboard")
+    public String dashboard() {
+        cacheManager.getCache(CacheConfiguration.STRATEGICAL_DASHBOARD).clear();
+
+        return "DASHBOARD UPDATED";
+    }
 }

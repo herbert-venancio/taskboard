@@ -15,8 +15,10 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
@@ -33,10 +35,12 @@ public class FollowupProgressCalculator {
         this.kpiService = kpiService;
     }
 
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'followup-with-projection', #timezone, #projectKey, #projectionSampleSize}")
     public ProgressData calculateWithCompleteProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
         return calculate(timezone, projectKey, projectionSampleSize, true);
     }
 
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'followup-without-projection', #timezone, #projectKey, #projectionSampleSize}")
     public ProgressData calculateWithExpectedProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
         return calculate(timezone, projectKey, projectionSampleSize, false);
     }

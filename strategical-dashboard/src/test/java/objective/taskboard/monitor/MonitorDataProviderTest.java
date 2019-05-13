@@ -104,7 +104,7 @@ public class MonitorDataProviderTest {
         }
 
         public MonitorDataProviderTestDSL whenExecuteFromProject() {
-            dataSet = subject.fromProject(projectConfig, timezone);
+            dataSet = subject.getDashboardConfiguration(projectConfig, timezone);
             return this;
         }
 

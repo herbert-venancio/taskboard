@@ -19,7 +19,7 @@ public class LocaleRule extends ExternalResource {
     }
 
     @Override
-    protected void before() throws Throwable {
+    protected void before() {
         Locale.setDefault(targetLocale);
     }
 

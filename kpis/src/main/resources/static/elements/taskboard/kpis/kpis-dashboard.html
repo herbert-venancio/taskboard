@@ -441,7 +441,7 @@
                         var matchProjectRoute = new RegExp('#/project/(.*)').exec(window.location.hash);
 
                         if (matchProjectRoute) {
-                            selectedProjectKey = matchProjectRoute[1];
+                            var selectedProjectKey = matchProjectRoute[1];
 
                             const projectKeyIsPresent = findInArray(this.projects, function (p) {
                                 return p.projectKey === selectedProjectKey;

@@ -1,6 +1,5 @@
 package objective.taskboard.monitor;
 
-import static java.util.Arrays.asList;
 import static objective.taskboard.monitor.MonitorUtils.removeDecimal;
 
 import java.time.ZoneId;
@@ -8,15 +7,18 @@ import java.time.ZoneId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
+import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
 import objective.taskboard.followup.data.ProgressDataPoint;
-import objective.taskboard.monitor.StrategicalProjectDataSet.DataItem;
 import objective.taskboard.monitor.StrategicalProjectDataSet.MonitorData;
+import objective.taskboard.monitor.StrategicalProjectDataSet.Status;
 
 @Component
 class ScopeMonitorCalculator implements MonitorCalculator {
@@ -24,25 +26,28 @@ class ScopeMonitorCalculator implements MonitorCalculator {
     public static final String CANT_CALCULATE_SCOPE_WARNING = "Can't calculate Scope warning: Project hasn't risk percentage configured.";
     public static final String CANT_CALCULATE_SCOPE_UNEXPECTED = "Can't calculate Scope: Unexpected error.";
 
-    private final MonitorDataService monitorDataService;
+    private final FollowupProgressCalculator progressCalculator;
 
     @Autowired
-    public ScopeMonitorCalculator(MonitorDataService monitorDataService) {
-        this.monitorDataService = monitorDataService;
+    public ScopeMonitorCalculator(FollowupProgressCalculator progressCalculator) {
+        this.progressCalculator = progressCalculator;
     }
 
     @Override
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'scope', #project.getProjectKey(), #timezone}")
     public MonitorData calculate(ProjectFilterConfiguration project, ZoneId timezone) {
-        MonitorData monitorScope = new MonitorData("Scope", "#icon-list");
+        MonitorDataBuilder monitorScope = MonitorData.builder()
+                .withLabel("Scope")
+                .withIcon("#icon-list")
+                .withStatusDetails("Gray is displayed when there is not enough data to measure project progress.");
 
-        DataItem expectedDataItem = new DataItem("(expected)", "Expected percentage of scope progress.");
-        DataItem warningDataItem = new DataItem("(warning)", "Range of percentages starting with the expected scope progress minus risk and ends up with the expected scope progress.");
-        DataItem actualDataItem = new DataItem("(actual)", "Percentage of current scope progress.");
+        monitorScope
+            .expectedDetails("Expected percentage of scope progress.")
+            .warningDetails("Range of percentages starting with the expected scope progress minus risk and ends up with the expected scope progress.")
+            .actualDetails("Percentage of current scope progress.");
 
         try {
-            monitorScope.statusDetails = "Gray is displayed when there is not enough data to measure project progress.";
- 
-            ProgressData progressData = monitorDataService.getProgressData(project, timezone);
+            ProgressData progressData = progressCalculator.calculateWithExpectedProjection(timezone, project.getProjectKey(), project.getProjectionTimespan());
 
             double actualScope = progressData.actualProjection.get(0).progress * 100;
             ProgressDataPoint expected = progressData.expected.stream()
@@ -54,55 +59,50 @@ class ScopeMonitorCalculator implements MonitorCalculator {
             double riskPercentage = project.getRiskPercentage() != null ? project.getRiskPercentage().doubleValue() : 0.0;
             double expectedScopeWithRisk = getExpectedScope(expectedScope, riskPercentage);
 
-            String status = verifyScopeStatus(actualScope, expectedScope, expectedScopeWithRisk);
-            monitorScope.statusDetails = verifyScopeStatusDetails(status);
+            Status statusEnum = verifyScopeStatus(actualScope, expectedScope, expectedScopeWithRisk);
 
-            expectedDataItem.text = removeDecimal(expectedScope, "%");
+            monitorScope.withStatusDetails(verifyScopeStatusDetails(statusEnum));
+            monitorScope.expectedValue(removeDecimal(expectedScope, "%"));
 
             if (Double.compare(expectedScopeWithRisk, expectedScope) == 0) {
-                warningDataItem.text = CANT_CALCULATE_MESSAGE;
-                warningDataItem.details = "Can't calculate Scope warning: Project hasn't risk percentage configured.";
+                monitorScope.warningValue(CANT_CALCULATE_MESSAGE);
+                monitorScope.warningDetails(CANT_CALCULATE_SCOPE_WARNING);
             } else {
-                warningDataItem.text = removeDecimal(expectedScopeWithRisk, "%") + " - " + removeDecimal(expectedScope, "%");
+                monitorScope.warningValue(removeDecimal(expectedScopeWithRisk, "%") + " - " + removeDecimal(expectedScope, "%"));
             }
 
-            monitorScope.status = status;
-
-            actualDataItem.text = removeDecimal(actualScope, "%");
-
-            monitorScope.items = asList(expectedDataItem, warningDataItem, actualDataItem);
+            monitorScope.withStatus(statusEnum.status());
+            monitorScope.actualValue(removeDecimal(actualScope, "%"));
         } catch (ClusterNotConfiguredException | ProjectDatesNotConfiguredException e) { //NOSONAR
-            monitorScope.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-            monitorScope = MonitorData.withError(monitorScope, "Can't calculate Scope: " +  e.getMessage());
+            return  monitorScope.withError("Can't calculate Scope: " +  e.getMessage());
         } catch (Exception e) { //NOSONAR
             log.error(e.getMessage(), e);
-
-            monitorScope.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-            monitorScope = MonitorData.withError(monitorScope, "Can't calculate Scope: Unexpected error.");
+            return monitorScope.withError(CANT_CALCULATE_SCOPE_UNEXPECTED);
         }
 
-        return monitorScope;
+        return monitorScope.build();
     }
 
-    private static String verifyScopeStatus(double actualScope, double expectedScope, double expectedScopeWithRisk) {
+    private static Status verifyScopeStatus(double actualScope, double expectedScope, double expectedScopeWithRisk) {
         if (actualScope > expectedScopeWithRisk && actualScope < expectedScope)
-            return "alert";
+            return StrategicalProjectDataSet.Status.ALERT;
         else if (actualScope <= expectedScopeWithRisk)
-            return "danger";
-        return "normal";
+            return StrategicalProjectDataSet.Status.DANGER;
+
+        return StrategicalProjectDataSet.Status.NORMAL;
     }
 
-    private static String verifyScopeStatusDetails(String status) {
-        String statusDetail = "The actual percentage of scope progress is over the warning range.";
-        
-        if (status.equals("alert")) {
-            statusDetail = "The actual percentage of scope progress is within the warning range.";
-        } else if (status.equals("danger")) {
-            statusDetail = "The scope progress is less than the initial percentage of the warning range.";
+    private static String verifyScopeStatusDetails(Status status) {
+        switch(status) {
+            case ALERT:
+                return "The actual percentage of scope progress is over the warning range.";
+            case DANGER:
+                return "The scope progress is less than the initial percentage of the warning range.";
+            default:
+                return "The actual percentage of scope progress is over the warning range.";
         }
-
-        return statusDetail;
     }
+
     private static double getExpectedScope(double expectedScope, double riskPercentage) {
         return expectedScope - (expectedScope * riskPercentage);
     }

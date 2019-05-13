@@ -1,19 +1,12 @@
 package objective.taskboard.monitor;
 
 import static objective.taskboard.monitor.MonitorCalculator.CANT_CALCULATE_MESSAGE;
-import static objective.taskboard.monitor.MonitorCalculatorDSL.assertMonitorError;
 import static objective.taskboard.monitor.ProgressDataPointBuilder.progressDataPoint;
 import static objective.taskboard.monitor.ScopeMonitorCalculator.CANT_CALCULATE_SCOPE_UNEXPECTED;
 import static objective.taskboard.monitor.ScopeMonitorCalculator.CANT_CALCULATE_SCOPE_WARNING;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.followup.ProjectDatesNotConfiguredException;
-import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
-
-@RunWith(MockitoJUnitRunner.class)
 public class ScopeMonitorCalculatorTest {
 
     @Test
@@ -26,7 +19,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.8)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
             .progressDataWithExpected(
                 progressDataPoint()
@@ -34,7 +26,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.7)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
 
         .whenCalculate()
@@ -58,7 +49,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.6)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
             .progressDataWithExpected(
                 progressDataPoint()
@@ -66,7 +56,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.7)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
 
         .whenCalculate()
@@ -90,7 +79,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.5)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
             .progressDataWithExpected(
                 progressDataPoint()
@@ -98,7 +86,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.7)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
 
         .whenCalculate()
@@ -121,7 +108,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.8)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
             .progressDataWithExpected(
                 progressDataPoint()
@@ -129,7 +115,6 @@ public class ScopeMonitorCalculatorTest {
                     .progress(0.7)
                     .sumEffortDone(5.0)
                     .sumEffortBacklog(6.0)
-                    .build()
             )
 
         .whenCalculate()
@@ -149,11 +134,9 @@ public class ScopeMonitorCalculatorTest {
         given()
             .progressDataWithActualProjection(
                 progressDataPoint()
-                    .build()
             )
             .progressDataWithExpected(
                 progressDataPoint()
-                    .build()
             )
 
         .whenCalculate()
@@ -168,24 +151,8 @@ public class ScopeMonitorCalculatorTest {
             .assertErrors(CANT_CALCULATE_SCOPE_UNEXPECTED);
     }
 
-    @Test
-    public void givenProjectDateNotConfigured_thenThrowProjectDatesNotConfiguredException() {
-        assertMonitorError(
-            given(),
-            ProjectDatesNotConfiguredException.fromProject(),
-            "Can't calculate Scope: The project has no start or delivery date.");
-    }
-
-    @Test
-    public void givenClusterNotConfigured_thenThrowClusterNotConfiguredException() {
-        assertMonitorError(
-                given(),
-                ClusterNotConfiguredException.fromProject(),
-                "Can't calculate Scope: No cluster configuration found.");
-    }
-
     private MonitorCalculatorDSL given() {
-        return MonitorCalculatorDSL.asScope();
+        return MonitorCalculatorDSL.forScope();
     }
 
 }

@@ -31,7 +31,7 @@ class MonitorDataProvider {
         this.costMonitorCalculator = costMonitorCalculator;
     }
 
-    public StrategicalProjectDataSet fromProject(ProjectFilterConfiguration taskboardProject, ZoneId timezone) {
+    public StrategicalProjectDataSet getDashboardConfiguration(ProjectFilterConfiguration taskboardProject, ZoneId timezone) {
         Project project = projectService.getJiraProjectAsUserOrCry(taskboardProject.getProjectKey());
 
         StrategicalProjectDataSet dataSet = new StrategicalProjectDataSet();

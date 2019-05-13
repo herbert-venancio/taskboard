@@ -18,6 +18,7 @@ import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardCustomerPermission;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.project.ProjectNotFoundException;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 public class BudgetChartServiceTest {

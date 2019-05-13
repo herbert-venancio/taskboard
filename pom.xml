@@ -26,6 +26,7 @@
 		<module>cardboard</module>
 		<module>jira-client</module>
 		<module>sizing-importer</module>
+		<module>strategical-dashboard</module>
 	</modules>
 
 	<properties>

@@ -40,10 +40,11 @@ public class StrategicalDashboardController {
         ) {
 
         ZoneId timezone = determineTimeZoneId(zoneId);
+
         return authorizedProjectsService
                 .getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, PROJECT_DASHBOARD_TACTICAL, PROJECT_DASHBOARD_OPERATIONAL)
                 .stream()
-                .map(p -> monitorDataProvider.fromProject(p, timezone))
+                .map(p -> monitorDataProvider.getDashboardConfiguration(p, timezone))
                 .collect(toList());
     }
 

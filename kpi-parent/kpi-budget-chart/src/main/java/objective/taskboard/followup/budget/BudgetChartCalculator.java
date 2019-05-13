@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
@@ -28,6 +30,7 @@ public class BudgetChartCalculator {
         this.changeRequestService = changeRequestService;
     }
 
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'budget', #systemDefault, #project.getProjectKey()}")
     public BudgetChartData calculate(ZoneId systemDefault, ProjectFilterConfiguration project) {
         ProgressData progressData = calculator.calculateWithCompleteProjection(
                 systemDefault, project.getProjectKey(), project.getProjectionTimespan());

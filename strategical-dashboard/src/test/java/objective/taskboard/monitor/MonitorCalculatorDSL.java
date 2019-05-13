@@ -1,7 +1,7 @@
 package objective.taskboard.monitor;
 
-import static java.util.Arrays.asList;
-import static objective.taskboard.monitor.MonitorCalculator.CANT_CALCULATE_MESSAGE;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,16 +11,18 @@ import java.time.ZoneId;
 import java.util.Optional;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.budget.BudgetChartCalculator;
 import objective.taskboard.followup.budget.BudgetChartData;
+import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
-import objective.taskboard.followup.data.ProgressDataPoint;
 import objective.taskboard.monitor.StrategicalProjectDataSet.MonitorData;
 
 class MonitorCalculatorDSL {
 
     private final MonitorCalculator subject;
 
-    private final MonitorDataService monitorDataServiceMock;
+    private final BudgetChartCalculator budgetChartCalculatorMock;
+    private final FollowupProgressCalculator followupProgressCalculatorMock;
 
     private final ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
     private final BudgetChartData budgetChartData = new BudgetChartData();
@@ -31,34 +33,43 @@ class MonitorCalculatorDSL {
 
     private static ZoneId timezone = ZoneId.of("America/Sao_Paulo");
 
-    public static MonitorCalculatorDSL asTimeline() {
-        MonitorDataService monitorDataServiceMock = mock(MonitorDataService.class);
-        TimelineMonitorCalculator timelineSubject = new TimelineMonitorCalculator(monitorDataServiceMock);
+    public static MonitorCalculatorDSL forTimeline() {
+        BudgetChartCalculator budgetChartCalculatorMock = mock(BudgetChartCalculator.class);
+        TimelineMonitorCalculator timelineSubject = new TimelineMonitorCalculator(budgetChartCalculatorMock);
 
-        return new MonitorCalculatorDSL(timelineSubject, monitorDataServiceMock);
+        return new MonitorCalculatorDSL(timelineSubject, budgetChartCalculatorMock);
     }
 
-    public static MonitorCalculatorDSL asCost() {
-        MonitorDataService monitorDataServiceMock = mock(MonitorDataService.class);
-        CostMonitorCalculator costSubject = new CostMonitorCalculator(monitorDataServiceMock);
+    public static MonitorCalculatorDSL forCost() {
+        FollowupProgressCalculator followupProgressCalculatorMock = mock(FollowupProgressCalculator.class);
+        CostMonitorCalculator costSubject = new CostMonitorCalculator(followupProgressCalculatorMock);
 
-        return new MonitorCalculatorDSL(costSubject, monitorDataServiceMock);
+        return new MonitorCalculatorDSL(costSubject, followupProgressCalculatorMock);
     }
 
-    public static MonitorCalculatorDSL asScope() {
-        MonitorDataService monitorDataServiceMock = mock(MonitorDataService.class);
-        ScopeMonitorCalculator costSubject = new ScopeMonitorCalculator(monitorDataServiceMock);
+    public static MonitorCalculatorDSL forScope() {
+        FollowupProgressCalculator followupProgressCalculatorMock = mock(FollowupProgressCalculator.class);
+        ScopeMonitorCalculator scopeSubject = new ScopeMonitorCalculator(followupProgressCalculatorMock);
 
-        return new MonitorCalculatorDSL(costSubject, monitorDataServiceMock);
+        return new MonitorCalculatorDSL(scopeSubject, followupProgressCalculatorMock);
     }
 
-    private MonitorCalculatorDSL(MonitorCalculator subject, MonitorDataService monitorDataServiceMock) {
+    private MonitorCalculatorDSL(MonitorCalculator subject, 
+            BudgetChartCalculator budgetChartCalculatorMock) {
         this.subject = subject;
-        this.monitorDataServiceMock = monitorDataServiceMock;
+        this.budgetChartCalculatorMock = budgetChartCalculatorMock;
+        this.followupProgressCalculatorMock = mock(FollowupProgressCalculator.class);
+    }
+    
+    private MonitorCalculatorDSL(MonitorCalculator subject, 
+            FollowupProgressCalculator followupProgressCalculatorMock) {
+        this.subject = subject;
+        this.budgetChartCalculatorMock = mock(BudgetChartCalculator.class);
+        this.followupProgressCalculatorMock = followupProgressCalculatorMock;
     }
 
     public MonitorCalculatorDSL projectWithRisk(double risk) {
-        when(project.getRiskPercentage()).thenReturn(new BigDecimal(risk));
+        when(project.getRiskPercentage()).thenReturn(BigDecimal.valueOf(risk));
         return this;
     }
 
@@ -86,61 +97,34 @@ class MonitorCalculatorDSL {
         return this;
     }
 
-    public MonitorCalculatorDSL progressDataWithActualProjection(ProgressDataPoint ...dataPoints) {
-        progressData.actualProjection = asList(dataPoints);
+    public MonitorCalculatorDSL progressDataWithActualProjection(ProgressDataPointBuilder ...dataPoints) {
+        progressData.actualProjection = stream(dataPoints)
+                .map(ProgressDataPointBuilder::build)
+                .collect(toList());
         return this;
     }
 
-    public MonitorCalculatorDSL progressDataWithExpected(ProgressDataPoint ...dataPoints) {
-        progressData.expected = asList(dataPoints);
+    public MonitorCalculatorDSL progressDataWithExpected(ProgressDataPointBuilder ...dataPoints) {
+        progressData.expected = stream(dataPoints)
+                .map(ProgressDataPointBuilder::build)
+                .collect(toList());
         return this;
     }
 
     public MonitorCalculatorDSL whenCalculate() {
         if (!exception.isPresent()) {
-            when(monitorDataServiceMock.getBudgetChartData(project, timezone)).thenReturn(budgetChartData);
-            when(monitorDataServiceMock.getProgressData(project, timezone)).thenReturn(progressData);
+            when(budgetChartCalculatorMock.calculate(timezone, project)).thenReturn(budgetChartData);
+            when(followupProgressCalculatorMock.calculateWithExpectedProjection(timezone, project.getProjectKey(), project.getProjectionTimespan())).thenReturn(progressData);
         } else {
-            when(monitorDataServiceMock.getBudgetChartData(project, timezone)).thenThrow(exception.get());
-            when(monitorDataServiceMock.getProgressData(project, timezone)).thenThrow(exception.get());
+            when(budgetChartCalculatorMock.calculate(timezone, project)).thenThrow(exception.get());
+            when(followupProgressCalculatorMock.calculateWithExpectedProjection(timezone, project.getProjectKey(), project.getProjectionTimespan())).thenThrow(exception.get());
         }
 
         monitorDataResult = subject.calculate(project, timezone);
         return this;
     }
 
-    public MonitorCalculatorDSL verifyException(MonitorCalculatorDSL dslWithType, Exception exception, String... errors) {
-        dslWithType
-            .givenServiceThrowing(exception)
-
-        .whenCalculate()
-
-        .then()
-            .assertActual(CANT_CALCULATE_MESSAGE)
-            .assertExpected(CANT_CALCULATE_MESSAGE)
-            .assertStatus(null)
-            .assertWarning(CANT_CALCULATE_MESSAGE)
-            .assertErrors(errors);
-        
-        return this;
-    }
-
     public MonitorCalculatorAsserter then() {
         return new MonitorCalculatorAsserter(monitorDataResult);
-    }
-
-    public static void assertMonitorError(MonitorCalculatorDSL typedDsl, Exception exception, String... errors) {
-        typedDsl
-            .givenServiceThrowing(exception)
-
-        .whenCalculate()
-
-        .then()
-            .assertActual(CANT_CALCULATE_MESSAGE)
-            .assertExpected(CANT_CALCULATE_MESSAGE)
-            .assertStatus(null)
-            .assertWarning(CANT_CALCULATE_MESSAGE)
-            .assertErrors(errors);
-        
     }
 }

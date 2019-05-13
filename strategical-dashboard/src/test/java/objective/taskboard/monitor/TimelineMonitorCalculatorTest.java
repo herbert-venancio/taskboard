@@ -1,20 +1,14 @@
 package objective.taskboard.monitor;
 
 import static objective.taskboard.monitor.MonitorCalculator.CANT_CALCULATE_MESSAGE;
-import static objective.taskboard.monitor.MonitorCalculatorDSL.assertMonitorError;
 import static objective.taskboard.monitor.TimelineMonitorCalculator.CANT_CALCULATE_TIMELINE_UNEXPECTED;
 import static objective.taskboard.monitor.TimelineMonitorCalculator.CANT_CALCULATE_TIMELINE_WARNING;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.followup.ProjectDatesNotConfiguredException;
-import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.rules.LocaleRule;
 
-@RunWith(MockitoJUnitRunner.class)
 public class TimelineMonitorCalculatorTest {
 
     @Rule
@@ -110,24 +104,8 @@ public class TimelineMonitorCalculatorTest {
             .assertErrors(CANT_CALCULATE_TIMELINE_UNEXPECTED);
     }
 
-    @Test
-    public void givenProjectDateNotConfigured_thenThrowProjectDatesNotConfiguredException() {
-        assertMonitorError(
-            given(),
-            ProjectDatesNotConfiguredException.fromProject(),
-            "Can't calculate Timeline: The project has no start or delivery date.");
-    }
-
-    @Test
-    public void givenClusterNotConfigured_thenThrowClusterNotConfiguredException() {
-        assertMonitorError(
-                given(),
-                ClusterNotConfiguredException.fromProject(),
-                "Can't calculate Timeline: No cluster configuration found.");
-    }
-
     private MonitorCalculatorDSL given() {
-        return MonitorCalculatorDSL.asTimeline();
+        return MonitorCalculatorDSL.forTimeline();
     }
 
 }

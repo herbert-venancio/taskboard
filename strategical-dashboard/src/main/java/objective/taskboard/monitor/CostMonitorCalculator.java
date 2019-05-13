@@ -1,21 +1,24 @@
 package objective.taskboard.monitor;
 
-import static java.util.Arrays.asList;
 import static objective.taskboard.monitor.MonitorUtils.removeDecimal;
 
 import java.time.ZoneId;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
+import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
 import objective.taskboard.followup.data.ProgressDataPoint;
-import objective.taskboard.monitor.StrategicalProjectDataSet.DataItem;
 import objective.taskboard.monitor.StrategicalProjectDataSet.MonitorData;
+import objective.taskboard.monitor.StrategicalProjectDataSet.Status;
 
 @Component
 class CostMonitorCalculator implements MonitorCalculator {
@@ -23,23 +26,28 @@ class CostMonitorCalculator implements MonitorCalculator {
     public static final String CANT_CALCULATE_COST_WARNING = "Can't calculate Cost warning: Project hasn't risk percentage configured.";
     public static final String CANT_CALCULATE_COST_UNEXPECTED = "Can't calculate Cost: Unexpected error.";
 
-    private final MonitorDataService monitoDataService;
+    private final FollowupProgressCalculator progressCalculator;
 
-    public CostMonitorCalculator(MonitorDataService monitorDataService) {
-        this.monitoDataService = monitorDataService;
+    @Autowired
+    public CostMonitorCalculator(FollowupProgressCalculator progressCalculator) {
+        this.progressCalculator = progressCalculator;
     }
 
     @Override
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'cost', #project.getProjectKey(), #timezone}")
     public MonitorData calculate(ProjectFilterConfiguration project, ZoneId timezone) {
-        MonitorData monitorCost = new MonitorData("Cost", "#icon-money-bag");
+        MonitorDataBuilder monitorCost = MonitorData.builder()
+                .withLabel("Cost")
+                .withIcon("#icon-money-bag")
+                .withStatusDetails("Gray is displayed when there is not enough data to measure project progress.");
 
-        DataItem expectedDataItem = new DataItem("(expected)", "Expected cost of the project represented as effort in hours.");
-        DataItem warningDataItem = new DataItem("(warning)", "Range of effort in hours from the expected cost to expected cost plus risk.");
-        DataItem actualDataItem = new DataItem("(actual)", "Actual project cost based on the current scope items complete.");
+        monitorCost
+            .expectedDetails("Expected cost of the project represented as effort in hours.")
+            .warningDetails("Range of effort in hours from the expected cost to expected cost plus risk.")
+            .actualDetails("Actual project cost based on the current scope items complete.");
 
         try {
-            monitorCost.statusDetails = "Gray is displayed when there is not enough data to measure project progress.";
-            ProgressData progressData = monitoDataService.getProgressData(project, timezone);
+            ProgressData progressData = progressCalculator.calculateWithExpectedProjection(timezone, project.getProjectKey(), project.getProjectionTimespan());
 
             ProgressDataPoint actualProjection = progressData.actualProjection.get(0);
             double actualCost = actualProjection.sumEffortDone;
@@ -53,56 +61,49 @@ class CostMonitorCalculator implements MonitorCalculator {
             double expectedCost = totalActualScope * expected.progress;
             double limitCost = project.getRiskPercentage() != null ? getLimitCost(project, expectedCost) : expectedCost;
 
-            String status = verifyCostStatus(actualCost, expectedCost, limitCost);
-            monitorCost.statusDetails = verifyCostStatusDetails(status);
+            Status statusEnum = verifyCostStatus(actualCost, expectedCost, limitCost);
 
-            expectedDataItem.text = removeDecimal(expectedCost, "h");
+            monitorCost.withStatusDetails(verifyCostStatusDetails(statusEnum));
+            monitorCost.expectedValue(removeDecimal(expectedCost, "h"));
 
             if (Double.compare(limitCost, expectedCost) == 0) {
-                warningDataItem.text = CANT_CALCULATE_MESSAGE;
-                warningDataItem.details = "Can't calculate Cost warning: Project hasn't risk percentage configured.";
+                monitorCost.warningValue(CANT_CALCULATE_MESSAGE);
+                monitorCost.warningDetails(CANT_CALCULATE_COST_WARNING);
             } else {
-                warningDataItem.text =  removeDecimal(expectedCost, "h") + " - " + removeDecimal(limitCost, "h");
+                monitorCost.warningValue(removeDecimal(expectedCost, "h") + " - " + removeDecimal(limitCost, "h"));
             }
-            actualDataItem.text = removeDecimal(actualCost, "h");
 
-            monitorCost.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-
-            monitorCost.status = status;
+            monitorCost.actualValue(removeDecimal(actualCost, "h"));
+            monitorCost.withStatus(statusEnum.status());
         } catch (ClusterNotConfiguredException | ProjectDatesNotConfiguredException e) { //NOSONAR
-            monitorCost.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-            monitorCost = MonitorData.withError(monitorCost, "Can't calculate Cost: " +  e.getMessage());
+            return monitorCost.withError("Can't calculate Cost: " +  e.getMessage());
         } catch (Exception e) { //NOSONAR
             log.error(e.getMessage(), e);
-
-            monitorCost.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-            monitorCost = MonitorData.withError(monitorCost, "Can't calculate Cost: Unexpected error.");
+            return monitorCost.withError(CANT_CALCULATE_COST_UNEXPECTED);
         }
 
-        return monitorCost;
+        return monitorCost.build();
     }
 
-    private static String verifyCostStatus(double actualCost, double expectedCost, double limitCost) {
-        String status = "normal";
-
+    private static Status verifyCostStatus(double actualCost, double expectedCost, double limitCost) {
         if (actualCost >= limitCost) {
-            status = "danger";
-        } else if (actualCost > expectedCost && actualCost < limitCost) {
-            status = "alert";
-        }
-        return status;
+            return StrategicalProjectDataSet.Status.DANGER;
+        } else if (actualCost > expectedCost) {
+            return StrategicalProjectDataSet.Status.ALERT;
+       }
+
+        return StrategicalProjectDataSet.Status.NORMAL;
     }
 
-    private static String verifyCostStatusDetails(String status) {
-        String statusDetails = "The actual cost is less than the beginning cost of the warning range.";
-
-        if (status.equals("danger")) {
-            statusDetails = "The actual cost is within the warning range.";
-        } else if (status.equals("alert ")) {
-            statusDetails = "The cost is more than the maximum cost of the warning range.";
+    private static String verifyCostStatusDetails(Status status) {
+        switch(status) {
+            case DANGER:
+                return "The actual cost is within the warning range.";
+            case ALERT:
+                return "The cost is more than the maximum cost of the warning range.";
+            default:
+                return "The actual cost is less than the beginning cost of the warning range.";
         }
-
-        return statusDetails;
     }
     private static double getLimitCost(ProjectFilterConfiguration project, double expectedCost) {
         return expectedCost + (expectedCost * project.getRiskPercentage().doubleValue());

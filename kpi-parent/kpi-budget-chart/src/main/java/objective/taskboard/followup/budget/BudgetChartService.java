@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardCustomerPermission;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.project.ProjectNotFoundException;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Service

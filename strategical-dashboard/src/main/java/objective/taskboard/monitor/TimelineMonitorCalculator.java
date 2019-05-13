@@ -1,7 +1,5 @@
 package objective.taskboard.monitor;
 
-import static java.util.Arrays.asList;
-
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -10,14 +8,17 @@ import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
+import objective.taskboard.followup.budget.BudgetChartCalculator;
 import objective.taskboard.followup.budget.BudgetChartData;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
-import objective.taskboard.monitor.StrategicalProjectDataSet.DataItem;
 import objective.taskboard.monitor.StrategicalProjectDataSet.MonitorData;
+import objective.taskboard.monitor.StrategicalProjectDataSet.Status;
 
 @Component
 class TimelineMonitorCalculator implements MonitorCalculator  {
@@ -25,24 +26,29 @@ class TimelineMonitorCalculator implements MonitorCalculator  {
     public static final String CANT_CALCULATE_TIMELINE_WARNING = "Can't calculate Timeline warning: Project hasn't risk percentage configured.";
     public static final String CANT_CALCULATE_TIMELINE_UNEXPECTED = "Can't calculate Timeline: Unexpected error.";
 
-    private final MonitorDataService monitorDataService;
+    private final BudgetChartCalculator budgetChartCalculator;
 
     @Autowired
-    public TimelineMonitorCalculator(MonitorDataService monitorDataService) {
-        this.monitorDataService = monitorDataService;
+    public TimelineMonitorCalculator(BudgetChartCalculator budgetChartCalculator) {
+        this.budgetChartCalculator = budgetChartCalculator;
     }
 
     @Override
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'timeline', #project.getProjectKey(), #timezone}")
     public MonitorData calculate(ProjectFilterConfiguration project, ZoneId timezone) {
-        MonitorData monitorTimeline = new MonitorData("Timeline Forecast", "#icon-notebook");
+        MonitorDataBuilder monitorTimeline = MonitorData.builder()
+                .withLabel("Timeline Forecast")
+                .withIcon("#icon-notebook")
+                .withStatusDetails("Gray is displayed when there is not enough data to measure project progress.");
 
-        DataItem expectedDataItem = new DataItem("(expected)", "Project end date that is beforehand set up on the Taskboard tool.");
-        DataItem warningDataItem = new DataItem("(warning)", "Range of dates which begins with the expected end date and ends up with the sum of expected end date plus risk.");
-        DataItem actualDataItem = new DataItem("(actual)", "Actual end date, according to the current scope progress.");
+        monitorTimeline
+            .expectedDetails("Project end date that is beforehand set up on the Taskboard tool.")
+            .warningDetails("Range of dates which begins with the expected end date and ends up with the sum of expected end date plus risk.")
+            .actualDetails("Actual end date, according to the current scope progress.");
 
         try {
             monitorTimeline.statusDetails = "Gray is displayed when there is not enough data to measure project progress.";
-            BudgetChartData budgetChartData = monitorDataService.getBudgetChartData(project, timezone);
+            BudgetChartData budgetChartData = budgetChartCalculator.calculate(timezone, project);
 
             DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("MMMd/YYYY");
 
@@ -58,73 +64,64 @@ class TimelineMonitorCalculator implements MonitorCalculator  {
             LocalDate projectionDate = budgetChartData.projectionDate;
 
             if (projectionDate == null) {
-                actualDataItem.details = "Can't calculate Timeline actual: Budget hasn't Projection Date.";
+                monitorTimeline.actualDetails("Can't calculate Timeline actual: Budget hasn't Projection Date.");
                 formattedProjectionDate = CANT_CALCULATE_MESSAGE;
             } else {
                 formattedProjectionDate = projectionDate.format(customFormat);
             }
 
             if (deliveryDate.isEqual(limitDeliveryDate)) {
-                warningDataItem.text = CANT_CALCULATE_MESSAGE;
-                warningDataItem.details = "Can't calculate Timeline warning: Project hasn't risk percentage configured.";
+                monitorTimeline.warningValue(CANT_CALCULATE_MESSAGE);
+                monitorTimeline.warningDetails(CANT_CALCULATE_TIMELINE_WARNING);
             } else {
-                warningDataItem.text = formattedDeliveryDate + " - " + formattedLimitDeliveryDate;
+                monitorTimeline.warningValue(formattedDeliveryDate + " - " + formattedLimitDeliveryDate);
             }
 
-            String status = verifyTimelineStatus(deliveryDate, limitDeliveryDate, projectionDate);
-            monitorTimeline.statusDetails = verifyTimelineStatusDetails(status);
+            Status statusEnum = verifyTimelineStatus(deliveryDate, limitDeliveryDate, projectionDate);
 
-            expectedDataItem.text = formattedDeliveryDate;
-
-            actualDataItem.text = formattedProjectionDate;
-            monitorTimeline.status = status;
-
-            monitorTimeline.items = asList(expectedDataItem, warningDataItem, actualDataItem);
+            monitorTimeline.withStatusDetails(verifyTimelineStatusDetails(statusEnum));
+            monitorTimeline.expectedValue(formattedDeliveryDate);
+            monitorTimeline.actualValue(formattedProjectionDate);
+            monitorTimeline.withStatus(statusEnum.status());
         } catch (ClusterNotConfiguredException | ProjectDatesNotConfiguredException e) {
             log.error(e.getMessage(), e);
-
-            monitorTimeline.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-            monitorTimeline = MonitorData.withError(monitorTimeline, "Can't calculate Timeline: " +  e.getMessage());
+            return monitorTimeline.withError("Can't calculate Timeline: " +  e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-
-            monitorTimeline.items = asList(expectedDataItem, warningDataItem, actualDataItem);
-            monitorTimeline = MonitorData.withError(monitorTimeline, "Can't calculate Timeline: Unexpected error.");
+            return monitorTimeline.withError(CANT_CALCULATE_TIMELINE_UNEXPECTED);
         }
 
-        return monitorTimeline;
+        return monitorTimeline.build();
     }
 
-    private static String verifyTimelineStatus(LocalDate deliveryDate, LocalDate limitDeliveryDate, LocalDate projectionDate) {
+    private static Status verifyTimelineStatus(LocalDate deliveryDate, LocalDate limitDeliveryDate, LocalDate projectionDate) {
 
         boolean projectionDateExists = projectionDate != null;
 
         if (projectionDateExists && (projectionDate.isBefore(deliveryDate) || projectionDate.isEqual(deliveryDate)))
-            return "normal";
+            return StrategicalProjectDataSet.Status.NORMAL;
         else if (projectionDateExists && projectionDate.isBefore(limitDeliveryDate))
-            return "alert";
+            return StrategicalProjectDataSet.Status.ALERT;
 
-        return "danger";
+        return StrategicalProjectDataSet.Status.DANGER;
     }
 
-    private static String verifyTimelineStatusDetails(String status) {
-        String statusDetails = "The actual end date is earlier than the beginning date of the warning range.";
-        
-        if (status.equals("alert")) {
-            statusDetails = "The actual end date is within the warning range.";
-        } else if (status.equals("danger")) {
-            statusDetails = "The end date is older than the maximum date of the warning range.";
+    private static String verifyTimelineStatusDetails(Status status) {
+        switch(status) {
+            case ALERT:
+                return "The actual end date is within the warning range.";
+            case DANGER:
+                return "The end date is older than the maximum date of the warning range.";
+            default:
+                return "The actual end date is earlier than the beginning date of the warning range.";
         }
-
-        return statusDetails;
     }
 
     private static LocalDate getLimitDeliveryDate(ProjectFilterConfiguration project, LocalDate startDate, LocalDate deliveryDate) {
         int diffBetweenDates = Period.between(startDate, deliveryDate).getDays();
         int daysOfRisk = project.getRiskPercentage() != null ? (int) (diffBetweenDates * project.getRiskPercentage().doubleValue()) : 0;
 
-        LocalDate limitDeliveryDate = deliveryDate.plusDays(daysOfRisk);
-        return limitDeliveryDate;
+        return deliveryDate.plusDays(daysOfRisk);
     }
 
 }
