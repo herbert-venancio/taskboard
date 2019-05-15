@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -25,13 +27,13 @@ import org.mockito.ArgumentCaptor;
 import objective.taskboard.MockBuilder;
 import objective.taskboard.controller.WebhookController;
 import objective.taskboard.data.Issue;
-import objective.taskboard.domain.Filter;
+import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
-import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
 
@@ -59,7 +61,7 @@ public class WebhookControllerTestDSL {
     public WebhookControllerTestDSL(
             IssueBufferService issueBufferService,
             ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository,
-            FilterCachedRepository filterCachedRepository,
+            LaneService laneService,
             JiraService jiraService,
             IssueEventProcessScheduler issueEventProcessScheduler,
             WebhookController webhookController
@@ -85,20 +87,21 @@ public class WebhookControllerTestDSL {
                     .orElse(null);
         }).given(issueBufferService).getIssueByKey(any());
 
-        Filter taskFilter = new Filter();
-        taskFilter.setIssueTypeId(10000L);
+        IssuesConfiguration taskFilter = new IssuesConfiguration(10000L, 1L);
 
-        Filter subtaskFilter = new Filter();
-        subtaskFilter.setIssueTypeId(10001L);
+        IssuesConfiguration subtaskFilter = new IssuesConfiguration(10001L, 1L);
 
-        Filter demand = new Filter();
-        demand.setIssueTypeId(10600L);
+        IssuesConfiguration demand = new IssuesConfiguration(10600L, 1L);
 
-        Filter feature = new Filter();
-        feature.setIssueTypeId(10601L);
+        IssuesConfiguration feature = new IssuesConfiguration(10601L, 1L);
 
-        willReturn(asList(taskFilter, subtaskFilter, demand, feature))
-            .given(filterCachedRepository).getCache();
+        List<IssuesConfiguration> filters = asList(taskFilter, subtaskFilter, demand, feature);
+        willAnswer(invocation -> {
+            long issueType = invocation.getArgumentAt(0, long.class);
+            return filters.stream()
+                    .filter(f -> f.getIssueType() == issueType)
+                    .collect(Collectors.toList());
+        }).given(laneService).getFiltersForIssueType(anyLong());
     }
 
     public ProjectMockBuilder project() {

@@ -32,7 +32,6 @@ import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.data.CardFieldFilter;
 import objective.taskboard.data.LaneConfiguration;
 import objective.taskboard.domain.UserPreferences;
-import objective.taskboard.domain.UserPreferences.LevelPreference;
 import objective.taskboard.domain.UserPreferences.Preferences;
 import objective.taskboard.repository.UserPreferencesRepository;
 
@@ -47,10 +46,8 @@ public class UserPreferencesService {
     }
 
     public UserPreferences getLoggedUserPreferences() {
-        Optional<UserPreferences> userPreferences = repository.findOneByJiraUser(CredentialsHolder.username());
-        if (userPreferences.isPresent())
-            return userPreferences.get();
-        return new UserPreferences(CredentialsHolder.username());
+        return repository.findOneByJiraUser(CredentialsHolder.username())
+                .orElseGet(() -> new UserPreferences(CredentialsHolder.username()));
     }
 
     public void save(String jiraUser, Preferences preferences) {
@@ -73,36 +70,24 @@ public class UserPreferencesService {
         if (filterPreferences.isEmpty())
             return;
 
-        cardFieldFilters.stream().forEach(cardFieldFilter -> {
-            cardFieldFilter.getFilterFieldsValues().stream().forEach(filterFieldValue -> {
+        cardFieldFilters.forEach(cardFieldFilter ->
+            cardFieldFilter.getFilterFieldsValues().forEach(filterFieldValue -> {
                 if (filterPreferences.containsKey(filterFieldValue.getValue()))
                     filterFieldValue.setSelected(filterPreferences.get(filterFieldValue.getValue()));
-            });
-        });
+            })
+        );
     }
 
-    public void applyLoggedUserPreferencesOnLaneConfiguration(List<LaneConfiguration> lanesConfiguration) {
-        applyPreferencesOnLaneConfiguration(lanesConfiguration, getLoggedUserPreferences());
+    public LaneConfiguration applyLoggedUserPreferencesOnLaneConfiguration(LaneConfiguration laneConf) {
+        return getUserLevelPreferences(laneConf.getLevel())
+                .map(levelPreference -> LaneConfiguration.from(laneConf, levelPreference))
+                .orElse(laneConf);
     }
 
-    private void applyPreferencesOnLaneConfiguration(List<LaneConfiguration> lanesConfiguration, UserPreferences userPreferences) {
-        List<LevelPreference> levelPreferences = userPreferences.getPreferences().levelPreferences;
-        if (levelPreferences.isEmpty())
-            return;
-
-        lanesConfiguration.stream().forEach(laneConf -> {
-            Optional<LevelPreference> levelPreferenceOpt = levelPreferences.stream()
-                    .filter(levelPref -> levelPref.level.equals(laneConf.getLevel()))
-                    .findFirst();
-            if (!levelPreferenceOpt.isPresent())
-                return;
-
-            LevelPreference levelPreference = levelPreferenceOpt.get();
-            laneConf.setShowHeader(levelPreference.showHeader);
-            laneConf.setShowLaneTeam(levelPreference.showLaneTeam);
-            laneConf.setShowLevel(levelPreference.showLevel);
-            laneConf.setWeight(levelPreference.weightLevel);
-        });
+    private Optional<UserPreferences.LevelPreference> getUserLevelPreferences(String laneLevel) {
+        return repository.findOneByJiraUser(CredentialsHolder.username())
+                .flatMap(userPreferences -> userPreferences.getPreferences().levelPreferences.stream()
+                        .filter(levelPref -> levelPref.level.equals(laneLevel))
+                        .findFirst());
     }
-
 }

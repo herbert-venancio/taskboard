@@ -19,7 +19,7 @@ import objective.taskboard.controller.WebhookHelper;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 import objective.taskboard.jira.data.WebhookEvent;
-import objective.taskboard.repository.FilterCachedRepository;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
 import objective.taskboard.task.IssueEventProcessorFactory;
@@ -62,7 +62,7 @@ public class WebhookControllerTest {
     private JiraService jiraService;
 
     @MockBean
-    private FilterCachedRepository filterCachedRepository;
+    private LaneService laneService;
 
     @MockBean
     private IssueBufferService issueBufferService;
@@ -80,7 +80,7 @@ public class WebhookControllerTest {
         dsl = new WebhookControllerTestDSL(
                 issueBufferService,
                 projectFilterConfigurationCachedRepository,
-                filterCachedRepository,
+                laneService,
                 jiraService,
                 issueEventProcessScheduler,
                 webhookController

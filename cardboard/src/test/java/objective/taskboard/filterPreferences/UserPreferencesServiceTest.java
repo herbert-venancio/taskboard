@@ -1,6 +1,7 @@
 package objective.taskboard.filterPreferences;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.ISSUE_TYPE_1_VALUE;
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.ISSUE_TYPE_2_VALUE;
 import static objective.taskboard.filterPreferences.CardFieldFilterUtils.ISSUE_TYPE_3_VALUE;
@@ -149,7 +150,9 @@ public class UserPreferencesServiceTest {
                 createLane("LANE_3", 3D, true, true, true)
                 ));
 
-        subject.applyLoggedUserPreferencesOnLaneConfiguration(lanesConfiguration);
+        lanesConfiguration = lanesConfiguration.stream()
+                .map(lane -> subject.applyLoggedUserPreferencesOnLaneConfiguration(lane))
+                .collect(toList());
 
         assertLevelPreference(lanesConfiguration, "LANE_1", true, false, false, 11D);
         assertLevelPreference(lanesConfiguration, "LANE_2", false, true, false, 22D);
@@ -167,7 +170,9 @@ public class UserPreferencesServiceTest {
         List<LaneConfiguration> lanesConfigurationWithUserPreferences = TaskboardConfigToLaneConfigurationTransformer.transform(lanes);
         List<LaneConfiguration> lanesConfiguration = TaskboardConfigToLaneConfigurationTransformer.transform(lanes);
 
-        subject.applyLoggedUserPreferencesOnLaneConfiguration(lanesConfigurationWithUserPreferences);
+        lanesConfigurationWithUserPreferences = lanesConfigurationWithUserPreferences.stream()
+                .map(lane -> subject.applyLoggedUserPreferencesOnLaneConfiguration(lane))
+                .collect(toList());
 
         assertThat((Object) lanesConfigurationWithUserPreferences).isEqualToComparingFieldByFieldRecursively(lanesConfiguration);
     }

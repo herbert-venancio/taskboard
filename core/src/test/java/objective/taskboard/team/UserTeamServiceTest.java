@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 
 import objective.taskboard.auth.authorizer.permission.TeamEditPermission;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.filter.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 

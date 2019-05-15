@@ -51,7 +51,7 @@ public class WipConfiguration extends TaskboardEntity implements Serializable {
     }
     
     public boolean isApplicable(long issueTypeId, long statusId) {
-        return getStep().getFilters().stream().anyMatch(f -> f.isApplicable(issueTypeId, statusId));
+        return getStep().getFilters().stream().anyMatch(f -> f.getIssueTypeId() == issueTypeId && f.getStatusId() == statusId);
     }
 
 }

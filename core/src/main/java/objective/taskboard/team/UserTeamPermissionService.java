@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.filter.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 

@@ -17,9 +17,9 @@ import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.issueBuffer.CardRepo;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,7 +31,7 @@ public class JiraIssueJqlBuilderServiceTest {
     private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Mock
-    private FilterCachedRepository filterRepository;
+    private LaneService laneService;
     
     @Mock
     private JiraProperties jiraProperties;

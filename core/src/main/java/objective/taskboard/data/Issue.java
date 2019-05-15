@@ -1,23 +1,3 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
 package objective.taskboard.data;
 
 import java.io.Serializable;
@@ -45,12 +25,12 @@ import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.domain.converter.IssueTeamService.TeamOrigin;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.JiraProperties.BallparkMapping;
-import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class Issue extends IssueScratch implements Serializable {
@@ -66,7 +46,7 @@ public class Issue extends IssueScratch implements Serializable {
 
     private transient IssueTeamService issueTeamService;
 
-    private transient FilterCachedRepository filterRepository;
+    private transient LaneService laneService;
 
     private transient CardVisibilityEvalService cardVisibilityEvalService;
 
@@ -82,7 +62,7 @@ public class Issue extends IssueScratch implements Serializable {
             JiraProperties properties, 
             MetadataService metadataService, 
             IssueTeamService issueTeamService, 
-            FilterCachedRepository filterRepository,
+            LaneService laneService,
             CycleTime cycleTime,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
@@ -122,7 +102,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.metaDataService = metadataService;
         this.jiraProperties = properties;
         this.issueTeamService = issueTeamService;
-        this.filterRepository = filterRepository;
+        this.laneService = laneService;
         this.cycleTime = cycleTime;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
@@ -138,7 +118,7 @@ public class Issue extends IssueScratch implements Serializable {
         jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
         issueTeamService = SpringContextBridge.getBean(IssueTeamService.class);
-        filterRepository = SpringContextBridge.getBean(FilterCachedRepository.class);
+        laneService = SpringContextBridge.getBean(LaneService.class);
         cycleTime = SpringContextBridge.getBean(CycleTime.class);
         cardVisibilityEvalService = SpringContextBridge.getBean(CardVisibilityEvalService.class);
         projectService = SpringContextBridge.getBean(ProjectService.class);
@@ -612,7 +592,7 @@ public class Issue extends IssueScratch implements Serializable {
         if (isDeferred())
             return false;
         
-        boolean isVisible = filterRepository.getCache().stream().anyMatch(f -> f.isApplicable(this));
+        boolean isVisible = laneService.getFilters().stream().anyMatch(f -> f.matches(this));
         if (!isVisible)
             return false;
         
@@ -686,7 +666,7 @@ public class Issue extends IssueScratch implements Serializable {
             JiraProperties jiraProperties, 
             MetadataService metaDataService,
             IssueTeamService issueTeamService,
-            FilterCachedRepository filterRepository,
+            LaneService laneService,
             CycleTime cycleTime,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
@@ -695,7 +675,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.jiraProperties = jiraProperties;
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
-        this.filterRepository = filterRepository;
+        this.laneService = laneService;
         this.cycleTime = cycleTime;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
@@ -826,7 +806,7 @@ public class Issue extends IssueScratch implements Serializable {
                 jiraProperties,
                 metaDataService,
                 issueTeamService,
-                filterRepository,
+                laneService,
                 cycleTime,
                 cardVisibilityEvalService,
                 projectService,

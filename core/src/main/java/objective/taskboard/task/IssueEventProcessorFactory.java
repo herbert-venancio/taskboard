@@ -1,20 +1,18 @@
 package objective.taskboard.task;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.controller.WebhookHelper;
-import objective.taskboard.domain.Filter;
+import objective.taskboard.filter.LaneService;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
-import objective.taskboard.repository.FilterCachedRepository;
 
 @Component
 public class IssueEventProcessorFactory implements JiraEventProcessorFactory {
@@ -23,7 +21,7 @@ public class IssueEventProcessorFactory implements JiraEventProcessorFactory {
     private WebhookHelper webhookHelper;
 
     @Autowired
-    private FilterCachedRepository filterCachedRepository;
+    private LaneService laneService;
 
     @Autowired
     private JiraService jiraService;
@@ -49,8 +47,7 @@ public class IssueEventProcessorFactory implements JiraEventProcessorFactory {
         if(issueTypeId == null)
             return true;
 
-        List<Filter> filters = filterCachedRepository.getCache();
-        return filters.stream().anyMatch(f -> issueTypeId.equals(f.getIssueTypeId()));
+        return !laneService.getFiltersForIssueType(issueTypeId).isEmpty();
     }
 
     private Long getIssueTypeIdOrNull(WebHookBody body) {

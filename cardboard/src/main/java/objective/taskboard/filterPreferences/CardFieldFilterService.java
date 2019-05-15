@@ -12,24 +12,24 @@ import objective.taskboard.data.CardFieldFilter;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.data.LaneConfiguration;
-import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.filter.LaneService;
 
 @Service
 public class CardFieldFilterService {
 
     private CardFieldFilterProvider cardFieldFilterProvider;
     private UserPreferencesService userPreferencesService;
-    private TaskboardDatabaseService taskboardDatabaseService;
+    private LaneService laneService;
 
     @Autowired
     public CardFieldFilterService(
             CardFieldFilterProvider cardFieldFilterProvider,
             UserPreferencesService userPreferencesService,
-            TaskboardDatabaseService taskboardDatabaseService
+            LaneService laneService
             ) {
         this.cardFieldFilterProvider = cardFieldFilterProvider;
         this.userPreferencesService = userPreferencesService;
-        this.taskboardDatabaseService = taskboardDatabaseService;
+        this.laneService = laneService;
     }
 
     public List<CardFieldFilter> getFilterForLoggerUser() {
@@ -45,8 +45,9 @@ public class CardFieldFilterService {
     }
 
     private Stream<Issue> getSelectedIssuesByLaneConfiguration(Stream<Issue> issues) {
-        List<LaneConfiguration> lanesConfiguration = taskboardDatabaseService.laneConfiguration();
-        userPreferencesService.applyLoggedUserPreferencesOnLaneConfiguration(lanesConfiguration);
+        List<LaneConfiguration> lanesConfiguration = laneService.getLanes().stream()
+                .map(lane -> userPreferencesService.applyLoggedUserPreferencesOnLaneConfiguration(lane))
+                .collect(toList());
         List<IssuesConfiguration> issuesConfToShow = lanesConfiguration.stream()
                 .flatMap(laneConfiguration -> laneConfiguration.getStages().stream())
                 .flatMap(stage -> stage.getSteps().stream())

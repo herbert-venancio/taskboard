@@ -2,6 +2,7 @@ package objective.taskboard.filter;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,7 +21,6 @@ import objective.taskboard.repository.LaneRepository;
 @Service
 public class LaneService {
 
-    @Autowired
     private LaneRepository laneRepository;
 
     @Autowired
@@ -31,12 +31,27 @@ public class LaneService {
     @Cacheable(value = CacheConfiguration.CONFIGURATION, key = "'lane'")
     public List<LaneConfiguration> getLanes() {
         List<Lane> lanes = laneRepository.findAll();
-        return TaskboardConfigToLaneConfigurationTransformer.transform(lanes);
+        return Collections.unmodifiableList(TaskboardConfigToLaneConfigurationTransformer.transform(lanes));
+    }
+
+    @Cacheable(value = CacheConfiguration.CONFIGURATION, key = "{'step', #issueTypeId, #statusId}")
+    public List<StepConfiguration> getSteps(long issueTypeId, long statusId) {
+        return stepStream()
+                .filter(step -> step.getIssuesConfiguration().stream()
+                        .anyMatch(filter -> filter.matches(issueTypeId, statusId)))
+                .collect(toList());
     }
 
     @Cacheable(value = CacheConfiguration.CONFIGURATION, key = "'filter'")
     public List<IssuesConfiguration> getFilters() {
         return filterStream()
+                .collect(toList());
+    }
+
+    @Cacheable(value = CacheConfiguration.CONFIGURATION, key = "{'filter', #issueTypeId}")
+    public List<IssuesConfiguration> getFiltersForIssueType(long issueTypeId) {
+        return filterStream()
+                .filter(f -> f.getIssueType() == issueTypeId)
                 .collect(toList());
     }
 

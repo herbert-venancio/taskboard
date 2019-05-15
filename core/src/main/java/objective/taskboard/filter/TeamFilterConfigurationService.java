@@ -1,4 +1,4 @@
-package objective.taskboard.filterConfiguration;
+package objective.taskboard.filter;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

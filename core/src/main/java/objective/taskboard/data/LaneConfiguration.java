@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import objective.taskboard.domain.Lane;
+import objective.taskboard.domain.UserPreferences;
 
 public class LaneConfiguration {
 
@@ -34,10 +35,10 @@ public class LaneConfiguration {
     private final List<RuleConfiguration> rules;
     private final boolean showParentIconInSynthetic;
 
-    private double weight;
-    private boolean showHeader;
-    private boolean showLevel;
-    private boolean showLaneTeam;
+    private final double weight;
+    private final boolean showHeader;
+    private final boolean showLevel;
+    private final boolean showLaneTeam;
 
     private LaneConfiguration(
             long id, int order, String level, List<StageConfiguration> stages, List<RuleConfiguration> rules, boolean showParentIconInSynthetic,
@@ -61,6 +62,21 @@ public class LaneConfiguration {
                 lane.getId(), lane.getOrdem(), lane.getName(), new ArrayList<>(), new ArrayList<>(), lane.isShowParentIconInSynthetic(),
                 lane.getWeight(), lane.isShowHeader(), true, lane.showLaneTeam
                 );
+    }
+
+    public static LaneConfiguration from(LaneConfiguration lane, UserPreferences.LevelPreference preference) {
+        return new LaneConfiguration(
+                lane.id
+                , lane.order
+                , lane.level
+                , lane.stages
+                , lane.rules
+                , lane.showParentIconInSynthetic
+                , preference.weightLevel
+                , preference.showHeader
+                , preference.showLevel
+                , preference.showLaneTeam
+        );
     }
 
     public void addStageConfiguration(StageConfiguration stage) {
@@ -99,32 +115,16 @@ public class LaneConfiguration {
         return this.weight;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
     public boolean isShowHeader() {
         return this.showHeader;
-    }
-
-    public void setShowHeader(boolean showHeader) {
-        this.showHeader = showHeader;
     }
 
     public boolean isShowLevel() {
         return this.showLevel;
     }
 
-    public void setShowLevel(boolean showLevel) {
-        this.showLevel = showLevel;
-    }
-
     public boolean isShowLaneTeam() {
         return this.showLaneTeam;
-    }
-
-    public void setShowLaneTeam(boolean showLaneTeam) {
-        this.showLaneTeam = showLaneTeam;
     }
 
 }
