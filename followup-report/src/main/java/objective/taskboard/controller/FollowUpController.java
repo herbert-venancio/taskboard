@@ -116,10 +116,10 @@ public class FollowUpController {
                             e.getTableName(), e.getSheetName(), e.getMinRows()));
 
         } catch (ClusterNotConfiguredException e) {//NOSONAR
-            return ResponseEntity.badRequest().body("No cluster configuration found for project " + projectKey + ".");
+            return ResponseEntity.badRequest().body(ClusterNotConfiguredException.fromProject(projectKey, e));
 
         } catch (ProjectDatesNotConfiguredException e) {//NOSONAR
-            return ResponseEntity.badRequest().body("The project " + projectKey + " has no start or delivery date.");
+            return ResponseEntity.badRequest().body(ProjectDatesNotConfiguredException.fromProject(projectKey, e));
 
         } catch (Exception e) {
             log.warn("Error generating followup spreadsheet", e);

@@ -1,0 +1,12 @@
+{
+	"private": true,
+	"scripts": {
+		"build": "npm run build --prefix web-app",
+		"watch": "npm run watch --prefix web-app",
+		"postinstall": "npm install --prefix web-app"
+	},
+	"engines": {
+		"node": ">=0.10.0"
+	},
+	"dependencies": {}
+}

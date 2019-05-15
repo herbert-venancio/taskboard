@@ -14,5 +14,5 @@ public class BudgetChartData {
     public LocalDate startingDate;
     public LocalDate endingDate;
     public LocalDate projectionDate;
-    
+
 }

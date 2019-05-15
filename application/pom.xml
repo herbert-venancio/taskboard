@@ -49,6 +49,11 @@
 			<artifactId>sizing-importer</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
+			<artifactId>strategical-dashboard</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>br.com.objective</groupId>
 			<artifactId>kpi-budget-chart</artifactId>
 			<version>${project.version}</version>

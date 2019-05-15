@@ -1,0 +1,15 @@
+<div class="monitor-item monitor-item--{{monitor.status}}" [title]="monitor.statusDetails">
+    <div class="monitor-item__content">
+        <sdb-monitor-icon
+            icon="{{monitor.icon}}"
+            label="{{monitor.label}}">
+        </sdb-monitor-icon>
+        <sdb-monitor-cost
+            *ngFor="let item of monitor.items" 
+            range="{{item.text}}"
+            label="{{item.title}}"
+            details="{{item.details}}"
+            status="{{monitor.status}}">
+        </sdb-monitor-cost>
+    </div>
+</div>

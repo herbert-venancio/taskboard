@@ -1,0 +1,16 @@
+
+.strategical-dashboard {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+
+    &__item {
+        flex:0 0 auto;
+        margin: 10px 13px;
+        width: calc(50% - 26px);
+    }
+}
+
+.content-svg {
+    width: 100%;
+}

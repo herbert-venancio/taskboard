@@ -1,0 +1,29 @@
+.monitor-item {
+    padding: 12px 12px 29px 12px;
+    background-color:#646464;
+
+    &--normal {
+        background-color:#465b4d;
+    }
+
+    &--alert {
+        background-color: #696039;
+    }
+
+    &--danger {
+        background-color: #643e3a;
+    }
+
+    &__actions {
+        text-align:right;
+        button {
+            &:hover {
+                color:#ccc;
+            }
+        }
+    }
+
+    &__content {
+        text-align: center;
+    }
+}

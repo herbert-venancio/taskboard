@@ -15,8 +15,10 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
@@ -33,10 +35,12 @@ public class FollowupProgressCalculator {
         this.kpiService = kpiService;
     }
 
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'followup-with-projection', #timezone, #projectKey, #projectionSampleSize}")
     public ProgressData calculateWithCompleteProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
         return calculate(timezone, projectKey, projectionSampleSize, true);
     }
 
+    @Cacheable(value = CacheConfiguration.STRATEGICAL_DASHBOARD, key="{'followup-without-projection', #timezone, #projectKey, #projectionSampleSize}")
     public ProgressData calculateWithExpectedProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
         return calculate(timezone, projectKey, projectionSampleSize, false);
     }
@@ -46,13 +50,13 @@ public class FollowupProgressCalculator {
 
         FollowUpSnapshot snapshot = kpiService.getSnapshotFromCurrentState(projectKey, timezone);
         if (!snapshot.hasClusterConfiguration())
-            throw new ClusterNotConfiguredException();
+            throw ClusterNotConfiguredException.fromProject(projectKey);
         
         Optional<LocalDate> optionalProjectStartDate = snapshot.getTimeline().getStart();
         Optional<LocalDate> optionalProjectDeliveryDate = snapshot.getTimeline().getEnd();
         
         if (!optionalProjectStartDate.isPresent() || !optionalProjectDeliveryDate.isPresent())
-            throw new ProjectDatesNotConfiguredException();
+            throw ProjectDatesNotConfiguredException.fromProject(projectKey);
         
         LocalDate projectStartDate = optionalProjectStartDate.get();
         LocalDate projectDeliveryDate = optionalProjectDeliveryDate.get(); 

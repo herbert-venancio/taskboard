@@ -1,0 +1,21 @@
+<obj-card class="project-item">
+    <obj-card-title class="project-item__title">
+        <a href="/followup-dashboard/#/project/{{project.projectKey}}">
+            {{project.projectDisplayName}}
+        </a>
+    </obj-card-title>
+    <obj-card-actions>
+        <a href="/followup-dashboard/#/project/{{project.projectKey}}">
+            <button obj-icon-button>
+                <obj-icon iconHref="#icon-view"></obj-icon>
+            </button>
+        </a>
+    </obj-card-actions>
+
+    <obj-card-content class="project-item__content" no-padding>
+        
+        <sdb-monitor-item
+            *ngFor="let monitor of project.monitors"
+            [monitor]="monitor"></sdb-monitor-item>
+    </obj-card-content>
+</obj-card>

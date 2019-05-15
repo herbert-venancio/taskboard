@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.followup.SnapshotGeneratedEvent;
 import objective.taskboard.followup.budget.BudgetChartService;
-import objective.taskboard.followup.budget.ProjectNotFoundException;
+import objective.taskboard.project.ProjectNotFoundException;
 import objective.taskboard.utils.DateTimeUtils;
 
 @CacheConfig(cacheNames = CacheConfiguration.DASHBOARD_BUDGET_DATA)

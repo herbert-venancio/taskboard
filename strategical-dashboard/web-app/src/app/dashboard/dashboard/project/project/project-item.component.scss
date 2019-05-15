@@ -1,0 +1,25 @@
+.project-item {
+    background-color: #444;
+    overflow: hidden;
+
+    button {
+        &:hover {
+            color:#ccc;
+        }
+    }
+
+    &__title,
+    &__title a {
+        font-size:20px;
+        color:#fff;
+        text-decoration:none;
+    }
+
+    &__content {
+        display: flex;
+
+        sdb-monitor-item {
+            flex: 1 1 0;
+        }
+    }
+}
