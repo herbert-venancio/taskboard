@@ -387,6 +387,10 @@
                  cursor: pointer;
              }
 
+             .multiple-reasons {
+                margin: 0px;
+             }
+
              .glasspane span {
                  font-size: 24px;
                  position: absolute;
@@ -881,17 +885,26 @@
                         <div class="block-button-container">Block</div>
                         <paper-toggle-button iron-label-target 
                             class="tb-toggle-button block-button" checked="{{blocked}}"
-                            on-change="_toggleBlockUnblock" 
-                            enabled="{{_canToggleBlockState()}}">
+                            on-change="_toggleBlockUnblock"
+                            disabled="{{_canToggleBlockState(item)}}">
                         </paper-toggle-button>
                     </div>
 
                     <div class="panel-parent">
                         <div class="leftPanel">
-                            <template is="dom-if" if="{{item.blocked}}">
+                            <template is="dom-if" if="{{_shouldHaveLastBlockReason(item)}}">
                                 <div class="blocked" title="This issue is blocked">
                                     <iron-icon class="icon-small" icon="taskboard-icons:blocked"></iron-icon>
-                                    <span>{{item.lastBlockReason}}</span>
+                                    <template is="dom-if" if="{{_isSingleBlockReason(item)}}" >
+                                        <span>{{_extractSingleBlockReason(item)}}</span>
+                                    </template>
+                                    <template is="dom-if" if="{{_isMultipleBlockReason(item)}}" >
+                                        <ul class="multiple-reasons">
+                                            <template is="dom-repeat" items="{{_extractMultipleBlockReasons(item)}}" as="reason">
+                                                <li>{{reason}}</li>
+                                            </template>
+                                        </ul>
+                                    </template>
                                 </div>
                             </template>
                             <template is="dom-if" if="{{item.cancelled}}">
@@ -917,7 +930,7 @@
                                 </div>
                                 <div class="details-column">
                                     <div class="subsubtitle">Class of service</div>
-                                    
+
                                     <paper-material id="class-of-service-value" class="sub-content classofservice" style$="background-color:{{item.color}}">
                                         <template is="dom-if" if="{{classOfServicePickerIsVisible}}">
                                             <div class="class-of-service-value__wrapper" on-tap="_showClassOfServicePicker">
@@ -927,12 +940,12 @@
                                                 </iron-icon>
                                             </div>
                                         </template>
-                                        
+
                                         <template is="dom-if" if="{{!classOfServicePickerIsVisible}}">
                                             <span>{{item.classOfServiceValue}}</span>
                                         </template>
                                     </paper-material>
-                                    
+
                                     <class-of-service-picker
                                         id="classOfServiceSelector"
                                         class="people-picker"
@@ -950,7 +963,7 @@
                                             <span>{{item.release.name}}</span>
                                         </div>
                                     </div>
-                                </template> 
+                                </template>
                                  <div class="details-column">
                                     <template is="dom-if" if="{{canShowSize}}">
                                         <div>
@@ -1104,7 +1117,7 @@
                                     </div>
                                 </div>
                             </template>
-                            
+
                             <template is="dom-if" if="{{item.additionalEstimatedHoursField}}">
                                 <div class="details-row">
                                     <div class="datailsColumn">
@@ -1155,6 +1168,7 @@
         </paper-dialog>
         <confirm-modal id="confirmModal"></confirm-modal>
         <fields-required-modal id="fieldsRequiredDialog" on-close-clicked="blockCancelled"></fields-required-modal>
+        <boolean-confirm-modal id="booleanConfirmModal" on-close-clicked="blockCancelled"></boolean-confirm-modal>
         <alert-modal id="alertModal"></alert-modal>
     </template>
 
@@ -1442,7 +1456,7 @@
                     this._closeAllPickers();
                     this.$.pickerForAddAssignee.open();
                 },
-                
+
                 _showClassOfServicePicker: function(e) {
                     e.stopPropagation();
                     this._closeAllPickers();
@@ -1582,12 +1596,12 @@
                          descriptionField.focus();
                      }, 10)
                 },
-                
+
                 _closeDescriptionEditMode: function() {
                      this.editableDescription = this.item.description;
                      this.descriptionIsEditable = false;
                 },
-                
+
                 _saveIssueDescription: function() {
                     var self = this;
                     this.item.description = this.editableDescription;
@@ -1598,7 +1612,7 @@
                          self._closeDescriptionEditMode();
                      });
                 },
-                
+
 
                 _expandDescription: function() {
                     var element = this.$$(".description-row");
@@ -1685,12 +1699,60 @@
                     });
                 },
 
-                _canToggleBlockState: function(state) {
-                    if (!this.item)
-                        return false;
-                    if (this.item.blocked)
+                _canToggleBlockState: function(item) {
+                    if (item.blockedByParent)
+                        return true;
+                    if (item.blocked)
                         return this.canBlock;
                     return this.canUnblock;
+                },
+
+                _shouldHaveLastBlockReason: function(item) {
+                    return item.blocked || item.blockedByParent;
+                },
+
+                _extractBlockReasons: function(item) {
+                    var reasons = {};
+
+                    if (item.blockedByParent){
+                        var blockedByParentReason = "Issue blocked by parent " + item.parent;
+
+                        if (item.blocked)
+                        {
+                            reasons.multipleReasons = [];
+                            reasons.multipleReasons.push(blockedByParentReason);
+                            reasons.multipleReasons.push(item.lastBlockReason);
+                        }
+                        else
+                            reasons.singleReason = blockedByParentReason;
+                    }
+                    else {
+                        reasons.singleReason = item.lastBlockReason;
+                    }
+
+                    return reasons;
+                },
+
+                _isSingleBlockReason : function(item) {
+                    var reasons = this._extractBlockReasons(item);
+                    if (reasons.singleReason)
+                        return true;
+                    return false;
+                },
+
+                _isMultipleBlockReason : function(item) {
+                    var reasons = this._extractBlockReasons(item);
+                    if (reasons.multipleReasons)
+                        return true;
+                    return false;
+                },
+
+                _extractSingleBlockReason: function(item) {
+                    return this._extractBlockReasons(item).singleReason;
+                },
+
+                _extractMultipleBlockReasons: function(item) {
+                    return this._extractBlockReasons(item).multipleReasons;
                 },
 
                 _toggleBlockUnblock: function() {
@@ -1701,20 +1763,45 @@
                 },
 
                 block: function () {
-                    var self = this;
-                    var callback = function(issue, fieldValuesRequired) {
-                        self._setIssueLocalState(self.item, true, null);
-                        self._issueAction("block-task", "block issue " + issue.issueKey, fieldValuesRequired.lastBlockReason)
+
+                    let callback = (issue, fieldValuesRequired) => {
+                        const self = this;
+                        let issues = taskboard.getHierarchyMatch(issue.issueKey);
+
+                        if(fieldValuesRequired.shouldBlockAllSubtasks){
+                            issues.forEach(issue => {
+                                this._setIssueLocalStateAndFireUpdated(taskboard.getIssueByKey(issue), true, null, 'TRANSITION');
+                            })
+                        }
+                        this._setIssueLocalState(this.item, true, null);
+                        this._issueAction("block-task", "block issue " + issue.issueKey, fieldValuesRequired)
                             .fail(function(){
-                                self.blocked = false;
-                            });
-                    };
+                                this.blocked = false;
+                            })
+                            .done(function() {
+                                if(fieldValuesRequired.shouldBlockAllSubtasks){
+                                    issues.forEach(issue => {
+                                        issue.block = true;
+                                        self._setIssueLocalStateAndFireUpdated(taskboard.getIssueByKey(issue), false, null, 'UPDATED');
+                                    })
+                                }
+                            }
+                        )
+                    }
 
-                    var fields = [{id: "lastBlockReason",
-                        name: taskboard.getFieldName({fieldId: CUSTOMFIELD.LAST_BLOCK_REASON}),
-                        type: TYPE_FIELD.TEXTAREA}];
+                    callback.bind(this);
 
-                    self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
+                    let fields = [{
+                            id: "lastBlockReason",
+                            name: taskboard.getFieldName({fieldId: CUSTOMFIELD.LAST_BLOCK_REASON}),
+                            type: TYPE_FIELD.TEXTAREA
+                        }, {
+                            id: "shouldBlockAllSubtasks",
+                            name: "Block Subtasks",
+                            type: TYPE_FIELD.BOOLEAN_CHECKBOX
+                        }];
+
+                    this.$.fieldsRequiredDialog.openDialog(fields, "Block", this.item, callback);
                 },
 
                 blockCancelled: function() {
@@ -1722,10 +1809,39 @@
                 },
 
                 unblock: function () {
-                    this._issueAction("unblock-task", "unblock issue " + this.item.issueKey, {})
-                        .fail(function(){
-                            self.blocked = true;
-                        });
+                    var callbackBlockTaskAndItsSubtasks = () => {
+                        const self = this;
+                        let issues = taskboard.getHierarchyMatch(this.item.issueKey);
+                        issues.forEach(issue => {
+                            this._setIssueLocalState(taskboard.getIssueByKey(issue), true, null);
+                        })
+                        this._issueAction("unblock-task", "unblock issue " + this.item.issueKey)
+                            .fail(function(){
+                                this.blocked = true;
+                            })
+                            .done(function(){
+                                self.item.shouldBlockAllSubtasks = false;
+                                issues.forEach(issue => {
+                                    issue.block = false;
+                                    issue.shouldBlockAllSubtasks = false;
+                                    self._setIssueLocalState(taskboard.getIssueByKey(issue), false, null);
+                                 })
+                            });
+                    }
+
+                    callbackBlockTaskAndItsSubtasks.bind(this);
+
+                    var callbackBlockOnlyTask = () => {
+                        this._issueAction("unblock-task", "unblock issue " + this.item.issueKey)
+                            .fail(function(){
+                                this.blocked = true;
+                            }
+                        );
+                    }
+
+                    callbackBlockOnlyTask.bind(this);
+
+                    this.$.booleanConfirmModal.openDialog("Unblock", "Do you want to unblock all task's substasks?", callbackBlockTaskAndItsSubtasks, callbackBlockOnlyTask);
                 },
 
                 requestTransition: function (e) {
@@ -1869,7 +1985,7 @@
                     this.descriptionExpanded = false;
                     this.set('descriptionTooLong', false);
                     var self = this;
-                    
+
                     if (this.canHaveSubtasks) {
                         this._collapseDescription();
                         setTimeout(function() {
@@ -1897,7 +2013,7 @@
                     this.canHaveSubtasks = item.feature || item.demand;
                     this.canShowSize = item.subTask && item.cardTshirtSize;
                     this.canBlock = !item.blocked && !item.completed;
-                    this.canUnblock = item.blocked && !item.completed;
+                    this.canUnblock = item.blocked && !item.completed && !item.blockedByParent;
                     this.issueChangeStateClass = '';
                     this.issueDeleteStateClass = '';
                     this.updatedIssue = null;
@@ -2043,7 +2159,7 @@
                 getIssueTypeImage: function(issue) {
                     return issue.typeIconUri;
                 },
-                
+
                 transitionList: function() {
                     var r = [];
                     r.push({name: taskboard.getStatusName(this.item.status), order: this.item.statusOrder})
@@ -2131,17 +2247,17 @@
                 _isOpenedAndIsTheSameIssue: function(issueKey) {
                     return this.isOpen && (this.item && this.item.issueKey == issueKey);
                 },
-                
+
                 removeTeam: function(e) {
                     var teamId = e.model.get("team.id")
                     this._issueAction('removeTeamFromIssue', 'remove team from issue', {id: teamId})
                 },
-                
+
                 _removeAssignee: function(e) {
                     var username = e.model.get("assignee.name")
                     this._issueAction('removeAssigneeFromIssue', 'remove assignee from issue', {username: username})
                 },
-                
+
                 _updateBallpark: function(e, data) {
                     this._issueAction('saveBallpark', 'change size of ballpark ' + data.fieldId + ' for issue ' + this.item.issueKey, {fieldId: data.fieldId, size:data.value})
                         .always(function() {
@@ -2208,7 +2324,7 @@
 
                 _updateIssueSummary : function(e) {
                     var self = this;
-                    
+
                     this._issueAction("saveSummary", "save summary " + this.item.issueKey, this.newSummaryValue)
                     .fail(function(){
                             self.editSummaryIsOpen = true;
@@ -2225,7 +2341,7 @@
                         this.querySelector('#modal').focus();
                         event.stopPropagation();
                     }
-                    
+
                     if (this._isEnter(event))
                         this._updateIssueSummary();
                 },

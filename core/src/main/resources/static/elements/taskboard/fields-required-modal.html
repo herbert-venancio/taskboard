@@ -85,19 +85,27 @@
                         <div class="content-row">
                             <div class="column-block">
                                 <div>
-                                    <span class="sub-header">[[field.name]]: </span>
-                                </div>
-                                <div>
                                     <template is="dom-if" if="{{_isTextArea(field.type)}}">
+                                        <div>
+                                            <span class="sub-header">[[field.name]]: </span>
+                                        </div>
                                         <textarea id$="{{field.id}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
                                     </template>
                                     <template is="dom-if" if="{{_isVersions(field.type)}}">
+                                        <div>
+                                            <span class="sub-header">[[field.name]]: </span>
+                                        </div>
                                         <version-field id$="{{field.id}}"
                                                 class="version-field"
                                                 value="{{getValue(field.id)}}"
                                                 versions="{{field.versions}}"
                                                 >
                                         </version-field>
+                                    </template>
+                                    <template is="dom-if" if="{{_isBooleanCheckbox(field.type)}}">
+                                        <paper-checkbox id$="{{field.id}}"checked>
+                                            [[field.name]]
+                                        </paper-checkbox>
                                     </template>
                                 </div>
                                 <div>
@@ -194,6 +202,10 @@
                     return type == TYPE_FIELD.VERSIONS;
                 },
 
+                _isBooleanCheckbox: function(type) {
+                    return type == TYPE_FIELD.BOOLEAN_CHECKBOX;
+                },
+
                 getValue: function(id) {
                     return this.issue[id];
                 },
@@ -247,12 +259,12 @@
                 },
 
                 _getValueFieldByType: function(id, type) {
-                    var elementTag = "";
                     if (this._isTextArea(type))
-                        elementTag = "textarea";
+                        return this.$$("textarea#" + id).value;
                     else if (this._isVersions(type))
-                        elementTag = "version-field";
-                    return this.$$(elementTag + "#" + id).value;
+                        return this.$$("version-field#" + id).value;
+                    else if (this._isBooleanCheckbox(type))
+                        return this.$$("paper-checkbox#" + id).checked;
                 },
 
                 isValidValue: function(value) {

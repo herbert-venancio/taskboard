@@ -177,6 +177,21 @@ public class IssueFieldsExtractor {
         }
     }
 
+    public  static boolean extractShouldBlockAllSubtasks(JiraProperties jiraProperties, JiraIssueDto issue) {
+        JSONArray jsonArray = issue.getField(jiraProperties.getCustomfield().getShouldBlockAllSubtasks().getId());
+
+        if (jsonArray == null || jsonArray.length() == 0)
+            return false;
+
+        try {
+            return jsonArray.getJSONObject(0) != null
+                    && jsonArray.getJSONObject(0).getInt("id") == jiraProperties.getCustomfield().getShouldBlockAllSubtasks().getYesOptionId();
+        } catch (JSONException e) {
+            logErrorExtractField(issue, jiraProperties.getCustomfield().getShouldBlockAllSubtasks().getId() + ".value", e);
+            return false;
+        }
+    }
+
     public  static String extractLastBlockReason(JiraProperties jiraProperties, JiraIssueDto issue) {
         String lastBlockReason = issue.getField(jiraProperties.getCustomfield().getLastBlockReason().getId());
 

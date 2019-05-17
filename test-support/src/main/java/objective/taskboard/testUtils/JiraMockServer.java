@@ -273,6 +273,9 @@ public class JiraMockServer {
                         case "customfield_11452"://last block reason
                             fields.put(aKey, reqFields.getString(aKey));
                             break;
+                        case "customfield_10705"://should block all subtasks
+                            fields.put(aKey, reqFields.getJSONArray(aKey));
+                            break;
                         default:
                             throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
                     }

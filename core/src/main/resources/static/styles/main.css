@@ -712,6 +712,11 @@ paper-toggle-button[disabled] .paper-toggle-button {
     opacity: .6;
 }
 
+paper-toggle-button[disabled][checked] .toggle-button.paper-toggle-button {
+    background-color:#E27323;
+    opacity: .6;
+}
+
 /*
     Clear button
 */

@@ -24,6 +24,66 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
+    public void whenTaskIsBlockedAndUnblocked_ShouldShowAndHideBlockedReasonLabel() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-235")
+                .click()
+                .issueDetails()
+                .assertIsNotBlocked()
+                .blockTask()
+                .assertIsBlocked();
+
+        mainPage.reload();
+
+        mainPage.issue("TASKB-235")
+                .issueDetails()
+                .assertIsBlocked()
+                .unblockTask()
+                .assertIsNotBlocked();
+    }
+
+    @Test
+    public void whenTaskIsBlockedAndUnblocked_ShouldBlockAndUnBlockSubtasks() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        registerWebhook("jira:issue_updated");
+
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-637")
+                .click()
+                .issueDetails()
+                .assertIsNotBlocked()
+                .blockTask()
+                .assertIsBlocked()
+                .closeDialog();
+
+        mainPage.issue("TASKB-680")
+                .assertHasBlockedIcon(true)
+                .click()
+                .issueDetails()
+                .assertIsBlocked()
+                .closeDialog();
+
+        mainPage.issue("TASKB-637")
+                .click()
+                .issueDetails()
+                .assertIsBlocked()
+                .unblockTask()
+                .assertIsNotBlocked()
+                .closeDialog();
+
+        mainPage.issue("TASKB-680")
+                .assertHasBlockedIcon(false)
+                .click()
+                .issueDetails()
+                .assertIsNotBlocked();
+    }
+
+    @Test
     public void whenClassOfServiceIsReplaced_ShouldUpdateIssueImmediatlyWithNewClassOfService() {
         MainPage mainPage = MainPage.produce(webDriver);
 

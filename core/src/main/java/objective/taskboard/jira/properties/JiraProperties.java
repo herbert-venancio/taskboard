@@ -62,7 +62,6 @@ public class JiraProperties implements JiraClientProperties {
     @NotNull
     @Valid
     private IssueType issuetype;
-
     @NotNull
     @NotEmpty
     private List<Long> statusesCompletedIds;
@@ -172,6 +171,9 @@ public class JiraProperties implements JiraClientProperties {
         @NotNull
         @Valid
         private CustomFieldDetails lastBlockReason;
+        @NotNull
+        @Valid
+        private ShouldBlockAllSubtasks shouldBlockAllSubtasks;
         @NotNull
         @Valid
         private CustomFieldDetails coAssignees;
@@ -447,6 +449,45 @@ public class JiraProperties implements JiraClientProperties {
             }
         }
 
+        public static class ShouldBlockAllSubtasks extends CustomFieldDetails {
+            @NotNull
+            @DecimalMin("1")
+            private Integer yesOptionId;
+
+            public Integer getYesOptionId() {
+                return this.yesOptionId;
+            }
+
+            public void setYesOptionId(final Integer yesOptionId) {
+                this.yesOptionId = yesOptionId;
+            }
+
+            @Override
+            public String toString() {
+                return "ShouldBlockAllSubtasks{" +
+                        "yesOptionId=" + yesOptionId +
+                        '}';
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                if (!super.equals(o)) return false;
+
+                ShouldBlockAllSubtasks shouldBlockAllSubtasks = (ShouldBlockAllSubtasks) o;
+
+                return yesOptionId != null ? yesOptionId.equals(shouldBlockAllSubtasks.yesOptionId) : shouldBlockAllSubtasks.yesOptionId == null;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = super.hashCode();
+                result = 31 * result + (yesOptionId != null ? yesOptionId.hashCode() : 0);
+                return result;
+            }
+        }
+
         public TShirtSize getTShirtSize() {
             return this.tShirtSize;
         }
@@ -461,6 +502,10 @@ public class JiraProperties implements JiraClientProperties {
 
         public CustomFieldDetails getLastBlockReason() {
             return this.lastBlockReason;
+        }
+
+        public ShouldBlockAllSubtasks getShouldBlockAllSubtasks() {
+            return this.shouldBlockAllSubtasks;
         }
 
         public CustomFieldDetails getCoAssignees() {
@@ -493,6 +538,10 @@ public class JiraProperties implements JiraClientProperties {
 
         public void setLastBlockReason(final CustomFieldDetails lastBlockReason) {
             this.lastBlockReason = lastBlockReason;
+        }
+
+        public void setShouldBlockAllSubtasks(final ShouldBlockAllSubtasks shouldBlockAllSubtasks) {
+            this.shouldBlockAllSubtasks = shouldBlockAllSubtasks;
         }
 
         public void setCoAssignees(final CustomFieldDetails coAssignees) {

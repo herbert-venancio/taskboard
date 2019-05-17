@@ -111,6 +111,10 @@ public abstract class AbstractUiFragment {
         waitAllConditions(element, elementIsVisible());
     }
 
+    protected void waitVisibilityOfElement(By by) {
+        waitAllConditions(by, elementIsVisible());
+    }
+
     protected void ensureVisibilityOfElementDuringMilliseconds(WebElement element, Long milliseconds) {
         long end = System.currentTimeMillis() + milliseconds;
         while (System.currentTimeMillis() < end)
@@ -151,8 +155,8 @@ public abstract class AbstractUiFragment {
         return waitAllConditions(by, atLeastOneElementExists());
     }
 
-    protected void waitUntilChildElementExists(WebElement element, By by) {
-        waitAllConditions(element, by, atLeastOneElementExists());
+    protected WebElement waitUntilChildElementExists(WebElement element, By by) {
+        return waitAllConditions(element, by, elementIsVisible());
     }
 
     protected void waitUntilChildElementNotExists(WebElement element, By by) {

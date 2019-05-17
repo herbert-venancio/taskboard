@@ -280,6 +280,7 @@ public abstract class FollowUpDataGeneratorTestBase {
         private Date priorityUpdatedDate;
         private String parent;
         private boolean blocked = false;
+        private boolean shouldBlockAllSubtasks = false;
         private String lastBlockReason;
         private Map<String, objective.taskboard.data.CustomField> tshirtSizes = new LinkedHashMap<>();
         private objective.taskboard.data.CustomField additionalEstimatedHours;
@@ -477,6 +478,7 @@ public abstract class FollowUpDataGeneratorTestBase {
                     labels,
                     components,
                     blocked,
+                    shouldBlockAllSubtasks,
                     lastBlockReason,
                     tshirtSizes,
                     additionalEstimatedHours,

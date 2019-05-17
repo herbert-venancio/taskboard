@@ -29,12 +29,15 @@ class IssueDetails extends AbstractUiFragment {
     private final ButtonComponent assignToMeButton;
     private final ButtonComponent addAssigneeButton;
     private final ButtonComponent assignTeamButton;
+    private final ButtonComponent blockTaskButton;
+    private final By toggleButtonSelector = By.cssSelector(".blocked");
 
     public IssueDetails(WebDriver driver) {
         super(driver);
         assignToMeButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("assignToMe")));
         addAssigneeButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("addAssigneeButton")));
         assignTeamButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("addTeamButton")));
+        blockTaskButton = new ButtonComponent(driver, new ByChained(issueDetailRootSelector, By.id("toggleButton")));
     }
 
     public IssueDetails assignToMe() {
@@ -56,6 +59,35 @@ class IssueDetails extends AbstractUiFragment {
                 , cssSelector(".assignees paper-material[data-assignee='" + assigneeToRemove + "'] .remove-button")));
         removeAssigneeButton.click();
 
+        return this;
+    }
+
+    public IssueDetails blockTask(){
+        assertIsOpened();
+        assertIsNotBlocked();
+        blockTaskButton.click();
+        setInputValue(webDriver.findElement(By.id("lastBlockReason")), "Block reason");
+        waitForClick(By.id("confirm-button"));
+        assertIsBlocked();
+        return this;
+    }
+
+    public IssueDetails unblockTask(){
+        assertIsOpened();
+        assertIsBlocked();
+        blockTaskButton.click();
+        waitForClick(By.id("yes-button"));
+        assertIsNotBlocked();
+        return this;
+    }
+
+    public IssueDetails assertIsBlocked() {
+        waitVisibilityOfElement(toggleButtonSelector);
+        return this;
+    }
+
+    public IssueDetails assertIsNotBlocked() {
+        waitElementNotExistsOrInvisible(toggleButtonSelector);
         return this;
     }
 
