@@ -757,3 +757,30 @@ class ScopeProgressChartBuilder extends ChartBuilderBase {
         this.options.plotOptions.series.pointInterval = 24 * 3600 * 1000;
     }
 }
+
+class BugByEnvironmentChartBuilder extends ChartBuilderBase {
+    constructor(divID) {
+        super(divID);
+        Highcharts.merge(true, this.options, {
+            tooltip: {
+                xDateFormat: 'Week from %A, %b %e, %Y'
+            }
+        });
+        Highcharts.merge(true, this.options, {
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    format: '{value:%e %b %y}'
+                }
+            }
+        });
+        Highcharts.merge(true, this.options, {
+            yAxis: {
+                title: {
+                    text: 'Quantity'
+                }
+            }
+        });
+        super.withTooltipFooterValue('{point.y}');
+    }
+}
