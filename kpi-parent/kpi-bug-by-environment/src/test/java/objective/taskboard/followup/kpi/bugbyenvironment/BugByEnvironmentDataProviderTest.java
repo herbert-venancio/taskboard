@@ -63,7 +63,7 @@ public class BugByEnvironmentDataProviderTest {
     public void givenProjectRange_fromMidleWeekOne_toCompleteWeekThree_thenAllBugsShouldReturn() {
         given()
             .preConfiguredBugs()
-            .projectWithRangeOf("3 Weeks Configuration") //x3
+            .projectWithRangeOf("3 Weeks Configuration - Starting middle Week 1") //x3
         .when()
             .appliesBehavior(requestBugByEnvironmentData())
         .then()
