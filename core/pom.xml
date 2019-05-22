@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>org.javers</groupId>
 			<artifactId>javers-spring-boot-starter-sql</artifactId>
-			<version>5.5.0</version>
+			<version>5.5.2</version>
 		</dependency>
 
 		<!-- GOOGLE API -->
