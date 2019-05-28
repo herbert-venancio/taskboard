@@ -1,3 +1,174 @@
 <dom-module id="widget-bug-by-environment">
+    <template>
 
+        <style>
+            #bugByEnvironment {
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+
+        <widget-wrap title="Bug by Environment" is-ready="{{isReady}}"
+                options="{{options}}" highcharts-chart="{{chart}}"
+                error-message="{{errorMessage}}">
+            <div id="bugByEnvironment" class="tb-chart"></div>
+        </widget-wrap>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'widget-bug-by-environment',
+
+                properties: {
+                    selectedProjectKey: {
+                        type: String,
+                        observer: '_onProjectSelected'
+                    },
+                    isReady: {
+                        type: Boolean,
+                        value: false
+                    },
+                    errorMessage: {
+                        type: String,
+                        value: ''
+                    },
+                    chart: {
+                        type: Object,
+                        value: null
+                    },
+                    options: {
+                        type: Array,
+                        value: null
+                    },
+                    isVisible: {
+                        type: Boolean
+                    },
+                    windowHasResized: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _plotData: {
+                        type: Object
+                    },
+                    _isPlotDataUpdated: {
+                        type: Boolean
+                    }
+                },
+
+                observers: [
+                    '_reflowChart(isVisible, windowHasResized)',
+                    '_createChart(_isPlotDataUpdated, isVisible)'
+                ],
+
+                _reflowChart: function(isVisible, windowHasResized) {
+                    if (isVisible && windowHasResized) {
+                        if (this.chart) {
+                            this.chart.reflow();
+                        }
+                        this.windowHasResized = false;
+                    }
+                },
+
+                _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
+                    if (newSelectedProjectKey === previousSelectedProjectKey) {
+                        return;
+                    }
+                    this._fetchData(newSelectedProjectKey);
+                },
+
+                _fetchData: function (selectedProjectKey) {
+                    this.reset();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    const url = `/api/projects/${selectedProjectKey}/followup/bugByEnvironment?timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        if (data.length === 0) {
+                            this.errorMessage = 'Bug by Environment chart has no data';
+                            return;
+                        }
+
+                        this._prepareData(data);
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
+                },
+
+                _prepareData: function (data) {
+                    this._parseDates(data);
+                    this._plotData = {
+                        allData: data
+                    };
+                    this._isPlotDataUpdated = true;
+                },
+
+                _parseDates: function (data) {
+                    data.forEach((item) => {
+                        item.date = new Date(item.date);
+                    });
+                },
+
+                ready: function () {
+                },
+
+                reset: function () {
+                    this.isReady = false;
+                    this.errorMessage = '';
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
+
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
+                    this._resetChart();
+                },
+
+                _resetChart: function () {
+                    if (this.chart) {
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
+                        this.chart.destroy();
+                        this.chart = null;
+                    }
+                },
+
+                _createChart: function (isPlotDataUpdated, isVisible) {
+                    if (!isVisible || !isPlotDataUpdated) {
+                        return;
+                    }
+                    this._resetChart();
+                    const series = this._transformToHighchartsSeries(this._plotData.allData);
+
+                    this.chart = new BugByEnvironmentChartBuilder('bugByEnvironment')
+                        .withChartType('column')
+                        .withSeriesData(series)
+                        .build();
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart);
+                    this._isPlotDataUpdated = false;
+                    this.isReady = true;
+                },
+
+                _transformToHighchartsSeries: function (filteredData) {
+                    const reduceFunction = (previous, current) => {
+                        if (previous[current.bugCategory] === undefined) {
+                            previous[current.bugCategory] = {
+                                name: current.bugCategory,
+                                data: []
+                            };
+                        }
+                        previous[current.bugCategory].data.push([
+                            current.date.getTime(),
+                            current.totalOfBugs,
+                        ]);
+                        return previous;
+                    };
+                    const series = Object.values(filteredData.reduce(reduceFunction, {}));
+                    return series;
+                }
+            });
+        })();
+    </script>
 </dom-module>
