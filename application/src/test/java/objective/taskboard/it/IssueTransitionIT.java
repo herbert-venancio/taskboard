@@ -23,6 +23,7 @@ package objective.taskboard.it;
 import org.junit.Test;
 
 import objective.taskboard.RequestBuilder;
+import objective.taskboard.testUtils.JiraMockController;
 import objective.taskboard.utils.IOUtilities;
 
 public class IssueTransitionIT extends AuthenticatedIntegrationTest {

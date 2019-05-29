@@ -18,20 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-package objective.taskboard.it;
+package objective.taskboard.testUtils;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-
-import javax.persistence.EntityManager;
-
-import org.hibernate.internal.SessionImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.TaskboardProperties;
 import objective.taskboard.controller.CacheRefreshController;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -41,22 +33,17 @@ import objective.taskboard.issueBuffer.IssueBufferService;
 public class TestExtraControllers {
 
     @Autowired
-    private IssueBufferService issueBuffer;
-    
+    private DataSourceResetter dataSourceResetter;
+
     @Autowired
-    EntityManager entityManager;
-    
-    @Autowired
-    CacheRefreshController cacheRefreshController;
-    
+    private CacheRefreshController cacheRefreshController;
+
     @Autowired
     private IssuePriorityService prioService;
 
     @Autowired
-    private TaskboardProperties taskboardProperties;
+    private IssueBufferService issueBuffer;
 
-    private Savepoint _savepoint;
-    
     @RequestMapping("resetbuffer")
     public void resetbuffer() {
         rollback();
@@ -65,31 +52,15 @@ public class TestExtraControllers {
         issueBuffer.reset();
         savepoint();
     }
-    
+
     @RequestMapping("savepoint")
     public void savepoint() {
-        try {
-            _savepoint = ((SessionImpl) entityManager.getDelegate()).connection().setSavepoint();
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        }
+        dataSourceResetter.savepoint();
     }
-    
+
     @RequestMapping("rollback")
     public void rollback() {
-        if (_savepoint == null)
-            return;
-        try {
-            ((SessionImpl) entityManager.getDelegate()).connection().rollback(_savepoint);
-            _savepoint = null;
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-    
-    @RequestMapping("set-root-data-directory")
-    public void setRootDataDirectory(@RequestParam("root") String root) {
-        taskboardProperties.setRootDataDirectory(root);
+        dataSourceResetter.rollback();
     }
 
     @RequestMapping("force-update-issue-buffer")

@@ -2,6 +2,8 @@ package objective.taskboard.it;
 
 import org.junit.Test;
 
+import objective.taskboard.testUtils.JiraMockController;
+
 public class JiraSyncErrorIT extends AuthenticatedIntegrationTest {
     @Test
     public void sucessfulStartup_ShouldShowOkIcon() {
