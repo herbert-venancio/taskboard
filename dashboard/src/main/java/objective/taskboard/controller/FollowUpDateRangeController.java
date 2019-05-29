@@ -7,16 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardTacticalPermission;
-import objective.taskboard.followup.FollowUpDateRangeProvider;
 import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.timeline.FollowUpDateRangeProvider;
 
 @RestController
 public class FollowUpDateRangeController {
@@ -34,7 +33,7 @@ public class FollowUpDateRangeController {
     private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
 
 
-    @RequestMapping(value = "/api/projects/{projectKey}/followup/date-range", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/api/projects/{projectKey}/followup/date-range", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getDateRangeByProjectKey(@PathVariable("projectKey") String projectKey) {
         if (!dashboardTacticalPermission.isAuthorizedFor(projectKey) || !projectDashboardOperationalPermission.isAuthorizedFor(projectKey))
             return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);

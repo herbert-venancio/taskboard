@@ -13,4 +13,8 @@ public class DashboardTimeline {
         this.endDate = endDate;
     }
 
+    public boolean hasBothDates() {
+        return startDate.isPresent() && endDate.isPresent();
+    }
+
 }
