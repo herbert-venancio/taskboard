@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class Comment implements Serializable {
+
+    private static final long serialVersionUID = -8217367583408881278L;
+
     public Date created;
     public String author;
     public String body;

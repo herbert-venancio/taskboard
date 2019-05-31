@@ -3,7 +3,6 @@ package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -14,11 +13,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.json.JsonConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,44 +46,18 @@ public class AuditController {
                         , Function.identity()));
     }
 
-    @GetMapping("/{type}/changes")
-    public ResponseEntity getEntityChanges(@PathVariable("type") String typeName) {
+    @GetMapping(value = "/{type}/changes", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getEntityChanges(@PathVariable("type") String typeName) {
         return Optional.ofNullable(typeNameMap.get(typeName))
-                .map(type -> ResponseEntity.ok(getChanges(type)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(this::getChanges)
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
-    @GetMapping("/{type}/snapshots")
-    public ResponseEntity getEntitySnapshots(@PathVariable("type") String typeName) {
+    @GetMapping(value = "/{type}/snapshots", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getEntitySnapshots(@PathVariable("type") String typeName) {
         return Optional.ofNullable(typeNameMap.get(typeName))
-                .map(type -> ResponseEntity.ok(getSnapshots(type)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("{type}/restore")
-    public ResponseEntity restoreEntity(@PathVariable("type") String typeName, @RequestBody RestoreRequest request) {
-        return Optional.ofNullable(typeNameMap.get(typeName))
-                .map(type -> restore(request, type))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    public static class RestoreRequest {
-
-        private String id;
-        private BigDecimal commitId;
-
-        public String getId() {
-            return id;
-        }
-        public void setId(String id) {
-            this.id = id;
-        }
-        public BigDecimal getCommitId() {
-            return commitId;
-        }
-        public void setCommitId(BigDecimal commitId) {
-            this.commitId = commitId;
-        }
+                .map(this::getSnapshots)
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     private String getChanges(Class<?> type) {
@@ -97,12 +68,4 @@ public class AuditController {
         return jsonConverter.toJson(auditService.getSnapshots(type));
     }
 
-    private ResponseEntity restore(RestoreRequest request, Class<?> type) {
-        try {
-            auditService.restore(request.getId(), request.getCommitId(), type);
-            return ResponseEntity.ok("ok");
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
-    }
 }
