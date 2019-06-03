@@ -1,5 +1,7 @@
 package objective.taskboard.auth;
 
+import java.util.Optional;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,21 +24,41 @@ package objective.taskboard.auth;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public abstract class CredentialsHolder {
 
-    public static String username() {
+    public static String defineUsername() {
         validateAuthentication();
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        LoggedUserDetails loggedUser = (LoggedUserDetails) getAuthentication().getPrincipal();
+        return loggedUser.defineUsername();
+    }
+
+    public static String realUsername() {
+        validateAuthentication();
+        LoggedUserDetails loggedUser = (LoggedUserDetails) getAuthentication().getPrincipal();
+        return loggedUser.getRealUsername();
+    }
+
+    public static Optional<String> impersonateUsername() {
+        validateAuthentication();
+        LoggedUserDetails loggedUser = (LoggedUserDetails) getAuthentication().getPrincipal();
+        return loggedUser.getImpersonateUsername();
     }
 
     public static String password() {
         validateAuthentication();
-        return (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        return (String) getAuthentication().getCredentials();
     }
 
     private static void validateAuthentication() {
-        Validate.isTrue(SecurityContextHolder.getContext().getAuthentication().isAuthenticated(), "Not authenticated");
+        Authentication authentication = getAuthentication();
+        Validate.isTrue(authentication != null && authentication.isAuthenticated(), "Not authenticated");
     }
+
+    private static Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
 }

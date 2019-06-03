@@ -40,7 +40,7 @@ public class UserTeamPermissionService {
         if (loggedInUser.isAdmin())
             return new HashSet<>(teamRepo.getCache());
 
-        return getTeamsVisibleToUser(loggedInUser.getUsername());
+        return getTeamsVisibleToUser(loggedInUser.defineUsername());
     }
 
     public Set<Team> getTeamsVisibleToUser(String username) {

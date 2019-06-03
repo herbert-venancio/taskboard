@@ -1,7 +1,6 @@
-package objective.taskboard.controller;
+package objective.taskboard.user;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
 
@@ -14,29 +13,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.authorizer.permission.UserVisibilityPermission;
-import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.data.JiraUser.UserDetails;
 
 @RestController
 @RequestMapping("/ws/users")
-public class UserController {
+class UserController {
+
+    private final UserSearchService userSearchService;
 
     @Autowired
-    private JiraService jiraBean;
-
-    @Autowired
-    private UserVisibilityPermission userVisibilityPermission;
+    public UserController(UserSearchService userSearchService) {
+        this.userSearchService = userSearchService;
+    }
 
     @GetMapping(path = "search")
     public ResponseEntity<?> usersWhoseNameContains(
             @RequestParam("query") String userQuery,
             @RequestParam(required=false, defaultValue="false") boolean onlyNames) {
-        List<UserDetails> usersFound = getUsersVisibleToLoggedInUserByQuery(userQuery);
+        List<UserDetails> usersFound = userSearchService.getUsersVisibleToLoggedInUserByQuery(userQuery);
 
         return onlyNames
-            ? new ResponseEntity<>(usersFound.stream().map(user -> user.name).collect(toList()), OK)
-            : new ResponseEntity<>(usersFound, OK);
+            ? ResponseEntity.ok(usersFound.stream().map(user -> user.name).collect(toList()))
+            : ResponseEntity.ok(usersFound);
     }
 
     @RequestMapping("logout")
@@ -44,13 +42,5 @@ public class UserController {
         session.invalidate();
         return "redirect:/login";
     }
-
-    private List<UserDetails> getUsersVisibleToLoggedInUserByQuery(String userQuery) {
-        List<UserDetails> usersFound = jiraBean.findUsers(userQuery);
-        return usersFound.stream()
-                .filter(user -> userVisibilityPermission.isAuthorizedFor(user.name))
-                .collect(toList());
-    }
-
 
 }

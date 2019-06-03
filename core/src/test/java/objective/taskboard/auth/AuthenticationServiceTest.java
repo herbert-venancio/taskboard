@@ -2,33 +2,39 @@ package objective.taskboard.auth;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.auth.authorizer.permission.ImpersonatePermission.IMPERSONATE_HEADER;
 import static objective.taskboard.testUtils.AssertUtils.collectionToString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+
+import com.google.api.client.util.Maps;
 
 import objective.taskboard.auth.AuthenticationService.AuthenticationResult;
 import objective.taskboard.auth.LoggedUserDetails.JiraRole;
+import objective.taskboard.auth.authorizer.permission.ImpersonatePermission;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.plugin.UserDetail;
-import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.jira.properties.JiraProperties.Lousa;
-import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.user.TaskboardUser;
-import objective.taskboard.user.TaskboardUserRepository;
+import objective.taskboard.user.TaskboardUserService;
 
 public class AuthenticationServiceTest {
 
@@ -41,85 +47,137 @@ public class AuthenticationServiceTest {
     public void authenticate_validCredentials_shouldAuthenticate() {
         given()
             .user("jose")
-                .withPassword("123")
                 .existsOnJiraWithRoles(
                         role().id(1).name("dev").projectKey("PX"),
                         role().id(2).name("adm").projectKey("SP"))
-                .existsOnTaskboardWithAdminPermissionEquals(true)
 
-        .whenExecute(() -> authenticateResult = subject.authenticate("jose", "123"))
+        .whenExecute(() -> authenticateResult = subject.authenticate("jose", "some-pass"))
 
-        .thenAssert()
-            .taskboardUserLastLoginWasUpdatedToNow()
-            .successEquals(true)
-            .messageEquals(null)
-            .principalEquals()
-                .username("jose")
-                .admin(true)
-                .roles("1 | dev | PX",
-                       "2 | adm | SP");
-    }
-
-    @Test
-    public void authenticate_firstLogin_shouldCreateTaskboardUser() {
-        given()
-            .usernamePropertyToConnectWithJiraEquals("mary")
-            .user("jose")
-                .withPassword("123")
-                .existsOnJiraWithRoles(
-                        role().id(1).name("dev").projectKey("PX"))
-                .doenstExistsOnTaskboard()
-
-        .whenExecute(() -> authenticateResult = subject.authenticate("jose", "123"))
-
-        .thenAssert()
-            .taskboardUserWasCreated()
-            .taskboardUserLastLoginWasUpdatedToNow()
-            .successEquals(true)
-            .messageEquals(null)
-            .principalEquals()
-                .username("jose")
-                .admin(false)
-                .roles("1 | dev | PX");
-    }
-
-    @Test
-    public void authenticate_jiraUserFirstLogin_shouldCreateTaskboardUserAsAdmin() {
-        given()
-            .usernamePropertyToConnectWithJiraEquals("mary")
-            .user("mary")
-                .withPassword("123")
-                .existsOnJiraWithRoles(
-                        role().id(1).name("dev").projectKey("PX"))
-                .doenstExistsOnTaskboard()
-
-        .whenExecute(() -> authenticateResult = subject.authenticate("mary", "123"))
-
-        .thenAssert()
-            .taskboardUserWasCreated()
-            .taskboardUserLastLoginWasUpdatedToNow()
-            .successEquals(true)
-            .messageEquals(null)
-            .principalEquals()
-                .username("mary")
-                .admin(true)
-                .roles("1 | dev | PX");
+        .then()
+            .assertUser("jose")
+                .taskboardUserLastLoginWasUpdatedToNow()
+                .success(true)
+                .message(null)
+                .principal()
+                    .defineUsername("jose")
+                    .roles("1 | dev | PX",
+                           "2 | adm | SP");
     }
 
     @Test
     public void authenticate_invalidCredentials_shouldFail() {
         given()
             .user("jose")
-                .withPassword("123")
                 .doenstExistsOnJira()
 
-        .whenExecute(() -> authenticateResult = subject.authenticate("jose", "123"))
+        .whenExecute(() -> authenticateResult = subject.authenticate("jose", "some-pass"))
 
-        .thenAssert()
-            .successEquals(false)
-            .messageEquals(AUTHENTICATION_ERROR_MESSAGE)
-            .principalEquals()
-                .nullValue();
+        .then()
+            .assertUser("jose")
+                .success(false)
+                .message(AUTHENTICATION_ERROR_MESSAGE)
+                .principal()
+                    .nullValue();
+    }
+
+    @Test
+    public void givenCorrectImpersonateValue_ifUserToBeImpersonatedExists_andLoggedInUserHasPermission_thenAuthenticateWithImpersonateValueSetted() {
+        given()
+            .requestWithHeaderEquals(IMPERSONATE_HEADER, "john")
+
+            .user("john")
+                .existsOnJiraWithRoles(
+                        role().id(2).name("adm").projectKey("TZ"))
+
+            .user("mary")
+                .existsOnJiraWithRoles(
+                        role().id(1).name("dev").projectKey("PX"))
+                .withPermissionToImpersonate("john")
+
+        .whenExecute(() -> authenticateResult = subject.authenticate("mary", "some-pass"))
+
+        .then()
+            .assertUser("mary")
+                .taskboardUserLastLoginWasUpdatedToNow()
+                .success(true)
+                .message(null)
+                .principal()
+                    .realUsername("mary")
+                    .defineUsername("john")
+                    .roles("2 | adm | TZ");
+    }
+
+    @Test
+    public void givenCorrectImpersonateValue_ifLoggedInUserDoesntHavePermission_thenAuthenticateWithoutImpersonateValueSetted() {
+        given()
+            .requestWithHeaderEquals(IMPERSONATE_HEADER, "john")
+
+            .user("john")
+                .existsOnJiraWithRoles(
+                        role().id(2).name("adm").projectKey("TZ"))
+
+            .user("mary")
+                .existsOnJiraWithRoles(
+                        role().id(1).name("dev").projectKey("PX"))
+                .withoutPermissionToImpersonate("john")
+
+        .whenExecute(() -> authenticateResult = subject.authenticate("mary", "123"))
+
+        .then()
+            .assertUser("mary")
+                .taskboardUserLastLoginWasUpdatedToNow()
+                .success(true)
+                .message(null)
+                .principal()
+                    .defineUsername("mary")
+                    .roles("1 | dev | PX");
+    }
+
+    @Test
+    public void givenCorrectImpersonateValue_ifLoggedInUserHasPermission_butUserToBeImpersonatedDoenstExists_thenAuthenticationMustFail() {
+        given()
+            .requestWithHeaderEquals(IMPERSONATE_HEADER, "jose")
+
+            .user("jose")
+                .doenstExistsOnJira()
+
+            .user("john")
+                .existsOnJiraWithRoles(
+                        role().id(1).name("dev").projectKey("PX"))
+                .withPermissionToImpersonate("jose")
+
+        .whenExecute(() -> authenticateResult = subject.authenticate("john", "123"))
+
+        .then()
+            .assertUser("john")
+                .taskboardUserLastLoginWasNotUpdated()
+                .success(false)
+                .message("User \"jose\" not found.")
+                .principal()
+                    .nullValue();
+    }
+
+    @Test
+    public void givenBlankImpersonateValue_ifUserToBeImpersonatedExists_andLoggedInUserHasPermission_thenAuthenticationMustFail() {
+        String blank = "";
+
+        given()
+            .requestWithHeaderEquals(IMPERSONATE_HEADER, blank)
+
+            .user("john")
+                .existsOnJiraWithRoles(
+                        role().id(1).name("dev").projectKey("PX"))
+                .withPermissionToImpersonate(blank)
+
+        .whenExecute(() -> authenticateResult = subject.authenticate("john", "123"))
+
+        .then()
+            .assertUser("john")
+                .taskboardUserLastLoginWasNotUpdated()
+                .success(false)
+                .message("\""+ IMPERSONATE_HEADER +"\" parameter cannot be blank.")
+                .principal()
+                    .nullValue();
     }
 
     private AuthenticationServiceTestDSL given() {
@@ -132,32 +190,27 @@ public class AuthenticationServiceTest {
 
     private class AuthenticationServiceTestDSL {
 
-        private JiraProperties jiraProperties = new JiraProperties();
+        private HttpServletRequest request = mock(HttpServletRequest.class);
         private JiraService jiraService = mock(JiraService.class);
-        private TaskboardUserRepository taskboardUserRepository = mock(TaskboardUserRepository.class);
-        private FixedClock clock = new FixedClock();
+        private ImpersonatePermission impersonatePermission = mock(ImpersonatePermission.class);
+        private TaskboardUserService taskboardUserService = mock(TaskboardUserService.class);
 
-        private final Instant NOW = Instant.parse("2018-01-20T10:15:30.00Z");
-
-        private String username;
-        private String password;
-        private TaskboardUser taskboardUser;
+        private Map<String, TaskboardUser> registredUsers = Maps.newHashMap();
 
         public AuthenticationServiceTestDSL() {
-            subject = new AuthenticationService(jiraProperties, jiraService, taskboardUserRepository, clock);
-
-            clock.setNow(NOW);
-            jiraProperties.setLousa(new Lousa());
             doThrow(new IllegalStateException("This method must be mocked")).when(jiraService).authenticate(any(), any());
-        }
+            when(jiraService.getJiraUserAsMaster(anyString())).thenReturn(Optional.empty());
 
-        public AuthenticationServiceTestDSL usernamePropertyToConnectWithJiraEquals(String propertyUsername) {
-            jiraProperties.getLousa().setUsername(propertyUsername);
-            return this;
+            subject = new AuthenticationService(request, jiraService, impersonatePermission, taskboardUserService);
         }
 
         public AuthenticationServiceTestDSLUser user(String username) {
             return new AuthenticationServiceTestDSLUser(username);
+        }
+
+        public AuthenticationServiceTestDSL requestWithHeaderEquals(String headerKey, String headerValue) {
+            when(request.getHeader(headerKey)).thenReturn(headerValue);
+            return this;
         }
 
         public AuthenticationServiceTestDSL whenExecute(Runnable method) {
@@ -165,42 +218,48 @@ public class AuthenticationServiceTest {
             return this;
         }
 
-        public AuthenticationServiceTestDSLAsserter thenAssert() {
-            return new AuthenticationServiceTestDSLAsserter();
+        public AuthenticationServiceTestDSL then() {
+            return this;
+        }
+
+        public AuthenticationServiceTestDSLAsserter assertUser(String username) {
+            return new AuthenticationServiceTestDSLAsserter(username);
         }
 
         private class AuthenticationServiceTestDSLUser {
 
-            public AuthenticationServiceTestDSLUser(String user) {
-                username = user;
-                taskboardUser = new TaskboardUser(username);
-            }
+            private TaskboardUser taskboardUser;
 
-            public AuthenticationServiceTestDSLUser withPassword(String pass) {
-                password = pass;
-                return this;
+            public AuthenticationServiceTestDSLUser(String username) {
+                taskboardUser = new TaskboardUser(username);
+                registredUsers.put(username, taskboardUser);
             }
 
             public AuthenticationServiceTestDSLUser existsOnJiraWithRoles(RoleBuilder... roles) {
-                doNothing().when(jiraService).authenticate(username, password);
-                when(jiraService.getUserRoles(username)).thenReturn(stream(roles).map(r -> r.build()).collect(toList()));
+                doNothing().when(jiraService).authenticate(eq(taskboardUser.getUsername()), anyString());
+                when(jiraService.getJiraUserAsMaster(eq(taskboardUser.getUsername()))).thenReturn(Optional.of(mock(JiraUser.class)));
+                when(jiraService.getUserRoles(taskboardUser.getUsername())).thenReturn(stream(roles).map(r -> r.build()).collect(toList()));
+                when(taskboardUserService.getTaskboardUser(taskboardUser.getUsername())).thenReturn(taskboardUser);
                 return this;
             }
 
             public AuthenticationServiceTestDSLUser doenstExistsOnJira() {
-                doThrow(new RuntimeException(AUTHENTICATION_ERROR_MESSAGE)).when(jiraService).authenticate(username, password);
+                doThrow(new RuntimeException(AUTHENTICATION_ERROR_MESSAGE)).when(jiraService).authenticate(eq(taskboardUser.getUsername()), anyString());
                 return this;
             }
 
-            public AuthenticationServiceTestDSLUser existsOnTaskboardWithAdminPermissionEquals(boolean isAdmin) {
-                taskboardUser.setAdmin(isAdmin);
-                when(taskboardUserRepository.getByUsername(username)).thenReturn(Optional.of(taskboardUser));
+            public AuthenticationServiceTestDSLUser withPermissionToImpersonate(String username) {
+                when(impersonatePermission.isAuthorized(any(), eq(username))).thenReturn(true);
                 return this;
             }
 
-            public AuthenticationServiceTestDSLUser doenstExistsOnTaskboard() {
-                when(taskboardUserRepository.getByUsername(username)).thenReturn(Optional.empty());
+            public AuthenticationServiceTestDSLUser withoutPermissionToImpersonate(String username) {
+                when(impersonatePermission.isAuthorized(any(), eq(username))).thenReturn(false);
                 return this;
+            }
+
+            public AuthenticationServiceTestDSLUser user(String username) {
+                return AuthenticationServiceTestDSL.this.user(username);
             }
 
             public AuthenticationServiceTestDSL whenExecute(Runnable method) {
@@ -211,34 +270,33 @@ public class AuthenticationServiceTest {
 
         private class AuthenticationServiceTestDSLAsserter {
 
-            private ArgumentCaptor<TaskboardUser> newTaskboardUser;
+            private TaskboardUser user;
 
-            public AuthenticationServiceTestDSLAsserter taskboardUserWasCreated() {
-                newTaskboardUser = ArgumentCaptor.forClass(TaskboardUser.class);
-                verify(taskboardUserRepository).add(newTaskboardUser.capture());
-                assertEquals(username, newTaskboardUser.getValue().getUsername());
-                return this;
+            public AuthenticationServiceTestDSLAsserter(String username) {
+                user = registredUsers.get(username);
             }
 
             public AuthenticationServiceTestDSLAsserter taskboardUserLastLoginWasUpdatedToNow() {
-                if (newTaskboardUser == null)
-                    assertEquals(Optional.of(NOW), taskboardUser.getLastLogin());
-                else
-                    assertEquals(Optional.of(NOW), newTaskboardUser.getValue().getLastLogin());
+                verify(taskboardUserService, times(1)).updateLastLoginToNow(eq(user.getUsername()));
                 return this;
             }
 
-            public AuthenticationServiceTestDSLAsserter successEquals(boolean success) {
+            public AuthenticationServiceTestDSLAsserter taskboardUserLastLoginWasNotUpdated() {
+                verify(taskboardUserService, times(0)).updateLastLoginToNow(eq(user.getUsername()));
+                return this;
+            }
+
+            public AuthenticationServiceTestDSLAsserter success(boolean success) {
                 assertEquals(success, authenticateResult.isSuccess());
                 return this;
             }
 
-            public AuthenticationServiceTestDSLAsserter messageEquals(String message) {
+            public AuthenticationServiceTestDSLAsserter message(String message) {
                 assertEquals(message, authenticateResult.getMessage());
                 return this;
             }
 
-            public AuthenticationServiceTestDSLAsserterPrincipal principalEquals() {
+            public AuthenticationServiceTestDSLAsserterPrincipal principal() {
                 return new AuthenticationServiceTestDSLAsserterPrincipal();
             }
 
@@ -249,13 +307,13 @@ public class AuthenticationServiceTest {
                     return this;
                 }
 
-                public AuthenticationServiceTestDSLAsserterPrincipal username(String user) {
-                    assertEquals(user, authenticateResult.getPrincipal().getUsername());
+                public AuthenticationServiceTestDSLAsserterPrincipal realUsername(String user) {
+                    assertEquals(user, authenticateResult.getPrincipal().getRealUsername());
                     return this;
                 }
 
-                public AuthenticationServiceTestDSLAsserterPrincipal admin(boolean isAdmin) {
-                    assertEquals(isAdmin, authenticateResult.getPrincipal().isAdmin());
+                public AuthenticationServiceTestDSLAsserterPrincipal defineUsername(String user) {
+                    assertEquals(user, authenticateResult.getPrincipal().defineUsername());
                     return this;
                 }
 
@@ -264,6 +322,7 @@ public class AuthenticationServiceTest {
                     assertEquals(StringUtils.join(expectedRoles, "\n"), collectionToString(authenticateResult.getPrincipal().getJiraRoles(), roleToString, "\n"));
                     return this;
                 }
+
             }
 
         }

@@ -21,7 +21,7 @@ public class AnyTeamPermissionAnyAcceptableRole extends BaseTargetlessPermission
 
     @Override
     protected boolean isAuthorized(LoggedUserDetails loggedUserDetails) {
-        return !userTeamRepository.findByUsernameAndRoles(loggedUserDetails.getUsername(), acceptedRoles).isEmpty();
+        return !userTeamRepository.findByUsernameAndRoles(loggedUserDetails.defineUsername(), acceptedRoles).isEmpty();
     }
 
 }

@@ -46,8 +46,8 @@ public class UserPreferencesService {
     }
 
     public UserPreferences getLoggedUserPreferences() {
-        return repository.findOneByJiraUser(CredentialsHolder.username())
-                .orElseGet(() -> new UserPreferences(CredentialsHolder.username()));
+        return repository.findOneByJiraUser(CredentialsHolder.defineUsername())
+                .orElseGet(() -> new UserPreferences(CredentialsHolder.defineUsername()));
     }
 
     public void save(String jiraUser, Preferences preferences) {
@@ -85,7 +85,7 @@ public class UserPreferencesService {
     }
 
     private Optional<UserPreferences.LevelPreference> getUserLevelPreferences(String laneLevel) {
-        return repository.findOneByJiraUser(CredentialsHolder.username())
+        return repository.findOneByJiraUser(CredentialsHolder.defineUsername())
                 .flatMap(userPreferences -> userPreferences.getPreferences().levelPreferences.stream()
                         .filter(levelPref -> levelPref.level.equals(laneLevel))
                         .findFirst());

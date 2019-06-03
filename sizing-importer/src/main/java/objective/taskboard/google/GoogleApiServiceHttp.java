@@ -171,7 +171,7 @@ class GoogleApiServiceHttp implements GoogleApiService {
     }
 
     private String getLoggedUser() {
-        return CredentialsHolder.username();
+        return CredentialsHolder.defineUsername();
     }
 
     @Override
