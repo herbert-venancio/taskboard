@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.configuration.DashboardConfiguration;
 import objective.taskboard.configuration.DashboardConfigurationService;
-import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.utils.Clock;
 
@@ -26,12 +25,10 @@ public class DashboardTimelineProvider {
         this.clock = clock;
     }
 
-    public DashboardTimeline getDashboardTimelineForProject(String projectKey) {
-        Optional<DashboardConfiguration> dashboardConfiguration = dashboardConfigurationService.retrieveConfiguration(projectKey);
-        if (!dashboardConfiguration.isPresent())
-            return getDashboardTimelineFromProjectService(projectKey);
-
-        return getDashboardTimelineFromDashboardConfiguration(dashboardConfiguration.get());
+    public DashboardTimeline getDashboardTimelineForProject(String projectKey) {    	
+    	return dashboardConfigurationService.retrieveConfiguration(projectKey)
+    			.map(this::getDashboardTimelineFromDashboardConfiguration)
+    			.orElseGet(() -> getDashboardTimelineFromProjectService(projectKey));
     }
 
     private DashboardTimeline getDashboardTimelineFromDashboardConfiguration(DashboardConfiguration dashboardConfiguration) {
@@ -42,12 +39,9 @@ public class DashboardTimelineProvider {
     }
 
     private DashboardTimeline getDashboardTimelineFromProjectService(String projectKey) {
-        Optional<ProjectFilterConfiguration> projectConfiguration = projectService.getTaskboardProject(projectKey);
-        if (!projectConfiguration.isPresent())
-            return new DashboardTimeline(Optional.empty(), Optional.empty());
-
-        ProjectFilterConfiguration projectFilterConfiguration = projectConfiguration.get();
-        return new DashboardTimeline(projectFilterConfiguration.getStartDate(), projectFilterConfiguration.getDeliveryDate());
+        return projectService.getTaskboardProject(projectKey)
+        		.map(p -> new DashboardTimeline(p.getStartDate(), p.getDeliveryDate()))
+        		.orElseGet(() -> new DashboardTimeline(Optional.empty(), Optional.empty()));
     }
 
     private LocalDate calculateStartDateTodayIncluded(LocalDate today, int daysToSubtract) {

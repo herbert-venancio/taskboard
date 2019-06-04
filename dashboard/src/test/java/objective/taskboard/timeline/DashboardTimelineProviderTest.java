@@ -41,10 +41,10 @@ public class DashboardTimelineProviderTest {
     }
     
     @Test
-    public void givenThirtyDaysToDisplayConfigured_whenGetDashboardTimeline_thenUseConfigurationToCalculteTimelineRange() throws Exception {
-        DashboardConfiguration thirtyTensToDisplayConfiguration = new DashboardConfiguration();
-        thirtyTensToDisplayConfiguration.setTimelineDaysToDisplay(30);
-        mockDashboardConfigurationServiceToReturn(thirtyTensToDisplayConfiguration);
+    public void givenThirtyDaysToDisplayConfigured_whenGetDashboardTimeline_thenUseConfigurationToCalculteTimelineRange() {
+        DashboardConfiguration thirtyDaysToDisplayConfiguration = new DashboardConfiguration();
+        thirtyDaysToDisplayConfiguration.setTimelineDaysToDisplay(30);
+        mockDashboardConfigurationServiceToReturn(thirtyDaysToDisplayConfiguration);
         
         DashboardTimeline timeline = subject.getDashboardTimelineForProject(DEFAULT_PROJECT_KEY);
         
@@ -53,7 +53,7 @@ public class DashboardTimelineProviderTest {
     }
 
     @Test
-    public void givenTenDaysToDisplayConfigured_whenGetDashboardTimeline_thenUseConfigurationToCalculteTimelineRange() throws Exception {
+    public void givenTenDaysToDisplayConfigured_whenGetDashboardTimeline_thenUseConfigurationToCalculteTimelineRange() {
         DashboardConfiguration tenDaysToDisplayConfiguration = new DashboardConfiguration();
         tenDaysToDisplayConfiguration.setTimelineDaysToDisplay(10);
         mockDashboardConfigurationServiceToReturn(tenDaysToDisplayConfiguration);
@@ -65,7 +65,7 @@ public class DashboardTimelineProviderTest {
     }
     
     @Test
-    public void givenMissingDashboardConfigurationAndHasNoDatesConfiguredToProject_whenGetDashboardTimeline_thenEmptyTimeline() throws Exception {
+    public void givenMissingDashboardConfigurationAndHasNoDatesConfiguredToProject_whenGetDashboardTimeline_thenEmptyTimeline() {
         mockDashboardConfigurationServiceToReturnEmptyConfiguration();
         
         mockProjectServiceToReturnDefaultProjectConfiguration();
@@ -77,7 +77,7 @@ public class DashboardTimelineProviderTest {
     }
 
     @Test
-    public void givenMissingDashboardConfigurationAndMissingProject_whenGetDashboardTimeline_thenEmptyTimeline() throws Exception {
+    public void givenMissingDashboardConfigurationAndMissingProject_whenGetDashboardTimeline_thenEmptyTimeline() {
         mockDashboardConfigurationServiceToReturnEmptyConfiguration();
         mockProjectServiceForMissingProject();
     
@@ -88,7 +88,7 @@ public class DashboardTimelineProviderTest {
     }
 
     @Test
-    public void givenMissingDashboardConfigurationAndHasOnlyStartDateConfiguredToProject_whenGetDashboardTimeline_thenTimelineStartDatePresentAndEndDateEmpty() throws Exception {
+    public void givenMissingDashboardConfigurationAndHasOnlyStartDateConfiguredToProject_whenGetDashboardTimeline_thenTimelineStartDatePresentAndEndDateEmpty() {
         mockDashboardConfigurationServiceToReturnEmptyConfiguration();
         defaultProjectFilterConfiguration.setStartDate(LocalDate.of(2019, JANUARY, 1));
         mockProjectServiceToReturnDefaultProjectConfiguration();
@@ -100,7 +100,7 @@ public class DashboardTimelineProviderTest {
     }
 
     @Test
-    public void givenMissingDashboardConfigurationAndHasOnlyDeliveryDateConfiguredToProject_whenGetDashboardTimeline_thenTimelineStartDateEmptyAndEndDatePresent() throws Exception {
+    public void givenMissingDashboardConfigurationAndHasOnlyDeliveryDateConfiguredToProject_whenGetDashboardTimeline_thenTimelineStartDateEmptyAndEndDatePresent() {
         mockDashboardConfigurationServiceToReturnEmptyConfiguration();
         defaultProjectFilterConfiguration.setDeliveryDate(LocalDate.of(2019, JANUARY, 1));
         mockProjectServiceToReturnDefaultProjectConfiguration();
@@ -112,7 +112,7 @@ public class DashboardTimelineProviderTest {
     }
     
     @Test
-    public void givenMissingDashboardConfigurationAndHasDatesConfiguredToProject_whenGetDashboardTimeline_thenTimelineBothDatesPresent() throws Exception {
+    public void givenMissingDashboardConfigurationAndHasDatesConfiguredToProject_whenGetDashboardTimeline_thenTimelineBothDatesPresent() {
         mockDashboardConfigurationServiceToReturnEmptyConfiguration();
         defaultProjectFilterConfiguration.setStartDate(LocalDate.of(2019, JANUARY, 1));
         defaultProjectFilterConfiguration.setDeliveryDate(LocalDate.of(2019, FEBRUARY, 1));

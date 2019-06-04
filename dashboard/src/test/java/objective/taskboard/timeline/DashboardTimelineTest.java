@@ -10,27 +10,29 @@ import org.junit.Test;
 
 public class DashboardTimelineTest {
 
-    @Test
-    public void givenTimelineWithEmptyDates_whenVerifyingEmptyness_thenTrue() throws Exception {
+    private static final Optional<LocalDate> JAN_FIRST_2019 = Optional.of(LocalDate.of(2019, JANUARY, 1));
+
+	@Test
+    public void givenTimelineWithEmptyDates_whenVerifyingEmptyness_thenTrue() {
         DashboardTimeline timeline = new DashboardTimeline(Optional.empty(), Optional.empty());
         Assertions.assertThat(timeline.hasBothDates()).isEqualTo(false);
     }
     
     @Test
-    public void givenTimelineWithOnlyStartDateSet_whenVerifyingEmptyness_thenFalse() throws Exception {
-        DashboardTimeline timeline = new DashboardTimeline(Optional.of(LocalDate.of(2019, JANUARY, 1)), Optional.empty());
+    public void givenTimelineWithOnlyStartDateSet_whenVerifyingEmptyness_thenFalse() {
+        DashboardTimeline timeline = new DashboardTimeline(JAN_FIRST_2019, Optional.empty());
         Assertions.assertThat(timeline.hasBothDates()).isEqualTo(false);
     }
     
     @Test
-    public void givenTimelineWithOnlyEndDateSet_whenVerifyingEmptyness_thenFalse() throws Exception {
-        DashboardTimeline timeline = new DashboardTimeline(Optional.empty(), Optional.of(LocalDate.of(2019, JANUARY, 1)));
+    public void givenTimelineWithOnlyEndDateSet_whenVerifyingEmptyness_thenFalse() {
+        DashboardTimeline timeline = new DashboardTimeline(Optional.empty(), JAN_FIRST_2019);
         Assertions.assertThat(timeline.hasBothDates()).isEqualTo(false);
     }
     
     @Test
-    public void givenTimelineWithBothDatesSet_whenVerifyingEmptyness_thenFalse() throws Exception {
-        DashboardTimeline timeline = new DashboardTimeline(Optional.of(LocalDate.of(2019, JANUARY, 1)), Optional.of(LocalDate.of(2019, JANUARY, 1)));
+    public void givenTimelineWithBothDatesSet_whenVerifyingEmptyness_thenFalse() {
+        DashboardTimeline timeline = new DashboardTimeline(JAN_FIRST_2019, JAN_FIRST_2019);
         Assertions.assertThat(timeline.hasBothDates()).isEqualTo(true);
     }
 }
