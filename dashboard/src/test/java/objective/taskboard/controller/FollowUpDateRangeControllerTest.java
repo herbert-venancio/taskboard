@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,11 +24,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
 import objective.taskboard.auth.authorizer.permission.ProjectDashboardTacticalPermission;
-import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.FollowUpDateRangeProvider;
-import objective.taskboard.followup.FollowUpDateRangeProvider.FollowUpProjectDataRangeDTO;
 import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.timeline.DashboardTimeline;
+import objective.taskboard.timeline.FollowUpDateRangeProvider;
+import objective.taskboard.timeline.FollowUpDateRangeProvider.FollowUpProjectDataRangeDTO;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -63,15 +64,12 @@ public class FollowUpDateRangeControllerTest {
     public void ifProjectExitsAndUserHasPermission_returnValue() throws Exception {
         LocalDate startDate = LocalDate.of(2017, 1, 1);
         LocalDate deliveryDate = LocalDate.of(2018, 1, 1);
-
-        ProjectFilterConfiguration taskboardProject = new ProjectFilterConfiguration(PROJECT_KEY, 1L);
-        taskboardProject.setStartDate(startDate);
-        taskboardProject.setDeliveryDate(deliveryDate);
+        DashboardTimeline timeline = new DashboardTimeline(Optional.of(startDate), Optional.of(deliveryDate));
 
         when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
         when(projectDashboardOperationalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
         when(projectService.taskboardProjectExists(PROJECT_KEY)).thenReturn(true);
-        when(provider.getDateRangeData(PROJECT_KEY)).thenReturn(new FollowUpProjectDataRangeDTO(taskboardProject));
+        when(provider.getDateRangeData(PROJECT_KEY)).thenReturn(new FollowUpProjectDataRangeDTO(PROJECT_KEY, timeline));
 
         mockMvc.perform(get("/api/projects/"+PROJECT_KEY+"/followup/date-range"))
                 .andExpect(status().isOk())

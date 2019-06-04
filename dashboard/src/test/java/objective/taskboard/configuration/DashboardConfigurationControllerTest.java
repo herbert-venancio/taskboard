@@ -32,7 +32,7 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenProjectConfigured_whenRetrieving_thenHappyPath() throws Exception {
+    public void givenProjectConfigured_whenRetrieving_thenHappyPath() {
         mockServiceToReturnDefaultConfiguration();
     
         subject = new DashboardConfigurationController(service, authorizer);
@@ -43,7 +43,7 @@ public class DashboardConfigurationControllerTest {
     }
 
     @Test
-    public void givenWithoutAdminPermission_whenCreating_thenNotFoundResponse() throws Exception {
+    public void givenWithoutAdminPermission_whenCreating_thenNotFoundResponse() {
         withoutAdminPermission();
         
         DashboardConfigurationDto defaultConfigurationDto = new DashboardConfigurationDto();
@@ -57,7 +57,7 @@ public class DashboardConfigurationControllerTest {
     }
 
     @Test
-    public void givenWithoutAdminPermission_whenUpdating_thenNotFoundResponse() throws Exception {
+    public void givenWithoutAdminPermission_whenUpdating_thenNotFoundResponse() {
         withoutAdminPermission();
         
         DashboardConfigurationDto defaultConfigurationDto = new DashboardConfigurationDto();
@@ -72,7 +72,7 @@ public class DashboardConfigurationControllerTest {
     }
 
     @Test
-    public void givenConfigurationNotFound_whenRetrieving_thenNotFoundResponse() throws Exception {
+    public void givenConfigurationNotFound_whenRetrieving_thenNotFoundResponse() {
         when(service.retrieveConfiguration(DEFAULT_PROJECT_KEY)).thenReturn(Optional.empty());
 
         subject = new DashboardConfigurationController(service, authorizer);
@@ -83,9 +83,10 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndProjectNotYetConfigured_whenCreating_thenHappyPath() throws Exception {
+    public void givenWithAdminPermissionAndProjectNotYetConfigured_whenCreating_thenHappyPath() {
         withAdminPermission();
-        when(service.persistConfigurationForProject(eq(DEFAULT_PROJECT_KEY), any(DashboardConfiguration.class))).thenReturn(defaultConfiguration);
+        when(service.persistConfigurationForProject(eq(DEFAULT_PROJECT_KEY), any(DashboardConfiguration.class)))
+        	.thenReturn(defaultConfiguration);
         
         subject = new DashboardConfigurationController(service, authorizer);
 
@@ -102,7 +103,7 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndProjectAlreadyConfigured_whenCreating_thenUnprocessableRequestResponse() throws Exception {
+    public void givenWithAdminPermissionAndProjectAlreadyConfigured_whenCreating_thenUnprocessableRequestResponse() {
         withAdminPermission();
         when(service.persistConfigurationForProject(eq(DEFAULT_PROJECT_KEY), any(DashboardConfiguration.class)))
             .thenThrow(new DashboardConfigurationDuplicateException(DEFAULT_PROJECT_KEY));
@@ -118,7 +119,7 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndNullDto_whenCreating_thenBadRequest() throws Exception {
+    public void givenWithAdminPermissionAndNullDto_whenCreating_thenBadRequest() {
         withAdminPermission();
         subject = new DashboardConfigurationController(service, authorizer);
 
@@ -130,7 +131,7 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndNullDto_whenUpdating_thenBadRequest() throws Exception {
+    public void givenWithAdminPermissionAndNullDto_whenUpdating_thenBadRequest() {
         withAdminPermission();
         subject = new DashboardConfigurationController(service, authorizer);
 
@@ -142,7 +143,7 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndInvalidTimeline_whenCreating_thenBadRequest() throws Exception {
+    public void givenWithAdminPermissionAndInvalidTimeline_whenCreating_thenBadRequest() {
         withAdminPermission();
         subject = new DashboardConfigurationController(service, authorizer);
 
@@ -155,7 +156,7 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndInvalidTimeline_whenUpdating_thenBadRequest() throws Exception {
+    public void givenWithAdminPermissionAndInvalidTimeline_whenUpdating_thenBadRequest() {
         withAdminPermission();
         subject = new DashboardConfigurationController(service, authorizer);
 
@@ -168,7 +169,7 @@ public class DashboardConfigurationControllerTest {
     }
 
     @Test
-    public void givenWithAdminPermissionAndProjectNotYetConfigured_whenUpdating_thenMethodNotAllowed() throws Exception {
+    public void givenWithAdminPermissionAndProjectNotYetConfigured_whenUpdating_thenMethodNotAllowed() {
         withAdminPermission();
         when(service.updateConfigurationForProject(eq(DEFAULT_PROJECT_KEY), any(DashboardConfiguration.class)))
             .thenThrow(new DashboardConfigurationNotFoundException(DEFAULT_PROJECT_KEY));
@@ -183,9 +184,10 @@ public class DashboardConfigurationControllerTest {
     }
     
     @Test
-    public void givenWithAdminPermissionAndProjectAlreadyConfigured_whenUpdating_thenHappyPath() throws Exception {
+    public void givenWithAdminPermissionAndProjectAlreadyConfigured_whenUpdating_thenHappyPath() {
         withAdminPermission();
-        when(service.updateConfigurationForProject(eq(DEFAULT_PROJECT_KEY), any(DashboardConfiguration.class))).thenReturn(defaultConfiguration);
+        when(service.updateConfigurationForProject(eq(DEFAULT_PROJECT_KEY), any(DashboardConfiguration.class)))
+        	.thenReturn(defaultConfiguration);
         subject = new DashboardConfigurationController(service, authorizer);
 
         DashboardConfigurationDto newConfigurationDto = new DashboardConfigurationDto();
