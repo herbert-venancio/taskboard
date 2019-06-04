@@ -95,6 +95,10 @@ public abstract class AbstractUiFragment {
         waitAllConditions(by, elementIsVisible(), elementTextIs(valueToSelect));
     }
 
+    protected void waitAttributeValue(By by, String attribute, String expected) {
+        waitAllConditions(by, elementIsVisible(), attributeToBe(attribute, expected));
+    }
+
     protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {
         waitAllConditions(element, elementIsVisible(), attributeToBe(attribute, expected));
     }

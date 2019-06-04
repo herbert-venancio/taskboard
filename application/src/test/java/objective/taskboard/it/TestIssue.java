@@ -31,8 +31,7 @@ class TestIssue extends AbstractUiFragment {
     }
 
     public TestIssue moveToTop() {
-        WebElement moveToTopButton = issueElement.findElement(By.className("arrow-box"));
-        waitForClick(moveToTopButton);
+        waitForClick(new ByChained(By.cssSelector("issue-item#" + issueKey), By.className("arrow-box")));
         return this;
     }
 

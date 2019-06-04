@@ -35,6 +35,8 @@ public class H2DriverNoCommit extends Driver {
                             return null;
                         if ("commit".equals(method.getName()))
                             return null;
+                        if ("rollback".equals(method.getName()) && args == null)
+                            return null;
 
                         return method.invoke(delegate, args);
                     });

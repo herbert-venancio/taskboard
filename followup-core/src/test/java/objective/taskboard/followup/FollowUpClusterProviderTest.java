@@ -66,9 +66,6 @@ public class FollowUpClusterProviderTest {
     @Test
     public void shouldReturnOnlyItemsByProject_whenProjectHasNotCluster() {
         
-        when(clusterRepository.findById(Optional.empty()))
-            .thenReturn(Optional.empty());
-        
         ProjectFilterConfiguration projectOne = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L);
         
         List<SizingClusterItem> itemsByProjectMock = generateProjectItemsMock(baseCluster, TASKB_PROJECT_KEY);
@@ -96,7 +93,7 @@ public class FollowUpClusterProviderTest {
     @Test
     public void shouldReturnOnlyItemsByProject_whenProjectHasClusterWithoutItems() {
         
-        when(clusterRepository.findById(Optional.ofNullable(baseCluster.getId())))
+        when(clusterRepository.findById(baseCluster.getId()))
             .thenReturn(Optional.ofNullable(baseCluster));
         
         ProjectFilterConfiguration projectOne = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L);
@@ -142,7 +139,7 @@ public class FollowUpClusterProviderTest {
     @Test
     public void shouldReturnItemsByProjectAndByClusterWhen_hasOverride() {
         
-        when(clusterRepository.findById(Optional.ofNullable(baseCluster.getId())))
+        when(clusterRepository.findById(baseCluster.getId()))
             .thenReturn(Optional.ofNullable(baseCluster));
 
         ProjectFilterConfiguration projectThree = new ProjectFilterConfiguration(TASKB_THREE_PROJECT_KEY, 3L);

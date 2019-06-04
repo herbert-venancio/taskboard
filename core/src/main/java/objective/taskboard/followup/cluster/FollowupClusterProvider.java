@@ -38,7 +38,7 @@ public class FollowupClusterProvider {
     }
 
     public FollowupCluster getFor(final ProjectFilterConfiguration project) {
-        Optional<SizingCluster> cluster = clusterRepository.findById(project.getBaseClusterId());
+        Optional<SizingCluster> cluster = project.getBaseClusterId().flatMap(clusterRepository::findById);
         final List<SizingClusterItem> sizingClusterItems = clusterItemRepository.findByProjectKeyOrBaseCluster(project.getProjectKey(), cluster);
             
         if(sizingClusterItems.isEmpty())

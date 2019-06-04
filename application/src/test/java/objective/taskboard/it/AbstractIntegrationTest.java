@@ -1,8 +1,7 @@
 package objective.taskboard.it;
 
-import static java.util.Arrays.asList;
-
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -21,6 +20,7 @@ import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.rules.CleanupDataFolderRule;
+import objective.taskboard.testUtils.JiraMockController;
 import objective.taskboard.testUtils.JiraMockServer;
 import objective.taskboard.utils.IOUtilities;
 
@@ -137,7 +137,7 @@ public abstract class AbstractIntegrationTest {
         if (jsonList.length == 0)
             throw new IllegalArgumentException();
 
-        String jsonValue = asList(jsonList).stream()
+        String jsonValue = Arrays.stream(jsonList)
             .map(json -> json.json)
             .collect(Collectors.joining(","));
         emulateUpdateIssue(issueKey, String.join(",", jsonValue));

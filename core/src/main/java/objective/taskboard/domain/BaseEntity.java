@@ -7,16 +7,19 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 @MappedSuperclass
 public abstract class BaseEntity {
 
     @Column(updatable=false, nullable = false)
     @CreationTimestamp
+    @DiffIgnore
     protected Instant created;
 
     @Column(nullable = false)
     @Version
+    @DiffIgnore
     protected Instant updated;
 
     public BaseEntity() {

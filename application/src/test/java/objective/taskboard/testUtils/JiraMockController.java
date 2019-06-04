@@ -1,4 +1,4 @@
-package objective.taskboard.it;
+package objective.taskboard.testUtils;
 
 import objective.taskboard.RequestBuilder;
 

@@ -21,7 +21,7 @@ public class ClusterComponent extends AbstractComponent {
     }
 
     public void assertEffort(String issueType, String size, String expectedEffort) {
-        waitAttributeValueInElement(getInputByIssueTypeAndSize(issueType, "effort", size), "value", expectedEffort);
+        waitAttributeValue(selectorInputByIssueTypeAndSize(issueType, "effort", size), "value", expectedEffort);
     }
 
     public void setCycle(String issueType, String size, String cycle) {
@@ -29,7 +29,7 @@ public class ClusterComponent extends AbstractComponent {
     }
 
     public void assertCycle(String issueType, String size, String expectedCycle) {
-        waitAttributeValueInElement(getInputByIssueTypeAndSize(issueType, "cycle", size), "value", expectedCycle);
+        waitAttributeValue(selectorInputByIssueTypeAndSize(issueType, "cycle", size), "value", expectedCycle);
     }
 
     public String getCycleValue(String issueType, String size) {
@@ -51,7 +51,10 @@ public class ClusterComponent extends AbstractComponent {
     }
 
     private WebElement getInputByIssueTypeAndSize(String issueType, String input, String size) {
-        return getChildElementWhenExists(component(), id(issueType + "-" + input + "-" + size));
+        return getElementWhenItExistsAndIsVisible(selectorInputByIssueTypeAndSize(issueType, input, size));
     }
 
+    private By selectorInputByIssueTypeAndSize(String issueType, String input, String size) {
+        return new ByChained(componentSelector, By.id(issueType + "-" + input + "-" + size));
+    }
 }
