@@ -422,7 +422,7 @@
 
                     var projectDates = hasProjectSelected ? this._getDatesFromProject(selectedProjectKey) : undefined;
                     this.set('_projectDates', projectDates);
-                    window.location.hash = '#/project/' + selectedProjectKey;
+                    window.location.hash = hasProjectSelected ? '#/project/' + selectedProjectKey : '';
                 },
 
                 _getDatesFromProject: function(projectKey) {
@@ -452,12 +452,12 @@
                             });
 
                             if (!projectKeyIsPresent) {
-                                window.location.href = '/strategical-dashboard';
+                                this.set('selectedProjectKey', null);
                             } else {
                                 this.set('selectedProjectKey', selectedProjectKey);
                             }
                         } else {
-                            window.location.href = '/strategical-dashboard';
+                            this.set('selectedProjectKey', null);
                         }
                     }
                 },
