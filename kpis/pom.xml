@@ -23,6 +23,11 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
+			<artifactId>dashboard-commons</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
 			<artifactId>test-support</artifactId>
 			<scope>test</scope>
 		</dependency>
