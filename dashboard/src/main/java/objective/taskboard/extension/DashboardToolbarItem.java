@@ -22,12 +22,12 @@ public class DashboardToolbarItem implements ApplicationToolbarItem {
     
     @Override
     public String getIconDisplayName() {
-        return "Strategical Dashboard";
+        return "Followup Dashboard";
     }
 
     @Override
     public String getOnClickLink() {
-        return "/strategical-dashboard/";
+        return "/followup-dashboard/";
     }
 
     @Override

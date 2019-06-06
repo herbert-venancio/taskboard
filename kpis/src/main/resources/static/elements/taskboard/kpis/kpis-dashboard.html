@@ -422,7 +422,7 @@
 
                     var projectDates = hasProjectSelected ? this._getDatesFromProject(selectedProjectKey) : undefined;
                     this.set('_projectDates', projectDates);
-                    window.location.hash = '#/project/' + selectedProjectKey;
+                    window.location.hash = hasProjectSelected ? '#/project/' + selectedProjectKey : '';
                 },
 
                 _getDatesFromProject: function(projectKey) {
@@ -439,27 +439,27 @@
                 },
 
                 _verifyProjectKeyHash: function (verifyHash) {
-                    if (verifyHash) {
-                        this.set('verifyHashChange', false);
+                    if (!verifyHash)
+                        return;
 
-                        var matchProjectRoute = new RegExp('#/project/(.*)').exec(window.location.hash);
+                    this.set('verifyHashChange', false);
 
-                        if (matchProjectRoute) {
-                            var selectedProjectKey = matchProjectRoute[1];
+                    var matchProjectRoute = new RegExp('#/project/(.*)').exec(window.location.hash);
 
-                            const projectKeyIsPresent = findInArray(this.projects, function (p) {
-                                return p.projectKey === selectedProjectKey;
-                            });
-
-                            if (!projectKeyIsPresent) {
-                                window.location.href = '/strategical-dashboard';
-                            } else {
-                                this.set('selectedProjectKey', selectedProjectKey);
-                            }
-                        } else {
-                            window.location.href = '/strategical-dashboard';
-                        }
+                    if (!matchProjectRoute) {
+                        this.set('selectedProjectKey', null);
+                        return;
                     }
+                    var selectedProjectKey = matchProjectRoute[1];
+
+                    const projectKeyIsPresent = findInArray(this.projects, function (p) {
+                        return p.projectKey === selectedProjectKey;
+                    });
+
+                    if (!projectKeyIsPresent)
+                        this.set('selectedProjectKey', null);
+                    else
+                        this.set('selectedProjectKey', selectedProjectKey);
                 },
 
                 _activeCategory: function(category) {

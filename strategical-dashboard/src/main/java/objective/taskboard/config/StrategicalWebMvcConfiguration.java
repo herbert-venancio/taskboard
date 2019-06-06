@@ -11,13 +11,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @Configuration
 public class StrategicalWebMvcConfiguration extends WebMvcConfigurerAdapter {
-    
+
     private static final String ANGULAR_APP_PATH = "/app-strategical-static/";
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("login");
-        registry.addViewController("/strategical-dashboard/**").setViewName("forward:/app-strategical-static-nocache/index.html");
+        registry.addViewController("/strategical-dashboard/**").setViewName("redirect:/followup-dashboard/");
 
         registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
     }
