@@ -6,12 +6,12 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.5.13.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>br.com.objective</groupId>
 	<artifactId>taskboard-parent</artifactId>
-	<version>0.0.86-SNAPSHOT</version>
+	<version>0.0.86</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -72,7 +72,7 @@
 		<url>https://github.com/herbert-venancio/taskboard</url>
 		<connection>scm:git:git@github.com/herbert-venancio/taskboard.git</connection>
 		<developerConnection>scm:git:git@github.com:herbert-venancio/taskboard.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>taskboard-parent-0.0.86</tag>
 	</scm>
 	<build>
 		<resources>
@@ -247,7 +247,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore/>
+										<ignore />
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -266,7 +266,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore/>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
