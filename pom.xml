@@ -11,7 +11,7 @@
 
 	<groupId>br.com.objective</groupId>
 	<artifactId>taskboard-parent</artifactId>
-	<version>0.0.86</version>
+	<version>0.0.87-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -72,7 +72,7 @@
 		<url>https://github.com/herbert-venancio/taskboard</url>
 		<connection>scm:git:git@github.com/herbert-venancio/taskboard.git</connection>
 		<developerConnection>scm:git:git@github.com:herbert-venancio/taskboard.git</developerConnection>
-		<tag>taskboard-parent-0.0.86</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<build>
 		<resources>
