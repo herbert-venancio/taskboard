@@ -69,9 +69,9 @@
 	<description>Liferay Taskboard Issue Manager</description>
 
 	<scm>
-		<url>https://github.com/objective-solutions/taskboard</url>
-		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
-		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
+		<url>https://github.com/herbert-venancio/taskboard</url>
+		<connection>scm:git:git@github.com/herbert-venancio/taskboard.git</connection>
+		<developerConnection>scm:git:git@github.com:herbert-venancio/taskboard.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 	<build>
@@ -197,6 +197,11 @@
 							<version>1.9.4</version>
 						</dependency>
 					</dependencies>
+					<configuration>
+						<checkModificationExcludes>
+							<checkModificationExclude>**/package-lock.json</checkModificationExclude>
+						</checkModificationExcludes>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>com.fizzed</groupId>
